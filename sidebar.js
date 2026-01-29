@@ -8,22 +8,21 @@ const sidebarContent = `
         <li><a href="moderation.html" id="link-mod">🚫 Moderation Queue</a></li>
         <li><a href="#">⚙️ Settings</a></li>
         
-        <li>
-            <a href="#" onclick="toggleTheme()" style="display: flex; align-items: center; justify-content: space-between;">
-                <span>🎨 Theme</span>
-                <span id="theme-icon">🌙</span>
-            </a>
-        </li>
-
         <li><a href="login.html" style="margin-top:20px; color:#f85149;">🚪 Logout</a></li>
     </ul>
     
     <div class="user-profile">
-        <div class="avatar">A</div>
-        <div>
-            <div><strong>Admin</strong></div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">Online</div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="avatar">A</div>
+            <div>
+                <div><strong>Admin</strong></div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Online</div>
+            </div>
         </div>
+
+        <button onclick="toggleTheme()" class="theme-btn" title="Toggle Theme">
+            <span id="theme-icon">🌙</span>
+        </button>
     </div>
 </nav>
 `;
@@ -40,8 +39,6 @@ if (path.includes('moderation.html')) document.getElementById('link-mod').classL
 // ===========================================
 // THEME SWITCHER LOGIC
 // ===========================================
-
-// Check local storage for saved theme
 const savedTheme = localStorage.getItem('appTheme');
 const themeIcon = document.getElementById('theme-icon');
 
@@ -52,7 +49,6 @@ if (savedTheme === 'light') {
     themeIcon.innerText = '🌙';
 }
 
-// Function to toggle theme
 window.toggleTheme = function() {
     const isLight = document.body.classList.toggle('light-mode');
     
