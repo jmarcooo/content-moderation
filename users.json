@@ -1,16 +1,20 @@
 [
     {
-        "id": 1,
+        "id": "46048000000001",
         "username": "admin",
-        "password": "password123",
+        "password": "password123", 
         "role": "Admin",
-        "name": "Super Admin"
+        "name": "Super Admin",
+        "status": "Active",
+        "createdAt": "1/26/2026, 4:39:00 PM"
     },
     {
-        "id": 2,
-        "username": "moderator",
-        "password": "modpassword",
+        "id": "46048000000002",
+        "username": "mod",
+        "password": "modpass",
         "role": "Moderator",
-        "name": "Jane Doe"
+        "name": "Jane Doe",
+        "status": "Active",
+        "createdAt": "1/26/2026, 5:15:00 PM"
     }
 ]
