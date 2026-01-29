@@ -5,7 +5,7 @@ const sidebarContent = `
 <nav class="sidebar">
     <div class="brand">🛡️ AdminPanel</div>
     <ul class="nav-links">
-        <li><a href="menu.html" id="link-menu">📊 Overview</a></li>
+        <li><a href="home.html" id="link-home">📊 Overview</a></li>
         <li><a href="user-management.html" id="link-users">👥 User Management</a></li>
         <li><a href="#">🚫 Moderation Queue</a></li>
         <li><a href="#">⚙️ Settings</a></li>
@@ -27,8 +27,8 @@ document.body.insertAdjacentHTML('afterbegin', sidebarContent);
 // 3. Automatically highlight the active link
 const currentPage = window.location.pathname;
 
-if (currentPage.includes('menu.html')) {
-    document.getElementById('link-menu').classList.add('active');
+if (currentPage.includes('home.html')) {
+    document.getElementById('link-home').classList.add('active');
 } else if (currentPage.includes('user-management.html')) {
     document.getElementById('link-users').classList.add('active');
 }
