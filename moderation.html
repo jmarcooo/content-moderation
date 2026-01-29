@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderation Queue</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles specific to this page */
+        .content-cell {
+            max-width: 350px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #c9d1d9;
+            cursor: pointer;
+        }
+        .content-cell:hover {
+            white-space: normal; /* Expand text on hover */
+            overflow: visible;
+            background-color: #21262d;
+            position: relative;
+            z-index: 10;
+        }
+        .reason-badge {
+            background-color: #30363d;
+            border: 1px solid #8b949e;
+            color: #8b949e;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="main-content">
+        <div class="header">
+            <h1>Moderation Queue</h1>
+            <div>
+                <span style="color:#8b949e; font-size:0.9rem; margin-right:10px;">Pending Reviews:</span>
+                <strong id="pending-count" style="font-size:1.2rem; color:white;">0</strong>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Report ID</th>
+                        <th>Author</th>
+                        <th>Flagged Content</th>
+                        <th>Reason</th>
+                        <th>Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="modTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="sidebar.js"></script>
+    <script>
+        // --- 1. AUTH GUARD ---
+        if (!localStorage.getItem('currentUser')) {
+            window.location.href = 'login.html';
+        }
+
+        // --- 2. MOCK DATA (Simulating Reports) ---
+        // In a real app, this would come from your API
+        let reports = [
+            { id: 401, author: "spambot_99", content: "CLICK HERE FOR FREE BITCOIN www.scam-site.com/login", reason: "Spam", time: "10 mins ago", status: "Pending" },
+            { id: 402, author: "angry_user", content: "This app is terrible and you are all stupid.", reason: "Harassment", time: "1 hour ago", status: "Pending" },
+            { id: 403, author: "ad_bot", content: "Buy generic pills cheap! fast delivery!", reason: "Spam", time: "2 hours ago", status: "Pending" },
+            { id: 404, author: "troll_123", content: "I hope your servers crash.", reason: "Toxic", time: "5 hours ago", status: "Pending" },
+            { id: 405, author: "new_guy", content: "Is anyone else having trouble logging in?", reason: "False Flag", time: "6 hours ago", status: "Pending" }
+        ];
+
+        // --- 3. RENDER TABLE ---
+        function render() {
+            const tbody = document.getElementById('modTableBody');
+            
+            // Filter only "Pending" items
+            const pendingItems = reports.filter(r => r.status === 'Pending');
+            
+            // Update counter
+            document.getElementById('pending-count').innerText = pendingItems.length;
+
+            // Empty State
+            if (pendingItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:3rem; color:#8b949e;">🎉 All caught up! No pending reports.</td></tr>';
+                return;
+            }
+
+            // Draw Rows
+            tbody.innerHTML = pendingItems.map(r => `
+                <tr>
+                    <td style="font-family:monospace; color:#8b949e;">#${r.id}</td>
+                    <td><strong>${r.author}</strong></td>
+                    <td>
+                        <div class="content-cell" title="${r.content}">${r.content}</div>
+                    </td>
+                    <td><span class="reason-badge">${r.reason}</span></td>
+                    <td style="font-size:0.85rem; color:#8b949e;">${r.time}</td>
+                    <td>
+                        <button onclick="handleAction(${r.id}, 'Approved')" class="action-btn" style="color:#238636;" title="Keep Content (Approve)">✔</button>
+                        <button onclick="handleAction(${r.id}, 'Removed')" class="action-btn" style="color:#f85149;" title="Delete Content (Remove)">✖</button>
+                        <button onclick="banUser('${r.author}')" class="action-btn" title="Ban User">🔨</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- 4. ACTIONS ---
+        function handleAction(id, action) {
+            // Find the report and change its status
+            const index = reports.findIndex(r => r.id === id);
+            if (index !== -1) {
+                reports[index].status = action;
+                
+                // Visual feedback (optional)
+                console.log(`Report #${id} marked as ${action}`);
+                
+                // Re-render table to remove the item
+                render();
+            }
+        }
+
+        function banUser(username) {
+            if(confirm(`Are you sure you want to BAN user @${username}?`)) {
+                // In a real app, you would send a ban request to the server here
+                alert(`🚫 User @${username} has been banned.`);
+                
+                // Optional: Remove all reports from this user
+                reports.forEach(r => {
+                    if(r.author === username) r.status = 'Banned';
+                });
+                render();
+            }
+        }
+
+        // Initialize Page
+        render();
+    </script>
+</body>
+</html>
