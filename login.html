@@ -6,7 +6,6 @@
     <title>Login - Admin Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Login specific overrides */
         body { display: flex; justify-content: center; align-items: center; }
         .login-card { width: 100%; max-width: 350px; background: #161b22; padding: 2rem; border-radius: 6px; border: 1px solid #30363d; text-align: center; }
         .sidebar { display: none; } /* Hide sidebar on login */
@@ -28,6 +27,9 @@
     </div>
 
     <script>
+        // 1. CLEAR OLD SESSION (Logs user out immediately upon visiting this page)
+        localStorage.removeItem('currentUser'); 
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const u = document.getElementById('username').value;
@@ -40,6 +42,7 @@
 
                 if (valid) {
                     localStorage.setItem('currentUser', JSON.stringify(valid));
+                    // UPDATED: Redirect to home.html
                     window.location.href = 'home.html';
                 } else {
                     document.getElementById('error-msg').style.display = 'block';
