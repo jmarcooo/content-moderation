@@ -157,3 +157,32 @@ input:focus, select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 
 .status-Active { background-color: rgba(56, 139, 253, 0.15); color: #0969da; border: 1px solid rgba(56, 139, 253, 0.4); }
 body.dark-mode .status-Active { color: #58a6ff; } 
 .status-Banned { background-color: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.4); }
+
+/* =========================================
+   8. DASHBOARD & ACTIVITY FEED (Add to style.css)
+   ========================================= */
+/* Dashboard Card Specifics */
+.card h3 { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; font-weight: normal; }
+.card .number { font-size: 2rem; font-weight: bold; color: var(--text-header); }
+.card .trend { font-size: 0.8rem; margin-top: 5px; }
+.trend.up { color: #238636; }
+.trend.down { color: #f85149; }
+
+/* Activity Feed */
+.section-title { 
+    font-size: 1.1rem; margin-bottom: 1rem; 
+    color: var(--text-header); 
+    border-bottom: 1px solid var(--border-color); 
+    padding-bottom: 0.5rem; 
+}
+
+.activity-list { list-style: none; margin-top: 10px; }
+.activity-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-main);
+}
+.activity-item span { color: var(--text-muted); font-size: 0.8rem; }
