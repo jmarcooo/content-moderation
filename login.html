@@ -151,8 +151,8 @@
                     // Save user to memory so other pages know who is logged in
                     localStorage.setItem('currentUser', JSON.stringify(userFound));
                     
-                    // Redirect to the main menu
-                    window.location.href = 'menu.html';
+                    // Redirect to the main home
+                    window.location.href = 'home.html';
                 } else {
                     // FAIL
                     errorMsg.style.display = "block";
