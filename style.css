@@ -1,41 +1,159 @@
-/* UPDATED USER PROFILE STYLES */
+/* =========================================
+   1. COLOR VARIABLES (DEFAULT = LIGHT MODE)
+   ========================================= */
+:root {
+    /* DEFAULT: LIGHT MODE COLORS */
+    --bg-body: #f6f8fa;       /* Light Gray Background */
+    --bg-sidebar: #ffffff;    /* White Sidebar */
+    --bg-card: #ffffff;       /* White Cards */
+    --bg-input: #ffffff;      /* White Inputs */
+    --text-main: #24292f;     /* Dark Text */
+    --text-header: #1F2328;   /* Black Headers */
+    --text-muted: #57606a;    /* Gray Muted Text */
+    --border-color: #d0d7de;  /* Light Border */
+    --hover-bg: #f3f4f6;      /* Light Hover */
+    --accent-blue: #0969da;   /* Github Blue */
+    --modal-overlay: rgba(0,0,0,0.5);
+    --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* DARK MODE OVERRIDES */
+body.dark-mode {
+    --bg-body: #0d1117;
+    --bg-sidebar: #161b22;
+    --bg-card: #161b22;
+    --bg-input: #0d1117;
+    --text-main: #c9d1d9;
+    --text-header: #ffffff;
+    --text-muted: #8b949e;
+    --border-color: #30363d;
+    --hover-bg: #21262d;
+    --accent-blue: #58a6ff;
+    --modal-overlay: rgba(0,0,0,0.7);
+    --shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* =========================================
+   2. GLOBAL RESET
+   ========================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* =========================================
+   3. SIDEBAR
+   ========================================= */
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.brand { font-size: 1.2rem; font-weight: bold; color: var(--text-header); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; }
+
+.nav-links { list-style: none; flex-grow: 1; }
+.nav-links li { margin-bottom: 8px; }
+.nav-links a { 
+    display: block; padding: 10px 12px; text-decoration: none; 
+    color: var(--text-main); border-radius: 6px; transition: background 0.2s; font-size: 0.95rem; 
+}
+.nav-links a:hover, .nav-links a.active { background-color: var(--hover-bg); color: var(--accent-blue); }
+
 .user-profile { 
     border-top: 1px solid var(--border-color); 
     padding-top: 15px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; /* Pushes items to edges */
-    gap: 10px; 
-    font-size: 0.9rem; 
-    margin-top: auto; /* Ensures it stays at the bottom even if list is short */
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.9rem; margin-top: auto;
 }
+.avatar { width: 32px; height: 32px; background-color: #238636; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
 
-.avatar { 
-    width: 32px; 
-    height: 32px; 
-    background-color: #238636; 
-    border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-weight: bold; 
-    color: white; 
-}
-
-/* NEW THEME BUTTON STYLE */
 .theme-btn {
-    background: transparent;
+    background: transparent; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; padding: 6px 10px; font-size: 1rem; transition: all 0.2s;
+}
+.theme-btn:hover { background-color: var(--hover-bg); transform: scale(1.05); }
+
+/* =========================================
+   4. CONTENT & TABLES
+   ========================================= */
+.main-content { flex-grow: 1; padding: 2rem; overflow-y: auto; width: 100%; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
+h1 { font-size: 1.5rem; color: var(--text-header); }
+
+.table-container { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th { background-color: var(--hover-bg); color: var(--text-muted); padding: 12px 16px; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-main); }
+tr:hover { background-color: var(--hover-bg); }
+
+/* =========================================
+   5. CARDS (Dashboard & Moderation)
+   ========================================= */
+.dashboard-grid, .queue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-top: 10px; }
+.card, .queue-card {
+    background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    padding: 6px 10px;
-    font-size: 1rem;
+    border-radius: 8px; padding: 24px;
     color: var(--text-main);
-    transition: all 0.2s;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, border-color 0.2s; 
 }
 
-.theme-btn:hover {
-    background-color: var(--hover-bg);
-    border-color: var(--accent-blue);
-    transform: scale(1.05);
+/* Specific Queue Card Styles */
+.queue-card { display: flex; flex-direction: column; justify-content: space-between; height: 180px; cursor: pointer; }
+.queue-card:hover { transform: translateY(-4px); border-color: var(--accent-blue); }
+.queue-title { font-size: 1rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+.queue-type { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: auto; }
+.count-number { font-size: 2.2rem; font-weight: bold; color: var(--text-header); line-height: 1; }
+.count-label { font-size: 0.85rem; color: var(--text-muted); }
+
+/* Priority Indicators */
+.priority-high { border-left: 4px solid #f85149; }
+.priority-med { border-left: 4px solid #d29922; }
+.priority-low { border-left: 4px solid #238636; }
+
+.btn-review { background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--accent-blue); padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+.queue-card:hover .btn-review { background-color: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+
+/* =========================================
+   6. FORMS, INPUTS & MODALS
+   ========================================= */
+.form-group { margin-bottom: 1.2rem; }
+label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; }
+input, select { 
+    width: 100%; padding: 10px; 
+    background-color: var(--bg-input); 
+    border: 1px solid var(--border-color); border-radius: 6px; 
+    color: var(--text-main); outline: none; transition: border 0.2s;
 }
+input:focus, select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3); }
+
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-overlay); backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background-color: var(--bg-card); padding: 2rem; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; max-width: 400px; box-shadow: var(--shadow); }
+.modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-header); border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+
+/* =========================================
+   7. BUTTONS & BADGES
+   ========================================= */
+.btn-primary { background-color: #238636; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.btn-primary:hover { background-color: #2ea043; }
+.btn-cancel { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.btn-cancel:hover { background-color: var(--hover-bg); }
+.action-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 8px; opacity: 0.7; color: var(--text-main); }
+.action-btn:hover { opacity: 1; transform: scale(1.1); }
+
+.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+.status-Active { background-color: rgba(56, 139, 253, 0.15); color: #0969da; border: 1px solid rgba(56, 139, 253, 0.4); }
+body.dark-mode .status-Active { color: #58a6ff; } 
+.status-Banned { background-color: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.4); }
