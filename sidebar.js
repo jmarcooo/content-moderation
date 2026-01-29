@@ -35,7 +35,6 @@ const sidebarContent = `
                         <li onclick="setStatus('offline', 'Offline')"><span class="dot dot-offline"></span> Offline</li>
                     </ul>
                 </div>
-
             </div>
         </div>
 
@@ -80,7 +79,7 @@ window.toggleTheme = function() {
 };
 
 // ===========================================
-// 3. STATUS LOGIC (Dropdown & Idle)
+// 3. STATUS LOGIC (Refined Auto-Idle)
 // ===========================================
 
 // Toggle the menu open/close
@@ -93,8 +92,6 @@ window.toggleStatusMenu = function() {
 document.addEventListener('click', function(event) {
     const dropdown = document.querySelector('.status-dropdown');
     const menu = document.getElementById('status-menu');
-    
-    // If click is NOT inside the dropdown, close it
     if (dropdown && !dropdown.contains(event.target)) {
         menu.classList.remove('active');
     }
@@ -108,6 +105,14 @@ window.setStatus = function(type, label) {
     
     // Save to storage
     localStorage.setItem('userStatus', JSON.stringify({ type, label }));
+    
+    // If user manually sets "Break" or "Lunch", we must ensure timer is reset/cleared immediately
+    if (type !== 'online') {
+        clearTimeout(idleTimer);
+    } else {
+        // If setting back to online manually, restart the timer logic
+        resetIdleTimer();
+    }
 }
 
 // Load Saved Status
@@ -116,28 +121,37 @@ if (savedStatus) {
     setStatus(savedStatus.type, savedStatus.label);
 }
 
-// Auto-Idle Logic (5 Minutes)
+// ------------------------------------------
+// STRICT AUTO-IDLE LOGIC
+// ------------------------------------------
 let idleTimer;
-const IDLE_LIMIT = 5 * 60 * 1000; 
+const IDLE_LIMIT = 5 * 60 * 1000; // 5 Minutes
 
 function resetIdleTimer() {
+    // 1. Clear any existing timer immediately
     clearTimeout(idleTimer);
+
     const currentLabel = document.getElementById('current-text').innerText;
-    
-    // If user wakes up from Idle
+
+    // 2. Logic: If user is "Idle" and moves mouse -> Wake up to "Online"
     if (currentLabel === 'Idle') {
         setStatus('online', 'Online');
+        // Once set to Online, the code below will run automatically on next event 
+        // or we can let it fall through, but setStatus restarts logic anyway.
+        return; 
     }
-    
-    // Start Timer if currently Online
+
+    // 3. Logic: Only start countdown if status is explicitly "Online"
+    // If status is Break, Lunch, Meeting, etc., DO NOTHING.
     if (currentLabel === 'Online') {
         idleTimer = setTimeout(() => {
             setStatus('idle', 'Idle');
+            console.log("User inactive for 5 mins: Status changed to Idle");
         }, IDLE_LIMIT);
     }
 }
 
-// Activity Listeners
+// Listen for activity
 window.onload = resetIdleTimer;
 document.onmousemove = resetIdleTimer;
 document.onkeypress = resetIdleTimer;
