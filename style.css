@@ -187,7 +187,7 @@ body.dark-mode .status-Active { color: #58a6ff; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
 
 /* =========================================
-   10. VIEW SWITCHER & LIST MODE
+   10. VIEW SWITCHER & LIST MODE (Fixed)
    ========================================= */
 
 /* Switcher Container */
@@ -198,65 +198,80 @@ body.dark-mode .status-Active { color: #58a6ff; }
     border: 1px solid var(--border-color);
     padding: 4px;
     border-radius: 6px;
-    margin-right: 20px; /* Space between switcher and total count */
+    margin-right: 20px;
 }
 
-/* Switcher Buttons */
 .view-btn {
-    background: transparent;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    background: transparent; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; color: var(--text-muted); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
 }
-
 .view-btn:hover { color: var(--text-main); }
+.view-btn.active { background-color: var(--bg-card); color: var(--accent-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-.view-btn.active {
-    background-color: var(--bg-card);
-    color: var(--accent-blue);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-/* LIST VIEW LAYOUT (Overrides Grid) */
+/* --- LIST VIEW GRID LAYOUT --- */
 .queue-container.list-mode {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
-/* List Item Style */
+/* 1. The Header Row (Only visible in list mode) */
+.list-header-row {
+    display: grid;
+    /* Define 5 columns: Tenant | Name | Pending | Latency | Action */
+    grid-template-columns: 100px 2fr 1fr 1fr 100px; 
+    padding: 0 20px;
+    margin-bottom: 5px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 2. The List Item Row */
 .queue-list-item {
-    display: flex;
+    display: grid;
+    /* Must match the header columns exactly */
+    grid-template-columns: 100px 2fr 1fr 1fr 100px;
     align-items: center;
-    justify-content: space-between;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    padding: 12px 20px;
-    border-radius: 6px;
-    transition: transform 0.2s, border-color 0.2s;
+    padding: 16px 20px;
+    border-radius: 8px;
+    transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
     cursor: pointer;
+    box-shadow: var(--shadow);
 }
 
 .queue-list-item:hover {
-    transform: translateX(4px); /* Slight slide effect */
+    transform: translateX(4px);
     border-color: var(--accent-blue);
     background-color: var(--hover-bg);
 }
 
-/* List Item Columns */
-.list-col-type { width: 100px; font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
-.list-col-name { flex-grow: 1; font-weight: 600; color: var(--text-main); font-size: 1rem; }
-.list-col-count { width: 120px; text-align: right; font-weight: bold; color: var(--text-header); font-size: 1.1rem; }
-.list-col-action { width: 100px; text-align: right; }
+/* Column Styling */
+.col-tenant { display: flex; align-items: center; }
+.badge-tenant { 
+    background-color: var(--hover-bg); 
+    border: 1px solid var(--border-color); 
+    color: var(--text-muted); 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    font-size: 0.75rem; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+}
 
-/* List Item Priority Indicators (Left Border) */
+.col-name { font-weight: 600; color: var(--text-main); font-size: 1rem; }
+.col-pending { font-weight: bold; color: var(--text-header); font-size: 1rem; }
+.sub-text { font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 4px; }
+
+.col-latency { font-family: monospace; color: var(--text-main); font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+.latency-icon { color: var(--text-muted); font-size: 1rem; }
+
+.col-action { text-align: right; }
+
+/* Priority Indicators (Left Border) */
 .list-priority-high { border-left: 4px solid #f85149; }
 .list-priority-med  { border-left: 4px solid #d29922; }
 .list-priority-low  { border-left: 4px solid #238636; }
