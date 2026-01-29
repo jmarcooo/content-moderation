@@ -5,91 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moderation Queues</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* GRID LAYOUT FOR QUEUES */
-        .queue-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            padding-top: 10px;
-        }
-
-        /* CARD STYLING */
-        .queue-card {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 180px;
-            transition: transform 0.2s, border-color 0.2s;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .queue-card:hover {
-            transform: translateY(-4px);
-            border-color: #58a6ff;
-            background-color: #1c2128;
-        }
-
-        /* CARD CONTENT */
-        .queue-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #c9d1d9;
-            margin-bottom: 8px;
-        }
-
-        .queue-type {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #8b949e;
-            margin-bottom: auto; /* Pushes number to bottom */
-        }
-
-        .queue-stat {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .count-number {
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: white;
-            line-height: 1;
-        }
-
-        .count-label {
-            font-size: 0.85rem;
-            color: #8b949e;
-        }
-
-        /* PRIORITY INDICATORS */
-        .priority-high { border-left: 4px solid #f85149; }
-        .priority-med { border-left: 4px solid #d29922; }
-        .priority-low { border-left: 4px solid #238636; }
-
-        .btn-review {
-            background-color: #21262d;
-            border: 1px solid #30363d;
-            color: #58a6ff;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .queue-card:hover .btn-review {
-            background-color: #58a6ff;
-            color: white;
-            border-color: #58a6ff;
-        }
-    </style>
 </head>
 <body>
 
@@ -97,8 +12,8 @@
         <div class="header">
             <h1>Moderation Queues</h1>
             <div style="text-align: right;">
-                <span style="color:#8b949e; font-size:0.9rem;">Total Pending:</span>
-                <strong id="total-pending" style="font-size:1.2rem; color:white; margin-left:5px;">0</strong>
+                <span style="color:var(--text-muted); font-size:0.9rem;">Total Pending:</span>
+                <strong id="total-pending" style="font-size:1.2rem; color:var(--text-header); margin-left:5px;">0</strong>
             </div>
         </div>
 
@@ -114,19 +29,14 @@
             window.location.href = 'login.html';
         }
 
-        // --- 2. CONFIGURATION: Define your queues here ---
+        // --- 2. CONFIGURATION ---
         const queueData = [
-            // BP (Business/Brand Profile)
             { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142 },
             { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56 },
-            { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890 }, // High volume!
-            
-            // GP (Game Profile)
+            { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890 },
             { id: 'gp_img',   category: 'GP', name: 'Dynamic Image Review', count: 23 },
             { id: 'gp_com',   category: 'GP', name: 'Comment Review',       count: 45 },
             { id: 'gp_vid',   category: 'GP', name: 'Dynamic Video Review', count: 12 },
-
-            // Community
             { id: 'comm_ava', category: 'Community', name: 'Avatar Review',    count: 310 },
             { id: 'comm_nick', category: 'Community', name: 'Nickname Review',  count: 67 },
             { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105 }
@@ -167,14 +77,10 @@
             document.getElementById('total-pending').innerText = total.toLocaleString();
         }
 
-        // --- 4. CLICK ACTION ---
         function openQueue(queueName) {
-            // For now, this just shows an alert. 
-            // In the future, this would go to: window.location.href = `review.html?type=${queueName}`;
             alert(`Opening queue: ${queueName}\nLoading pending items...`);
         }
 
-        // Initialize
         renderQueues();
     </script>
 </body>
