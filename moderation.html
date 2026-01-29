@@ -11,9 +11,19 @@
     <main class="main-content">
         <div class="header">
             <h1>Moderation Queues</h1>
-            <div style="text-align: right;">
-                <span style="color:var(--text-muted); font-size:0.9rem;">Total Pending:</span>
-                <strong id="total-pending" style="font-size:1.2rem; color:var(--text-header); margin-left:5px;">0</strong>
+            
+            <div style="display: flex; align-items: center;">
+                <div class="view-switcher">
+                    <button id="btn-card" class="view-btn" onclick="switchView('card')" title="Card View">
+                        ⊞ </button>
+                    <button id="btn-list" class="view-btn" onclick="switchView('list')" title="List View">
+                        ☰ </button>
+                </div>
+
+                <div style="text-align: right;">
+                    <span style="color:var(--text-muted); font-size:0.9rem;">Total Pending:</span>
+                    <strong id="total-pending" style="font-size:1.2rem; color:var(--text-header); margin-left:5px;">0</strong>
+                </div>
             </div>
         </div>
 
@@ -42,45 +52,95 @@
             { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105 }
         ];
 
-        // --- 3. RENDER FUNCTION ---
+        // --- 3. VIEW STATE LOGIC ---
+        // Load saved view or default to 'card'
+        let currentView = localStorage.getItem('modQueueView') || 'card';
+
+        function switchView(viewType) {
+            currentView = viewType;
+            localStorage.setItem('modQueueView', viewType); // Save preference
+            renderQueues(); // Re-render
+            updateViewButtons(); // Update active button state
+        }
+
+        function updateViewButtons() {
+            document.getElementById('btn-card').classList.toggle('active', currentView === 'card');
+            document.getElementById('btn-list').classList.toggle('active', currentView === 'list');
+        }
+
+        // --- 4. RENDER FUNCTION ---
         function renderQueues() {
             const container = document.getElementById('queue-container');
             let total = 0;
+            let html = '';
 
-            const cardsHTML = queueData.map(queue => {
+            // Update Container Class (Grid vs List)
+            if (currentView === 'card') {
+                container.className = 'queue-grid';
+            } else {
+                container.className = 'queue-container list-mode';
+            }
+
+            // Loop through data
+            html = queueData.map(queue => {
                 total += queue.count;
 
-                // Determine Priority Color
-                let priorityClass = 'priority-low';
-                if (queue.count > 100) priorityClass = 'priority-med';
-                if (queue.count > 500) priorityClass = 'priority-high';
+                // Priority Logic
+                let priorityClass = 'priority-low'; // Default for Card
+                let listPriorityClass = 'list-priority-low'; // Default for List
+                
+                if (queue.count > 100) { 
+                    priorityClass = 'priority-med'; 
+                    listPriorityClass = 'list-priority-med';
+                }
+                if (queue.count > 500) { 
+                    priorityClass = 'priority-high'; 
+                    listPriorityClass = 'list-priority-high';
+                }
 
-                return `
-                <div class="queue-card ${priorityClass}" onclick="openQueue('${queue.name}')">
-                    <div>
-                        <div class="queue-type">${queue.category}</div>
-                        <div class="queue-title">${queue.name}</div>
-                    </div>
-                    
-                    <div class="queue-stat">
+                // --- GENERATE HTML BASED ON VIEW ---
+                if (currentView === 'card') {
+                    // CARD LAYOUT
+                    return `
+                    <div class="queue-card ${priorityClass}" onclick="openQueue('${queue.name}')">
                         <div>
-                            <div class="count-number">${queue.count.toLocaleString()}</div>
-                            <div class="count-label">Pending Items</div>
+                            <div class="queue-type">${queue.category}</div>
+                            <div class="queue-title">${queue.name}</div>
                         </div>
-                        <button class="btn-review">Review →</button>
-                    </div>
-                </div>
-                `;
+                        <div class="queue-stat">
+                            <div>
+                                <div class="count-number">${queue.count.toLocaleString()}</div>
+                                <div class="count-label">Pending Items</div>
+                            </div>
+                            <button class="btn-review">Review →</button>
+                        </div>
+                    </div>`;
+                } else {
+                    // LIST LAYOUT
+                    return `
+                    <div class="queue-list-item ${listPriorityClass}" onclick="openQueue('${queue.name}')">
+                        <div class="list-col-type">${queue.category}</div>
+                        <div class="list-col-name">${queue.name}</div>
+                        <div class="list-col-count">
+                            ${queue.count.toLocaleString()} <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">pending</span>
+                        </div>
+                        <div class="list-col-action">
+                            <button class="btn-review">Review →</button>
+                        </div>
+                    </div>`;
+                }
             }).join('');
 
-            container.innerHTML = cardsHTML;
+            container.innerHTML = html;
             document.getElementById('total-pending').innerText = total.toLocaleString();
+            updateViewButtons();
         }
 
         function openQueue(queueName) {
             alert(`Opening queue: ${queueName}\nLoading pending items...`);
         }
 
+        // Initialize
         renderQueues();
     </script>
 </body>
