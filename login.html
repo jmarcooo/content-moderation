@@ -6,8 +6,24 @@
     <title>Login - Admin Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { display: flex; justify-content: center; align-items: center; }
-        .login-card { width: 100%; max-width: 350px; background: #161b22; padding: 2rem; border-radius: 6px; border: 1px solid #30363d; text-align: center; }
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background-color: var(--bg-body); /* Uses Theme Color */
+        }
+        
+        .login-card { 
+            width: 100%; 
+            max-width: 350px; 
+            background: var(--bg-card);      /* Uses Theme Color */
+            padding: 2rem; 
+            border-radius: 6px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow);
+            text-align: center; 
+        }
+        
         .sidebar { display: none; } /* Hide sidebar on login */
     </style>
 </head>
@@ -15,8 +31,8 @@
 
     <div class="login-card">
         <span style="font-size: 3rem;">🛡️</span>
-        <h2 style="color: white; margin: 10px 0;">Admin Portal</h2>
-        <p style="color: #8b949e; margin-bottom: 20px;">Sign in to continue</p>
+        <h2 style="color: var(--text-header); margin: 10px 0;">Admin Portal</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Sign in to continue</p>
 
         <form id="loginForm">
             <input type="text" id="username" placeholder="Username (admin)" required>
@@ -27,9 +43,14 @@
     </div>
 
     <script>
-        // 1. CLEAR OLD SESSION (Logs user out immediately upon visiting this page)
+        // 1. CLEAR OLD SESSION
         localStorage.removeItem('currentUser'); 
 
+        // 2. CHECK THEME (Login page needs to know if it should be dark)
+        const savedTheme = localStorage.getItem('appTheme') || 'light';
+        if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+
+        // 3. LOGIN LOGIC
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const u = document.getElementById('username').value;
@@ -42,7 +63,6 @@
 
                 if (valid) {
                     localStorage.setItem('currentUser', JSON.stringify(valid));
-                    // UPDATED: Redirect to home.html
                     window.location.href = 'home.html';
                 } else {
                     document.getElementById('error-msg').style.display = 'block';
