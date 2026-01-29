@@ -2,52 +2,184 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
     <link rel="stylesheet" href="style.css">
-    
-    <style>
-         /* Modal styles can stay here or move to style.css */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background-color: #161b22; padding: 2rem; border-radius: 8px; border: 1px solid #30363d; width: 400px; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; background-color: #0d1117; border: 1px solid #30363d; color: white; }
-    </style>
 </head>
 <body>
 
     <main class="main-content">
         <div class="header">
             <h1>User Management</h1>
-            <button class="btn-add" onclick="alert('Demo action')">+ Add User</button>
+            <button class="btn-primary" onclick="openAddModal()">+ Add User</button>
         </div>
 
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created At</th> <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="userTableBody">
-                    </tbody>
+                <tbody id="userTableBody"></tbody>
             </table>
         </div>
     </main>
 
+    <div id="addModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">Register New User</div>
+            <form id="addForm">
+                <input type="text" id="addName" required placeholder="Full Name">
+                <input type="text" id="addUsername" required placeholder="Username">
+                <select id="addRole"><option>User</option><option>Moderator</option><option>Admin</option></select>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('addModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="editModal" class="modal-overlay">
         <div class="modal-content">
-            <h3>Edit User</h3>
-            <button onclick="closeModal()">Close</button>
+            <div class="modal-header">Edit User</div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <input type="text" id="editName" required>
+                <select id="editRole"><option>User</option><option>Moderator</option><option>Admin</option></select>
+                <select id="editStatus"><option>Active</option><option>Banned</option></select>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script src="sidebar.js"></script>
-
     <script>
-        // ... (Paste your Table Logic / Users array script here) ...
-        // You can keep the script block from the previous step exactly as is.
-    </script>
+        let users = [];
 
+        // INIT
+        async function init() {
+            const stored = localStorage.getItem('mockUsers');
+            if (stored) {
+                users = JSON.parse(stored);
+            } else {
+                const res = await fetch('users.json');
+                users = await res.json();
+                save();
+            }
+            render();
+        }
+
+        // RENDER TABLE
+        function render() {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td style="font-family:monospace; color:#8b949e">${u.id}</td>
+                    <td><strong>${u.name}</strong><br><span style="font-size:0.8em; color:#8b949e">@${u.username}</span></td>
+                    <td>${u.role}</td>
+                    <td><span class="badge status-${u.status}">${u.status}</span></td>
+                    <td style="font-size:0.85rem;">${u.createdAt || 'N/A'}</td> <td>
+                        <button onclick="openEdit('${u.id}')" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">✏️</button>
+                        <button onclick="delUser('${u.id}')" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- NEW ID GENERATION LOGIC ---
+        function getExcelDate() {
+            const date = new Date();
+            // Excel base date is Dec 30, 1899. 
+            // We calculate difference in milliseconds and convert to days.
+            const excelEpoch = new Date(1899, 11, 30);
+            const diff = date - excelEpoch;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+
+        function generateId() {
+            const excelDatePrefix = getExcelDate().toString(); // e.g., "46048"
+            
+            // Filter users to find how many were created TODAY (starting with this prefix)
+            const todaysUsers = users.filter(u => u.id.toString().startsWith(excelDatePrefix));
+            
+            // The next sequence is the count + 1
+            const nextSeq = todaysUsers.length + 1;
+            
+            // Pad the sequence with zeros to make it 9 digits long (e.g., 000000001)
+            const paddedSeq = nextSeq.toString().padStart(9, '0');
+            
+            return excelDatePrefix + paddedSeq;
+        }
+        // -------------------------------
+
+        // ADD LOGIC
+        function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+        
+        document.getElementById('addForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newId = generateId(); // Use our new logic
+            const now = new Date().toLocaleString(); // Get current timestamp
+
+            users.push({
+                id: newId,
+                name: document.getElementById('addName').value,
+                username: document.getElementById('addUsername').value,
+                role: document.getElementById('addRole').value,
+                status: 'Active',
+                password: '123',
+                createdAt: now // Save creation time
+            });
+            
+            save(); render(); closeModal('addModal');
+            alert(`✅ User created with ID: ${newId}`);
+        });
+
+        // EDIT LOGIC (Updated to handle string IDs)
+        function openEdit(id) {
+            // Note: IDs are now strings, so strict equality check is safer with string conversion
+            const u = users.find(u => u.id.toString() === id.toString());
+            document.getElementById('editId').value = u.id;
+            document.getElementById('editName').value = u.name;
+            document.getElementById('editRole').value = u.role;
+            document.getElementById('editStatus').value = u.status;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        document.getElementById('editForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const idx = users.findIndex(u => u.id.toString() === id.toString());
+            
+            users[idx].name = document.getElementById('editName').value;
+            users[idx].role = document.getElementById('editRole').value;
+            users[idx].status = document.getElementById('editStatus').value;
+            
+            save(); render(); closeModal('editModal');
+        });
+
+        // DELETE LOGIC
+        function delUser(id) {
+            if(confirm('Delete user?')) { 
+                users = users.filter(u => u.id.toString() !== id.toString()); 
+                save(); render(); 
+            }
+        }
+
+        // HELPERS
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function save() { localStorage.setItem('mockUsers', JSON.stringify(users)); }
+
+        init();
+    </script>
 </body>
 </html>
