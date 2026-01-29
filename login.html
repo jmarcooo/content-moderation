@@ -73,6 +73,14 @@
 
         .btn-login:hover { background-color: #2ea043; }
 
+        /* ERROR MESSAGE */
+        #error-msg {
+            color: #f85149;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none; /* Hidden by default */
+        }
+
         /* FOOTER */
         .footer-links { margin-top: 1.5rem; font-size: 0.8rem; }
         .footer-links a { color: #58a6ff; text-decoration: none; }
@@ -86,24 +94,80 @@
         <h2>Admin Portal</h2>
         <p>Sign in to manage moderation rules</p>
 
-        <form action="/login" method="POST">
+        <form id="loginForm">
             <div class="form-group">
-                <label for="username">Username or Email</label>
-                <input type="text" id="username" name="username" required autofocus>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus placeholder="admin">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required placeholder="password123">
             </div>
 
             <button type="submit" class="btn-login">Sign in</button>
+            <p id="error-msg">❌ Invalid username or password</p>
         </form>
 
         <div class="footer-links">
             <a href="#">Forgot password?</a>
         </div>
     </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('error-msg');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop page reload
+
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+            const btn = document.querySelector('.btn-login');
+
+            // Visual feedback (Loading state)
+            btn.innerText = "Checking...";
+            btn.style.opacity = "0.7";
+            errorMsg.style.display = "none";
+
+            try {
+                // Fetch the mock database
+                const response = await fetch('users.json');
+                
+                if (!response.ok) {
+                    throw new Error("Could not load users.json");
+                }
+
+                const users = await response.json();
+
+                // Find matching user
+                const userFound = users.find(user => 
+                    user.username === usernameInput && 
+                    user.password === passwordInput
+                );
+
+                if (userFound) {
+                    // SUCCESS
+                    // Save user to memory so other pages know who is logged in
+                    localStorage.setItem('currentUser', JSON.stringify(userFound));
+                    
+                    // Redirect to the main menu
+                    window.location.href = 'menu.html';
+                } else {
+                    // FAIL
+                    errorMsg.style.display = "block";
+                    btn.innerText = "Sign in";
+                    btn.style.opacity = "1";
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('⚠️ Error: Make sure users.json exists and you are viewing this via GitHub Pages (not a local file).');
+                btn.innerText = "Sign in";
+                btn.style.opacity = "1";
+            }
+        });
+    </script>
 
 </body>
 </html>
