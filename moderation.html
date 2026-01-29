@@ -3,33 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moderation Queue</title>
+    <title>Moderation Queues</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Styles specific to this page */
-        .content-cell {
-            max-width: 350px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #c9d1d9;
+        /* GRID LAYOUT FOR QUEUES */
+        .queue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding-top: 10px;
+        }
+
+        /* CARD STYLING */
+        .queue-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 180px;
+            transition: transform 0.2s, border-color 0.2s;
             cursor: pointer;
-        }
-        .content-cell:hover {
-            white-space: normal; /* Expand text on hover */
-            overflow: visible;
-            background-color: #21262d;
             position: relative;
-            z-index: 10;
+            overflow: hidden;
         }
-        .reason-badge {
-            background-color: #30363d;
-            border: 1px solid #8b949e;
-            color: #8b949e;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
+
+        .queue-card:hover {
+            transform: translateY(-4px);
+            border-color: #58a6ff;
+            background-color: #1c2128;
+        }
+
+        /* CARD CONTENT */
+        .queue-title {
+            font-size: 1rem;
             font-weight: 600;
+            color: #c9d1d9;
+            margin-bottom: 8px;
+        }
+
+        .queue-type {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8b949e;
+            margin-bottom: auto; /* Pushes number to bottom */
+        }
+
+        .queue-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .count-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: white;
+            line-height: 1;
+        }
+
+        .count-label {
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+
+        /* PRIORITY INDICATORS */
+        .priority-high { border-left: 4px solid #f85149; }
+        .priority-med { border-left: 4px solid #d29922; }
+        .priority-low { border-left: 4px solid #238636; }
+
+        .btn-review {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            color: #58a6ff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .queue-card:hover .btn-review {
+            background-color: #58a6ff;
+            color: white;
+            border-color: #58a6ff;
         }
     </style>
 </head>
@@ -37,29 +95,16 @@
 
     <main class="main-content">
         <div class="header">
-            <h1>Moderation Queue</h1>
-            <div>
-                <span style="color:#8b949e; font-size:0.9rem; margin-right:10px;">Pending Reviews:</span>
-                <strong id="pending-count" style="font-size:1.2rem; color:white;">0</strong>
+            <h1>Moderation Queues</h1>
+            <div style="text-align: right;">
+                <span style="color:#8b949e; font-size:0.9rem;">Total Pending:</span>
+                <strong id="total-pending" style="font-size:1.2rem; color:white; margin-left:5px;">0</strong>
             </div>
         </div>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Report ID</th>
-                        <th>Author</th>
-                        <th>Flagged Content</th>
-                        <th>Reason</th>
-                        <th>Time</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="modTableBody">
-                    </tbody>
-            </table>
-        </div>
+        <div id="queue-container" class="queue-grid">
+            </div>
+
     </main>
 
     <script src="sidebar.js"></script>
@@ -69,81 +114,68 @@
             window.location.href = 'login.html';
         }
 
-        // --- 2. MOCK DATA (Simulating Reports) ---
-        // In a real app, this would come from your API
-        let reports = [
-            { id: 401, author: "spambot_99", content: "CLICK HERE FOR FREE BITCOIN www.scam-site.com/login", reason: "Spam", time: "10 mins ago", status: "Pending" },
-            { id: 402, author: "angry_user", content: "This app is terrible and you are all stupid.", reason: "Harassment", time: "1 hour ago", status: "Pending" },
-            { id: 403, author: "ad_bot", content: "Buy generic pills cheap! fast delivery!", reason: "Spam", time: "2 hours ago", status: "Pending" },
-            { id: 404, author: "troll_123", content: "I hope your servers crash.", reason: "Toxic", time: "5 hours ago", status: "Pending" },
-            { id: 405, author: "new_guy", content: "Is anyone else having trouble logging in?", reason: "False Flag", time: "6 hours ago", status: "Pending" }
+        // --- 2. CONFIGURATION: Define your queues here ---
+        const queueData = [
+            // BP (Business/Brand Profile)
+            { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142 },
+            { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56 },
+            { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890 }, // High volume!
+            
+            // GP (Game Profile)
+            { id: 'gp_img',   category: 'GP', name: 'Dynamic Image Review', count: 23 },
+            { id: 'gp_com',   category: 'GP', name: 'Comment Review',       count: 45 },
+            { id: 'gp_vid',   category: 'GP', name: 'Dynamic Video Review', count: 12 },
+
+            // Community
+            { id: 'comm_ava', category: 'Community', name: 'Avatar Review',    count: 310 },
+            { id: 'comm_nick', category: 'Community', name: 'Nickname Review',  count: 67 },
+            { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105 }
         ];
 
-        // --- 3. RENDER TABLE ---
-        function render() {
-            const tbody = document.getElementById('modTableBody');
-            
-            // Filter only "Pending" items
-            const pendingItems = reports.filter(r => r.status === 'Pending');
-            
-            // Update counter
-            document.getElementById('pending-count').innerText = pendingItems.length;
+        // --- 3. RENDER FUNCTION ---
+        function renderQueues() {
+            const container = document.getElementById('queue-container');
+            let total = 0;
 
-            // Empty State
-            if (pendingItems.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:3rem; color:#8b949e;">🎉 All caught up! No pending reports.</td></tr>';
-                return;
-            }
+            const cardsHTML = queueData.map(queue => {
+                total += queue.count;
 
-            // Draw Rows
-            tbody.innerHTML = pendingItems.map(r => `
-                <tr>
-                    <td style="font-family:monospace; color:#8b949e;">#${r.id}</td>
-                    <td><strong>${r.author}</strong></td>
-                    <td>
-                        <div class="content-cell" title="${r.content}">${r.content}</div>
-                    </td>
-                    <td><span class="reason-badge">${r.reason}</span></td>
-                    <td style="font-size:0.85rem; color:#8b949e;">${r.time}</td>
-                    <td>
-                        <button onclick="handleAction(${r.id}, 'Approved')" class="action-btn" style="color:#238636;" title="Keep Content (Approve)">✔</button>
-                        <button onclick="handleAction(${r.id}, 'Removed')" class="action-btn" style="color:#f85149;" title="Delete Content (Remove)">✖</button>
-                        <button onclick="banUser('${r.author}')" class="action-btn" title="Ban User">🔨</button>
-                    </td>
-                </tr>
-            `).join('');
+                // Determine Priority Color
+                let priorityClass = 'priority-low';
+                if (queue.count > 100) priorityClass = 'priority-med';
+                if (queue.count > 500) priorityClass = 'priority-high';
+
+                return `
+                <div class="queue-card ${priorityClass}" onclick="openQueue('${queue.name}')">
+                    <div>
+                        <div class="queue-type">${queue.category}</div>
+                        <div class="queue-title">${queue.name}</div>
+                    </div>
+                    
+                    <div class="queue-stat">
+                        <div>
+                            <div class="count-number">${queue.count.toLocaleString()}</div>
+                            <div class="count-label">Pending Items</div>
+                        </div>
+                        <button class="btn-review">Review →</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            container.innerHTML = cardsHTML;
+            document.getElementById('total-pending').innerText = total.toLocaleString();
         }
 
-        // --- 4. ACTIONS ---
-        function handleAction(id, action) {
-            // Find the report and change its status
-            const index = reports.findIndex(r => r.id === id);
-            if (index !== -1) {
-                reports[index].status = action;
-                
-                // Visual feedback (optional)
-                console.log(`Report #${id} marked as ${action}`);
-                
-                // Re-render table to remove the item
-                render();
-            }
+        // --- 4. CLICK ACTION ---
+        function openQueue(queueName) {
+            // For now, this just shows an alert. 
+            // In the future, this would go to: window.location.href = `review.html?type=${queueName}`;
+            alert(`Opening queue: ${queueName}\nLoading pending items...`);
         }
 
-        function banUser(username) {
-            if(confirm(`Are you sure you want to BAN user @${username}?`)) {
-                // In a real app, you would send a ban request to the server here
-                alert(`🚫 User @${username} has been banned.`);
-                
-                // Optional: Remove all reports from this user
-                reports.forEach(r => {
-                    if(r.author === username) r.status = 'Banned';
-                });
-                render();
-            }
-        }
-
-        // Initialize Page
-        render();
+        // Initialize
+        renderQueues();
     </script>
 </body>
 </html>
