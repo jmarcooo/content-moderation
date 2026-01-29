@@ -3,160 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moderation Dashboard</title>
+    <title>User Management</title>
+    <link rel="stylesheet" href="style.css">
+    
     <style>
-        /* --- DARK THEME STYLES (MATCHING YOUR LOGIN) --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        
-        body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            padding: 2rem;
-        }
-
-        /* HEADER */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #30363d;
-            padding-bottom: 1rem;
-        }
-
-        h1 { font-size: 1.5rem; color: #ffffff; }
-        
-        .btn-add {
-            background-color: #238636;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        /* DATA TABLE */
-        .table-container {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            overflow: hidden; /* Rounds the corners */
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background-color: #21262d;
-            color: #8b949e;
-            padding: 12px 16px;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #30363d;
-        }
-
-        td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #30363d;
-            font-size: 0.9rem;
-        }
-
-        tr:last-child td { border-bottom: none; }
-        tr:hover { background-color: #21262d; }
-
-        /* BADGES (FOR STATUS) */
-        .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-        
-        .status-active { background-color: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.4); }
-        .status-banned { background-color: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.4); }
-
-        /* ACTION BUTTONS */
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-right: 10px;
-            opacity: 0.7;
-        }
-        .action-btn:hover { opacity: 1; }
+         /* Modal styles can stay here or move to style.css */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background-color: #161b22; padding: 2rem; border-radius: 8px; border: 1px solid #30363d; width: 400px; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; background-color: #0d1117; border: 1px solid #30363d; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>🛡️ User Management</h1>
-        <button class="btn-add" onclick="alert('This would open a registration form!')">+ Add New User</button>
+    <main class="main-content">
+        <div class="header">
+            <h1>User Management</h1>
+            <button class="btn-add" onclick="alert('Demo action')">+ Add User</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Edit User</h3>
+            <button onclick="closeModal()">Close</button>
+        </div>
     </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="userTableBody">
-                <tr>
-                    <td>#101</td>
-                    <td><strong>jmarcooo</strong></td>
-                    <td>admin@example.com</td>
-                    <td>Admin</td>
-                    <td><span class="badge status-active">Active</span></td>
-                    <td>
-                        <button class="action-btn" title="Edit">✏️</button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>#102</td>
-                    <td>spambot_99</td>
-                    <td>spam@fake.com</td>
-                    <td>User</td>
-                    <td><span class="badge status-banned">Banned</span></td>
-                    <td>
-                        <button class="action-btn" title="Edit">✏️</button>
-                        <button class="action-btn" title="Delete" onclick="deleteRow(this)">🗑️</button>
-                    </td>
-                </tr>
-
-                 <tr>
-                    <td>#103</td>
-                    <td>new_user_22</td>
-                    <td>hello@world.com</td>
-                    <td>User</td>
-                    <td><span class="badge status-active">Active</span></td>
-                    <td>
-                        <button class="action-btn" title="Edit">✏️</button>
-                        <button class="action-btn" title="Delete" onclick="deleteRow(this)">🗑️</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <script src="sidebar.js"></script>
 
     <script>
-        // Simple script to remove a row when you click the Trash icon
-        function deleteRow(btn) {
-            var row = btn.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-        }
+        // ... (Paste your Table Logic / Users array script here) ...
+        // You can keep the script block from the previous step exactly as is.
     </script>
 
 </body>
