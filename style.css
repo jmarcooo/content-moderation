@@ -185,3 +185,78 @@ body.dark-mode .status-Active { color: #58a6ff; }
 .modal-content { background-color: var(--bg-card); padding: 2rem; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; max-width: 400px; box-shadow: var(--shadow); }
 .modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-header); border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+
+/* =========================================
+   10. VIEW SWITCHER & LIST MODE
+   ========================================= */
+
+/* Switcher Container */
+.view-switcher {
+    display: flex;
+    gap: 4px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    padding: 4px;
+    border-radius: 6px;
+    margin-right: 20px; /* Space between switcher and total count */
+}
+
+/* Switcher Buttons */
+.view-btn {
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.view-btn:hover { color: var(--text-main); }
+
+.view-btn.active {
+    background-color: var(--bg-card);
+    color: var(--accent-blue);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* LIST VIEW LAYOUT (Overrides Grid) */
+.queue-container.list-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* List Item Style */
+.queue-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 6px;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+
+.queue-list-item:hover {
+    transform: translateX(4px); /* Slight slide effect */
+    border-color: var(--accent-blue);
+    background-color: var(--hover-bg);
+}
+
+/* List Item Columns */
+.list-col-type { width: 100px; font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
+.list-col-name { flex-grow: 1; font-weight: 600; color: var(--text-main); font-size: 1rem; }
+.list-col-count { width: 120px; text-align: right; font-weight: bold; color: var(--text-header); font-size: 1.1rem; }
+.list-col-action { width: 100px; text-align: right; }
+
+/* List Item Priority Indicators (Left Border) */
+.list-priority-high { border-left: 4px solid #f85149; }
+.list-priority-med  { border-left: 4px solid #d29922; }
+.list-priority-low  { border-left: 4px solid #238636; }
