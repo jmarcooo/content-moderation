@@ -15,9 +15,11 @@
             <div style="display: flex; align-items: center;">
                 <div class="view-switcher">
                     <button id="btn-card" class="view-btn" onclick="switchView('card')" title="Card View">
-                        ⊞ </button>
+                        ⊞
+                    </button>
                     <button id="btn-list" class="view-btn" onclick="switchView('list')" title="List View">
-                        ☰ </button>
+                        ☰
+                    </button>
                 </div>
 
                 <div style="text-align: right;">
@@ -39,28 +41,29 @@
             window.location.href = 'login.html';
         }
 
-        // --- 2. CONFIGURATION ---
+        // --- 2. CONFIGURATION (Added Latency Data) ---
         const queueData = [
-            { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142 },
-            { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56 },
-            { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890 },
-            { id: 'gp_img',   category: 'GP', name: 'Dynamic Image Review', count: 23 },
-            { id: 'gp_com',   category: 'GP', name: 'Comment Review',       count: 45 },
-            { id: 'gp_vid',   category: 'GP', name: 'Dynamic Video Review', count: 12 },
-            { id: 'comm_ava', category: 'Community', name: 'Avatar Review',    count: 310 },
-            { id: 'comm_nick', category: 'Community', name: 'Nickname Review',  count: 67 },
-            { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105 }
+            { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142, latency: '1m 20s' },
+            { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56,  latency: '3m 45s' },
+            { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890, latency: '0m 30s' },
+            
+            { id: 'gp_img',   category: 'GP', name: 'Dynamic Image Review', count: 23,  latency: '5m 10s' },
+            { id: 'gp_com',   category: 'GP', name: 'Comment Review',       count: 45,  latency: '1m 05s' },
+            { id: 'gp_vid',   category: 'GP', name: 'Dynamic Video Review', count: 12,  latency: '8m 20s' },
+            
+            { id: 'comm_ava', category: 'Community', name: 'Avatar Review',    count: 310, latency: '2m 15s' },
+            { id: 'comm_nick', category: 'Community', name: 'Nickname Review',  count: 67,  latency: '0m 50s' },
+            { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105, latency: '4m 30s' }
         ];
 
         // --- 3. VIEW STATE LOGIC ---
-        // Load saved view or default to 'card'
         let currentView = localStorage.getItem('modQueueView') || 'card';
 
         function switchView(viewType) {
             currentView = viewType;
-            localStorage.setItem('modQueueView', viewType); // Save preference
-            renderQueues(); // Re-render
-            updateViewButtons(); // Update active button state
+            localStorage.setItem('modQueueView', viewType);
+            renderQueues();
+            updateViewButtons();
         }
 
         function updateViewButtons() {
@@ -74,20 +77,30 @@
             let total = 0;
             let html = '';
 
-            // Update Container Class (Grid vs List)
+            // Update Container Class
             if (currentView === 'card') {
                 container.className = 'queue-grid';
             } else {
                 container.className = 'queue-container list-mode';
+                // Add Header Row for List Mode
+                html += `
+                <div class="list-header-row">
+                    <div class="col-tenant">TENANT</div>
+                    <div class="col-name">QUEUE NAME</div>
+                    <div class="col-pending">PENDING TASKS</div>
+                    <div class="col-latency">LATENCY (AVG)</div>
+                    <div class="col-action">ACTION</div>
+                </div>
+                `;
             }
 
             // Loop through data
-            html = queueData.map(queue => {
+            html += queueData.map(queue => {
                 total += queue.count;
 
                 // Priority Logic
-                let priorityClass = 'priority-low'; // Default for Card
-                let listPriorityClass = 'list-priority-low'; // Default for List
+                let priorityClass = 'priority-low';
+                let listPriorityClass = 'list-priority-low';
                 
                 if (queue.count > 100) { 
                     priorityClass = 'priority-med'; 
@@ -98,7 +111,7 @@
                     listPriorityClass = 'list-priority-high';
                 }
 
-                // --- GENERATE HTML BASED ON VIEW ---
+                // --- RENDER BASED ON VIEW ---
                 if (currentView === 'card') {
                     // CARD LAYOUT
                     return `
@@ -116,17 +129,14 @@
                         </div>
                     </div>`;
                 } else {
-                    // LIST LAYOUT
+                    // LIST LAYOUT (Fixed Columns)
                     return `
                     <div class="queue-list-item ${listPriorityClass}" onclick="openQueue('${queue.name}')">
-                        <div class="list-col-type">${queue.category}</div>
-                        <div class="list-col-name">${queue.name}</div>
-                        <div class="list-col-count">
-                            ${queue.count.toLocaleString()} <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">pending</span>
-                        </div>
-                        <div class="list-col-action">
-                            <button class="btn-review">Review →</button>
-                        </div>
+                        <div class="col-tenant"><span class="badge-tenant">${queue.category}</span></div>
+                        <div class="col-name">${queue.name}</div>
+                        <div class="col-pending">${queue.count.toLocaleString()} <span class="sub-text">Tasks</span></div>
+                        <div class="col-latency"><span class="latency-icon">⏱</span> ${queue.latency}</div>
+                        <div class="col-action"><button class="btn-review">Review</button></div>
                     </div>`;
                 }
             }).join('');
