@@ -8,6 +8,10 @@ const sidebarContent = `
         <li><a href="home.html" id="link-home">📊 Overview</a></li>
         <li><a href="user-management.html" id="link-users">👥 User Management</a></li>
         <li><a href="moderation.html" id="link-mod">🚫 Moderation Queue</a></li>
+        
+        <li><a href="#" id="link-audit">🔍 Quality Audit</a></li>
+        <li><a href="#" id="link-appeal">⚖️ Appeal Center</a></li>
+        
         <li><a href="#">⚙️ Settings</a></li>
         <li><a href="login.html" style="margin-top:20px; color:#f85149;">🚪 Logout</a></li>
     </ul>
@@ -53,6 +57,9 @@ const path = window.location.pathname;
 if (path.includes('home.html')) document.getElementById('link-home').classList.add('active');
 if (path.includes('user-management.html')) document.getElementById('link-users').classList.add('active');
 if (path.includes('moderation.html')) document.getElementById('link-mod').classList.add('active');
+// Future-proofing: If you create these files later, they will auto-highlight
+if (path.includes('audit.html')) document.getElementById('link-audit').classList.add('active');
+if (path.includes('appeals.html')) document.getElementById('link-appeal').classList.add('active');
 
 // ===========================================
 // 2. THEME LOGIC
@@ -82,13 +89,11 @@ window.toggleTheme = function() {
 // 3. STATUS LOGIC (Refined Auto-Idle)
 // ===========================================
 
-// Toggle the menu open/close
 window.toggleStatusMenu = function() {
     const menu = document.getElementById('status-menu');
     menu.classList.toggle('active');
 }
 
-// Close menu when clicking outside
 document.addEventListener('click', function(event) {
     const dropdown = document.querySelector('.status-dropdown');
     const menu = document.getElementById('status-menu');
@@ -97,61 +102,45 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Set Status Function
 window.setStatus = function(type, label) {
     document.getElementById('current-text').innerText = label;
     document.getElementById('current-dot').className = `dot dot-${type}`;
     document.getElementById('status-menu').classList.remove('active');
     
-    // Save to storage
     localStorage.setItem('userStatus', JSON.stringify({ type, label }));
     
-    // If user manually sets "Break" or "Lunch", we must ensure timer is reset/cleared immediately
     if (type !== 'online') {
         clearTimeout(idleTimer);
     } else {
-        // If setting back to online manually, restart the timer logic
         resetIdleTimer();
     }
 }
 
-// Load Saved Status
 const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
 if (savedStatus) {
     setStatus(savedStatus.type, savedStatus.label);
 }
 
-// ------------------------------------------
-// STRICT AUTO-IDLE LOGIC
-// ------------------------------------------
+// AUTO-IDLE LOGIC
 let idleTimer;
 const IDLE_LIMIT = 5 * 60 * 1000; // 5 Minutes
 
 function resetIdleTimer() {
-    // 1. Clear any existing timer immediately
     clearTimeout(idleTimer);
-
     const currentLabel = document.getElementById('current-text').innerText;
 
-    // 2. Logic: If user is "Idle" and moves mouse -> Wake up to "Online"
     if (currentLabel === 'Idle') {
         setStatus('online', 'Online');
-        // Once set to Online, the code below will run automatically on next event 
-        // or we can let it fall through, but setStatus restarts logic anyway.
         return; 
     }
 
-    // 3. Logic: Only start countdown if status is explicitly "Online"
-    // If status is Break, Lunch, Meeting, etc., DO NOTHING.
     if (currentLabel === 'Online') {
         idleTimer = setTimeout(() => {
             setStatus('idle', 'Idle');
-            console.log("User inactive for 5 mins: Status changed to Idle");
         }, IDLE_LIMIT);
     }
 }
 
-// Listen for activity
 window.onload = resetIdleTimer;
 document.onmousemove = resetIdleTimer;
 document.onkeypress = resetIdleTimer;
