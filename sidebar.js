@@ -1,4 +1,4 @@
-// 1. Sidebar HTML Content
+// 1. Sidebar HTML Content (Theme button in User Profile)
 const sidebarContent = `
 <nav class="sidebar">
     <div class="brand">🛡️ AdminPanel</div>
@@ -21,7 +21,7 @@ const sidebarContent = `
         </div>
 
         <button onclick="toggleTheme()" class="theme-btn" title="Toggle Theme">
-            <span id="theme-icon">🌙</span>
+            <span id="theme-icon">☀️</span>
         </button>
     </div>
 </nav>
@@ -37,26 +37,30 @@ if (path.includes('user-management.html')) document.getElementById('link-users')
 if (path.includes('moderation.html')) document.getElementById('link-mod').classList.add('active');
 
 // ===========================================
-// THEME SWITCHER LOGIC
+// THEME SWITCHER LOGIC (DEFAULT = LIGHT)
 // ===========================================
-const savedTheme = localStorage.getItem('appTheme');
+const savedTheme = localStorage.getItem('appTheme') || 'light'; // Default to light
 const themeIcon = document.getElementById('theme-icon');
 
-if (savedTheme === 'light') {
-    document.body.classList.add('light-mode');
-    themeIcon.innerText = '☀️';
-} else {
+// Apply Saved Theme
+if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
     themeIcon.innerText = '🌙';
+} else {
+    // Default is light, so we do nothing (body has no class)
+    themeIcon.innerText = '☀️';
 }
 
+// Toggle Function
 window.toggleTheme = function() {
-    const isLight = document.body.classList.toggle('light-mode');
+    // Toggle the 'dark-mode' class
+    const isDark = document.body.classList.toggle('dark-mode');
     
-    if (isLight) {
-        localStorage.setItem('appTheme', 'light');
-        document.getElementById('theme-icon').innerText = '☀️';
-    } else {
+    if (isDark) {
         localStorage.setItem('appTheme', 'dark');
         document.getElementById('theme-icon').innerText = '🌙';
+    } else {
+        localStorage.setItem('appTheme', 'light');
+        document.getElementById('theme-icon').innerText = '☀️';
     }
 };
