@@ -4,90 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moderation Hub</title>
+    
+    <link rel="stylesheet" href="style.css">
+
     <style>
-        /* --- GLOBAL STYLES --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        
-        body {
-            background-color: #0d1117; /* GitHub Dark */
-            color: #c9d1d9;
-            display: flex;
-            height: 100vh;
-        }
-
-        /* --- SIDEBAR MENU --- */
-        .sidebar {
-            width: 250px;
-            background-color: #161b22;
-            border-right: 1px solid #30363d;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .brand {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #ffffff;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-links {
-            list-style: none;
-            flex-grow: 1;
-        }
-
-        .nav-links li { margin-bottom: 8px; }
-
-        .nav-links a {
-            display: block;
-            padding: 10px 12px;
-            text-decoration: none;
-            color: #c9d1d9;
-            border-radius: 6px;
-            transition: background 0.2s;
-            font-size: 0.95rem;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            background-color: #21262d;
-            color: #58a6ff; /* GitHub Blue */
-        }
-
-        .user-profile {
-            border-top: 1px solid #30363d;
-            padding-top: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-        }
-        
-        .avatar {
-            width: 32px;
-            height: 32px;
-            background-color: #238636;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-        }
-
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            flex-grow: 1;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        h1 { margin-bottom: 1.5rem; color: #ffffff; font-size: 1.5rem; }
-
-        /* GRID LAYOUT FOR CARDS */
+        /* These styles are only for the Dashboard Overview */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -105,12 +26,11 @@
         .card h3 { font-size: 0.9rem; color: #8b949e; margin-bottom: 10px; font-weight: normal; }
         .card .number { font-size: 2rem; font-weight: bold; color: #ffffff; }
         .card .trend { font-size: 0.8rem; margin-top: 5px; }
-        .trend.up { color: #238636; } /* Green */
-        .trend.down { color: #f85149; } /* Red */
+        .trend.up { color: #238636; }
+        .trend.down { color: #f85149; }
 
-        /* RECENT ACTIVITY SECTION */
+        /* Recent Activity List */
         .section-title { font-size: 1.1rem; margin-bottom: 1rem; color: #ffffff; border-bottom: 1px solid #30363d; padding-bottom: 0.5rem; }
-        
         .activity-list { list-style: none; }
         .activity-item {
             padding: 12px 0;
@@ -120,28 +40,9 @@
             justify-content: space-between;
         }
         .activity-item span { color: #8b949e; font-size: 0.8rem; }
-
     </style>
 </head>
 <body>
-
-    <nav class="sidebar">
-        <div class="brand">🛡️ AdminPanel</div>
-        <ul class="nav-links">
-            <li><a href="#" class="active">📊 Overview</a></li>
-            <li><a href="user-management.html">👥 User Management</a></li>
-            <li><a href="#">🚫 Moderation Queue <span style="float:right; background:#f85149; color:white; font-size:0.7em; padding:2px 6px; border-radius:10px;">5</span></a></li>
-            <li><a href="#">⚙️ Settings</a></li>
-        </ul>
-        
-        <div class="user-profile">
-            <div class="avatar">J</div>
-            <div>
-                <div><strong>jmarcooo</strong></div>
-                <div style="font-size: 0.8rem; color: #8b949e;">Super Admin</div>
-            </div>
-        </div>
-    </nav>
 
     <main class="main-content">
         <h1>Overview</h1>
@@ -180,6 +81,21 @@
             </li>
         </ul>
     </main>
+
+    <script src="sidebar.js"></script>
+
+    <script>
+        // Check if a user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        
+        if (currentUser) {
+            // Change the H1 to welcome them by name
+            document.querySelector('h1').innerText = `Welcome back, ${currentUser.name}`;
+        } else {
+            // If they aren't logged in, send them back to login (Optional security)
+            // window.location.href = 'index.html'; 
+        }
+    </script>
 
 </body>
 </html>
