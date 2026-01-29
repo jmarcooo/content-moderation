@@ -4,8 +4,9 @@ const sidebarContent = `
     <ul class="nav-links">
         <li><a href="home.html" id="link-home">📊 Overview</a></li>
         <li><a href="user-management.html" id="link-users">👥 User Management</a></li>
-        <li><a href="#">🚫 Moderation Queue</a></li>
+        <li><a href="moderation.html" id="link-mod">🚫 Moderation Queue</a></li>
         <li><a href="#">⚙️ Settings</a></li>
+        
         <li><a href="login.html" style="margin-top:20px; color:#f85149;">🚪 Logout</a></li>
     </ul>
     
@@ -22,7 +23,13 @@ const sidebarContent = `
 // Insert sidebar
 document.body.insertAdjacentHTML('afterbegin', sidebarContent);
 
-// Highlight active link
+// Highlight active link logic
 const path = window.location.pathname;
-if (path.includes('home.html')) document.getElementById('link-home').classList.add('active');
-if (path.includes('user-management.html')) document.getElementById('link-users').classList.add('active');
+
+if (path.includes('home.html')) {
+    document.getElementById('link-home').classList.add('active');
+} else if (path.includes('user-management.html')) {
+    document.getElementById('link-users').classList.add('active');
+} else if (path.includes('moderation.html')) {
+    document.getElementById('link-mod').classList.add('active');
+}
