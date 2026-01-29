@@ -1,5 +1,5 @@
 // ===========================================
-// 1. SIDEBAR HTML (With New Status Dropdown)
+// 1. SIDEBAR HTML
 // ===========================================
 const sidebarContent = `
 <nav class="sidebar">
@@ -18,24 +18,25 @@ const sidebarContent = `
             <div>
                 <div><strong>Admin</strong></div>
                 
-                <div class="status-container">
-                    <div class="status-trigger" onclick="toggleStatusMenu()" title="Change Status">
-                        <span id="current-dot" class="status-dot dot-online"></span>
+                <div class="status-dropdown">
+                    <div class="status-trigger" onclick="toggleStatusMenu()">
+                        <span id="current-dot" class="dot dot-online"></span>
                         <span id="current-text">Online</span>
-                        <span style="font-size:0.7rem; margin-left:4px;">▼</span>
+                        <span style="font-size: 0.7em; opacity: 0.5;">▼</span>
                     </div>
 
                     <ul id="status-menu" class="status-menu">
-                        <li onclick="setStatus('online', 'Online')"><span class="status-dot dot-online"></span> Online</li>
-                        <li onclick="setStatus('break', 'Break')"><span class="status-dot dot-break"></span> Break</li>
-                        <li onclick="setStatus('lunch', 'Lunch')"><span class="status-dot dot-lunch"></span> Lunch</li>
-                        <li onclick="setStatus('meeting', 'Meeting')"><span class="status-dot dot-meeting"></span> Meeting</li>
-                        <li onclick="setStatus('idle', 'Idle')"><span class="status-dot dot-idle"></span> Idle</li>
-                        <li onclick="setStatus('training', 'Training')"><span class="status-dot dot-training"></span> Training</li>
-                        <li onclick="setStatus('offline', 'Offline')"><span class="status-dot dot-offline"></span> Offline</li>
+                        <li onclick="setStatus('online', 'Online')"><span class="dot dot-online"></span> Online</li>
+                        <li onclick="setStatus('break', 'Break')"><span class="dot dot-break"></span> Break</li>
+                        <li onclick="setStatus('lunch', 'Lunch')"><span class="dot dot-lunch"></span> Lunch</li>
+                        <li onclick="setStatus('meeting', 'Meeting')"><span class="dot dot-meeting"></span> Meeting</li>
+                        <li onclick="setStatus('idle', 'Idle')"><span class="dot dot-idle"></span> Idle</li>
+                        <li onclick="setStatus('training', 'Training')"><span class="dot dot-training"></span> Training</li>
+                        <li onclick="setStatus('offline', 'Offline')"><span class="dot dot-offline"></span> Offline</li>
                     </ul>
                 </div>
-                </div>
+
+            </div>
         </div>
 
         <button onclick="toggleTheme()" class="theme-btn" title="Toggle Theme">
@@ -55,7 +56,7 @@ if (path.includes('user-management.html')) document.getElementById('link-users')
 if (path.includes('moderation.html')) document.getElementById('link-mod').classList.add('active');
 
 // ===========================================
-// 2. THEME SWITCHER LOGIC
+// 2. THEME LOGIC
 // ===========================================
 const savedTheme = localStorage.getItem('appTheme') || 'light';
 const themeIcon = document.getElementById('theme-icon');
@@ -79,72 +80,64 @@ window.toggleTheme = function() {
 };
 
 // ===========================================
-// 3. STATUS & AUTO-IDLE LOGIC
+// 3. STATUS LOGIC (Dropdown & Idle)
 // ===========================================
 
-// A. Toggle Menu Visibility
+// Toggle the menu open/close
 window.toggleStatusMenu = function() {
     const menu = document.getElementById('status-menu');
-    menu.classList.toggle('show');
+    menu.classList.toggle('active');
 }
 
-// Close menu if clicking outside
+// Close menu when clicking outside
 document.addEventListener('click', function(event) {
-    const container = document.querySelector('.status-container');
+    const dropdown = document.querySelector('.status-dropdown');
     const menu = document.getElementById('status-menu');
-    if (!container.contains(event.target)) {
-        menu.classList.remove('show');
+    
+    // If click is NOT inside the dropdown, close it
+    if (dropdown && !dropdown.contains(event.target)) {
+        menu.classList.remove('active');
     }
 });
 
-// B. Set Status Function
+// Set Status Function
 window.setStatus = function(type, label) {
-    // Update visual text and dot color
     document.getElementById('current-text').innerText = label;
+    document.getElementById('current-dot').className = `dot dot-${type}`;
+    document.getElementById('status-menu').classList.remove('active');
     
-    // Remove old dot class and add new one
-    const dot = document.getElementById('current-dot');
-    dot.className = `status-dot dot-${type}`;
-    
-    // Close menu
-    document.getElementById('status-menu').classList.remove('show');
-    
-    // Save to local storage (Mocking backend update)
+    // Save to storage
     localStorage.setItem('userStatus', JSON.stringify({ type, label }));
-    console.log(`User status set to: ${label} (${type})`);
 }
 
-// C. Initialize Saved Status (On Page Load)
+// Load Saved Status
 const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
 if (savedStatus) {
     setStatus(savedStatus.type, savedStatus.label);
 }
 
-// D. AUTO-IDLE SYSTEM (5 Minutes Inactivity)
+// Auto-Idle Logic (5 Minutes)
 let idleTimer;
-const IDLE_LIMIT = 5 * 60 * 1000; // 5 Minutes in milliseconds
+const IDLE_LIMIT = 5 * 60 * 1000; 
 
 function resetIdleTimer() {
     clearTimeout(idleTimer);
-    
-    // Only reset if we are NOT already manually set to 'Offline' or 'Break'
-    // (We don't want to wake up someone who is actually on lunch just because they moved the mouse)
     const currentLabel = document.getElementById('current-text').innerText;
+    
+    // If user wakes up from Idle
     if (currentLabel === 'Idle') {
-        // If they were idle and moved mouse, set back to Online
         setStatus('online', 'Online');
     }
     
-    // Start countdown to Idle
+    // Start Timer if currently Online
     if (currentLabel === 'Online') {
         idleTimer = setTimeout(() => {
             setStatus('idle', 'Idle');
-            alert("⚠️ You have been set to 'Idle' due to inactivity.");
         }, IDLE_LIMIT);
     }
 }
 
-// Listen for activity
+// Activity Listeners
 window.onload = resetIdleTimer;
 document.onmousemove = resetIdleTimer;
 document.onkeypress = resetIdleTimer;
