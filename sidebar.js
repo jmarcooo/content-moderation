@@ -1,13 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Create Sidebar Element
     const sidebar = document.createElement("div");
     sidebar.className = "sidebar";
 
-    // 2. Get User Data
+    // 1. Get User
     const user = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Admin', role: 'Viewer' };
     const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
-    // 3. Define Navigation Links
+    // 2. Navigation
     const navItems = [
         { name: "📊 Overview", link: "home.html" },
         { name: "👥 User Management", link: "user-management.html" },
@@ -17,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { name: "🔔 Notification Center", link: "#" }
     ];
 
-    // 4. Build HTML
+    // 3. FORCE STRUCTURE
     sidebar.innerHTML = `
         <div class="brand">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--accent-blue)" xmlns="http://www.w3.org/2000/svg">
@@ -27,15 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         
         <ul class="nav-links">
-            ${navItems.map(item => `
-                <li><a href="${item.link}">${item.name}</a></li>
-            `).join('')}
+            ${navItems.map(item => `<li><a href="${item.link}">${item.name}</a></li>`).join('')}
         </ul>
 
         <div class="user-profile">
             <div class="avatar">${initials}</div>
             <div style="flex-grow:1; overflow:hidden;">
-                <div style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${user.name}</div>
+                <div style="font-weight:bold; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${user.name}</div>
                 
                 <div class="status-dropdown">
                     <div class="status-trigger" onclick="toggleStatusMenu(event)">
@@ -61,13 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="sidebar-footer-menu">
             <a href="settings.html">⚙️ Settings</a>
-            <a href="#" onclick="logout()">🚪 Logout</a>
+            <a href="#" onclick="logout()" class="logout-link">🚪 Logout</a>
         </div>
     `;
 
     document.body.prepend(sidebar);
 
-    // 5. Highlight Active Link
+    // Active Link
     const currentPage = window.location.pathname.split("/").pop() || "home.html";
     const activeLink = document.querySelector(`.nav-links a[href="${currentPage}"]`);
     if (activeLink) activeLink.classList.add("active");
@@ -76,10 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
     resetInactivityTimer();
 });
 
-// --- HELPER FUNCTIONS ---
-
+// --- UTILS ---
 function logout() {
-    if(confirm('Are you sure you want to logout?')) {
+    if(confirm('Logout?')) {
         localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
     }
@@ -97,13 +93,11 @@ function setStatus(statusName) {
     document.getElementById('status-menu').classList.remove('active');
 }
 
-// Close menu when clicking outside
 document.addEventListener('click', () => {
     const menu = document.getElementById('status-menu');
     if (menu) menu.classList.remove('active');
 });
 
-// --- THEME ---
 function initTheme() {
     const theme = localStorage.getItem('theme') || 'light';
     if (theme === 'dark') {
@@ -128,9 +122,7 @@ function toggleTheme() {
     }
 }
 
-// --- IDLE TIMER ---
 let inactivityTimer;
-
 function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
@@ -138,7 +130,7 @@ function resetInactivityTimer() {
         if (currentStatus === 'online') {
             setStatus('idle');
         }
-    }, 300000); // 5 Minutes
+    }, 300000); // 5 mins
 }
 
 ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
