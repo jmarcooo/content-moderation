@@ -104,7 +104,7 @@
         </div>
 
         <div id="violationDrawer" class="violation-drawer">
-            <div class="drawer-header"><span>Reason</span><span style="cursor:pointer;" onclick="closeDrawer()">✕</span></div>
+            <div class="drawer-header"><span>Select Reason</span><span style="cursor:pointer;" onclick="closeDrawer()">✕</span></div>
             <div class="drawer-content" id="violationList"></div>
         </div>
 
@@ -181,7 +181,7 @@
                 const modContent = document.getElementById('module-content');
                 
                 if (task.images.length > 0) {
-                    modContent.style.display = 'block'; // Visually show
+                    modContent.style.display = 'block'; 
                     if (q.includes('avatar')) {
                         imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="openImageViewer(this.src)">`;
                     } else {
@@ -190,7 +190,7 @@
                         ).join('');
                     }
                 } else {
-                    modContent.style.display = 'none'; // Visually hide
+                    modContent.style.display = 'none'; 
                 }
 
                 // TEXT
@@ -232,9 +232,8 @@
             }, 500);
         }
 
-        // --- STRICT VALIDATION (THE FIX) ---
+        // --- STRICT VALIDATION ---
         function validateSubmission() {
-            // Helper to check if an element is truly visible
             const isVisible = (elem) => !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
 
             const contentModule = document.getElementById('module-content');
@@ -252,7 +251,6 @@
                     return false;
                 }
             }
-
             return true;
         }
 
@@ -295,7 +293,6 @@
 
             const selection = window.getSelection();
             if (selection.rangeCount > 0 && !selection.isCollapsed && box.contains(selection.anchorNode)) {
-                // Clear old
                 const highlights = box.querySelectorAll('.restricted-text');
                 highlights.forEach(span => {
                     const textNode = document.createTextNode(span.textContent);
@@ -303,7 +300,6 @@
                 });
                 box.normalize();
 
-                // New highlight
                 const range = selection.getRangeAt(0);
                 const span = document.createElement('span');
                 span.className = 'restricted-text';
@@ -329,8 +325,6 @@
             const container = document.getElementById(`module-${target}`);
             container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
             
-            // Note: We leave cleaning of highlights to the selection handler or explicit clear
-            
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
             if(status === 'restrict') container.querySelector('.btn-restrict-sm').classList.add('active');
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
@@ -343,7 +337,98 @@
         }
 
         let currentTargetForDrawer = '';
-        const violations = { "Insults": ["Attacks", "Bullying"], "Spam": ["Ads", "Gibberish"], "NSFW": ["Nudity", "Gore"] };
+        
+        // --- NEW VIOLATION DATA ---
+        const violations = {
+            "Insults": [
+                "Personal Attacks",
+                "Uncivilized Language",
+                "Implicit and Uncivilized Language",
+                "Bullying",
+                "Discrimination and Insult"
+            ],
+            "Advertising": [
+                "General Advertising",
+                "Betting Advertising",
+                "Contact Details",
+                "Marketing Advertising"
+            ],
+            "Prohibited": [
+                "Drugs",
+                "Prohibited Goods",
+                "Firearms Ammunition",
+                "Tobacco",
+                "Alcohol"
+            ],
+            "Pornography": [
+                "Perverted Porn Sexual",
+                "Sexual Description",
+                "Pornographic Depiction",
+                "Sexual Harassment"
+            ],
+            "Violence": [
+                "War Events",
+                "Violence and Bloody",
+                "Shooting Incidents",
+                "Horror Scenes"
+            ],
+            "Terrorism": [
+                "Terrorist Figures",
+                "Terrorist Organizations",
+                "Terrorist Incidents"
+            ],
+            "Involving Minors": [
+                "Sexual Content Involving Minors",
+                "Underage Drinking",
+                "Underage Smoking",
+                "Underage Drug",
+                "Underage Self-Harm",
+                "Child Gambling or Betting activities",
+                "Child Inappropriate Language or Gestures"
+            ],
+            "Involved in Politics": [
+                "Domestic Leaders",
+                "Foreign Leaders",
+                "National Institution",
+                "Negative Speech",
+                "Policies and Regulations",
+                "Coordinated Inauthentic Behavior (CIB)"
+            ],
+            "Unauthorized Solicitation": [
+                "Coerced Interaction/ Begging",
+                "Fraudulent Reward Promotions",
+                "Exploitative Follow-for-Follow Schemes",
+                "Direct Requests for Funds",
+                "Asking for Third-Party Donations",
+                "Emotional/Distress Solicitation",
+                "Implied Solicitation"
+            ],
+            "Disturbing Content": [
+                "Body Horror/Distortion Imagery",
+                "Unsanitary Practices",
+                "Graphic Medical/Dermatological Imagery",
+                "Bodily Fluids/Waste"
+            ],
+            "Suicide and Self-Harm": [
+                "Suicidal Tendencies",
+                "Suicide Depiction",
+                "Self-Harm Tendencies",
+                "Promotion of Suicide/Self-Harm",
+                "Aftermath or Consequence",
+                "Suicide and Self Harm (Emoji)",
+                "Implicit suicidal and self harm expressions/slangs"
+            ],
+            "Low Quality Content": [
+                "Low Quality and Meaningless"
+            ],
+            "Company Negative": [
+                "Malicious smear",
+                "Negative Reviews",
+                "Malicious Users",
+                "Experience Related"
+            ]
+        };
+
         function renderViolations() {
             const list = document.getElementById('violationList');
             let h = '';
