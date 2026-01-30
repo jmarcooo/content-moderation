@@ -33,7 +33,7 @@
         <div class="header" style="margin-bottom: 10px; border-bottom: none; padding-bottom: 0;">
             <div>
                 <a href="moderation.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem;">← Back to Queues</a>
-                <h1 id="queue-title" style="margin-top: 5px;">Dynamic Review</h1>
+                <h1 id="queue-title" style="margin-top: 5px;">Loading...</h1>
             </div>
             
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -138,6 +138,14 @@
         const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Admin' };
         document.getElementById('reviewer-name').innerText = currentUser.name;
         
+        // --- NEW: DYNAMIC TITLE LOGIC ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const queueName = urlParams.get('queue') || 'Review';
+        const tenant = urlParams.get('tenant') || 'BP'; // Default to BP if missing
+        
+        // Set the H1 Title: [Tenant] [Queue Name]
+        document.getElementById('queue-title').innerText = `${tenant} ${queueName}`;
+
         let currentTarget = '';
         let tasksCompleted = 0; 
         let timerInterval;
@@ -216,24 +224,15 @@
             const selection = window.getSelection();
             const textBox = document.getElementById('text-content');
 
-            // Only proceed if text is selected AND it's inside our text box
             if (selection.rangeCount > 0 && !selection.isCollapsed && textBox.contains(selection.anchorNode)) {
-                
-                // 1. Clean previous highlights (if you want single selection only)
                 clearHighlights();
-
-                // 2. Wrap new selection
                 const range = selection.getRangeAt(0);
                 const span = document.createElement('span');
                 span.className = 'restricted-text';
                 try {
                     range.surroundContents(span);
-                    selection.removeAllRanges(); // Clear selection UI so user sees the yellow style
-                    
-                    // 3. AUTO-TRIGGER RESTRICT STATUS
-                    // We pass 'true' to preserveHighlights so setStatus doesn't wipe what we just did
+                    selection.removeAllRanges(); 
                     setStatus('text', 'restrict', '', true);
-
                 } catch (e) {
                     console.log("Selection error");
                 }
@@ -241,28 +240,22 @@
         }
 
         // --- 3. STATUS LOGIC ---
-        // Added 'preserveHighlights' flag
         function setStatus(target, status, reason = '', preserveHighlights = false) {
             const container = document.getElementById(`module-${target}`);
             const buttons = container.querySelectorAll('.btn-sm');
             buttons.forEach(b => b.classList.remove('active'));
 
-            // Step 1: Clean highlights unless we specifically asked to keep them (e.g., from the selection handler)
             if (target === 'text' && !preserveHighlights) {
                 clearHighlights();
             }
 
-            // Step 2: Activate Buttons
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
-            
             if(status === 'restrict') {
                 const btn = container.querySelector('.btn-restrict-sm');
                 if(btn) btn.classList.add('active');
             }
-            
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
 
-            // Step 3: Update Badge
             const badge = document.getElementById(`status-${target}`);
             badge.style.display = 'block';
             
