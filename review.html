@@ -12,6 +12,16 @@
             letter-spacing: 1px;
             font-weight: bold;
         }
+
+        /* NEW STYLE: For the highlighted text */
+        .restricted-text {
+            background-color: rgba(210, 153, 34, 0.25); /* Light Orange background */
+            border-bottom: 2px solid #d29922; /* Solid underline */
+            color: #b07b17; /* Darker orange text */
+            font-weight: bold;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body>
@@ -99,14 +109,13 @@
 
                     <div class="action-module">
                         <button class="btn-sm btn-approve-sm" onclick="setStatus('text', 'approve')">Approve</button>
-                        <button class="btn-sm btn-restrict-sm" onclick="setStatus('text', 'restrict')">Restrict</button>
+                        <button class="btn-sm btn-restrict-sm" onmousedown="event.preventDefault()" onclick="setStatus('text', 'restrict')">Restrict</button>
                         <button class="btn-sm btn-reject-sm" onclick="openDrawer('text')">Reject</button>
                     </div>
                 </div>
 
                 <div style="margin-top: auto; padding-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
                     <button class="btn-cancel" onclick="submitAndExit()">Submit & Exit</button>
-                    
                     <button class="btn-primary" onclick="nextTask()">Submit & Next →</button>
                 </div>
 
@@ -131,8 +140,6 @@
         
         let currentTarget = '';
         let tasksCompleted = 0; 
-
-        // --- TIMER ---
         let timerInterval;
         let secondsElapsed = 0;
 
@@ -140,7 +147,6 @@
             clearInterval(timerInterval);
             secondsElapsed = 0;
             document.getElementById('timer').innerText = "00:00:00";
-            
             timerInterval = setInterval(() => {
                 secondsElapsed++;
                 const h = Math.floor(secondsElapsed / 3600).toString().padStart(2, '0');
@@ -152,7 +158,6 @@
 
         function stopTimer() { clearInterval(timerInterval); }
 
-        // --- VIOLATION DATA ---
         const violations = {
             "Insults": ["Personal Attacks", "Uncivilized Language", "Bullying"],
             "Advertising": ["Gambling", "Phishing", "Commercial Spam"],
@@ -190,38 +195,51 @@
             container.innerHTML = html;
         }
 
-        function toggleSubmenu(element) {
-            const submenu = element.nextElementSibling;
-            submenu.classList.toggle('active');
-        }
+        function toggleSubmenu(element) { element.nextElementSibling.classList.toggle('active'); }
+        function openDrawer(target) { currentTarget = target; document.getElementById('violationDrawer').classList.add('open'); }
+        function closeDrawer() { document.getElementById('violationDrawer').classList.remove('open'); }
+        function confirmReject(reason) { setStatus(currentTarget, 'reject', reason); closeDrawer(); }
 
-        function openDrawer(target) {
-            currentTarget = target; 
-            document.getElementById('violationDrawer').classList.add('open');
-        }
-
-        function closeDrawer() {
-            document.getElementById('violationDrawer').classList.remove('open');
-        }
-
-        function confirmReject(reason) {
-            setStatus(currentTarget, 'reject', reason);
-            closeDrawer();
-        }
-
-        // --- 3. STATUS LOGIC ---
+        // --- 3. STATUS LOGIC (With Highlight Feature) ---
         function setStatus(target, status, reason = '') {
             const container = document.getElementById(`module-${target}`);
             const buttons = container.querySelectorAll('.btn-sm');
             buttons.forEach(b => b.classList.remove('active'));
 
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
+            
+            // --- NEW: RESTRICT / HIGHLIGHT LOGIC ---
             if(status === 'restrict') {
                 const btn = container.querySelector('.btn-restrict-sm');
                 if(btn) btn.classList.add('active');
+                
+                // If this is the TEXT module, check for selection
+                if(target === 'text') {
+                    const selection = window.getSelection();
+                    // Ensure there is a selection and it's inside our text box
+                    if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                        const range = selection.getRangeAt(0);
+                        const textBox = document.getElementById('text-content');
+                        
+                        // Security check: ensure we are only highlighting inside the text box
+                        if (textBox.contains(range.commonAncestorContainer)) {
+                            const span = document.createElement('span');
+                            span.className = 'restricted-text'; // Apply the yellow highlight style
+                            try {
+                                range.surroundContents(span);
+                                // clear selection after highlighting to make it look clean
+                                selection.removeAllRanges();
+                            } catch (e) {
+                                console.log("Complex selection (crossing tags) not supported in this prototype");
+                            }
+                        }
+                    }
+                }
             }
+
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
 
+            // Update Badge
             const badge = document.getElementById(`status-${target}`);
             badge.style.display = 'block';
             
@@ -264,18 +282,13 @@
             }, 500);
         }
 
-        // --- 5. NAVIGATION LOGIC ---
-
-        // A. Load Next Task
         function nextTask() {
             tasksCompleted++;
             document.getElementById('session-counter').innerText = tasksCompleted;
             loadNextTask();
         }
 
-        // B. Submit & Exit (Returns to Menu)
         function submitAndExit() {
-            // In a real app, this would send an API call first.
             alert("Decision Saved. Returning to Menu...");
             window.location.href = 'moderation.html';
         }
