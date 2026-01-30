@@ -6,7 +6,6 @@
     <title>Review Task</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Specific style for the timer to look like a digital clock */
         .timer-badge {
             font-family: monospace;
             font-size: 1rem;
@@ -100,6 +99,7 @@
 
                     <div class="action-module">
                         <button class="btn-sm btn-approve-sm" onclick="setStatus('text', 'approve')">Approve</button>
+                        <button class="btn-sm btn-restrict-sm" onclick="setStatus('text', 'restrict')">Restrict</button>
                         <button class="btn-sm btn-reject-sm" onclick="openDrawer('text')">Reject</button>
                     </div>
                 </div>
@@ -128,14 +128,14 @@
         document.getElementById('reviewer-name').innerText = currentUser.name;
         
         let currentTarget = '';
-        let tasksCompleted = 0; // Counter for session
+        let tasksCompleted = 0; 
 
-        // --- TIMER LOGIC ---
+        // --- TIMER ---
         let timerInterval;
         let secondsElapsed = 0;
 
         function startTimer() {
-            clearInterval(timerInterval); // Stop previous
+            clearInterval(timerInterval);
             secondsElapsed = 0;
             document.getElementById('timer').innerText = "00:00:00";
             
@@ -148,9 +148,7 @@
             }, 1000);
         }
 
-        function stopTimer() {
-            clearInterval(timerInterval);
-        }
+        function stopTimer() { clearInterval(timerInterval); }
 
         // --- VIOLATION DATA ---
         const violations = {
@@ -168,7 +166,7 @@
             "Company Negative": ["Slander", "Fake News"]
         };
 
-        // --- 2. DRAWER LOGIC ---
+        // --- 2. DRAWER ---
         function renderViolations() {
             const container = document.getElementById('violationList');
             let html = '';
@@ -209,44 +207,50 @@
             closeDrawer();
         }
 
-        // --- 3. STATUS LOGIC ---
+        // --- 3. STATUS LOGIC (Restored Restrict) ---
         function setStatus(target, status, reason = '') {
             const container = document.getElementById(`module-${target}`);
             const buttons = container.querySelectorAll('.btn-sm');
             buttons.forEach(b => b.classList.remove('active'));
 
+            // Activate button
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
+            // Check if Restrict button exists (it won't for Content) before adding class
+            if(status === 'restrict') {
+                const btn = container.querySelector('.btn-restrict-sm');
+                if(btn) btn.classList.add('active');
+            }
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
 
             const badge = document.getElementById(`status-${target}`);
             badge.style.display = 'block';
             
+            // Set Badge Visuals
             if (status === 'approve') {
                 badge.innerText = "✅ APPROVED";
                 badge.className = "decision-badge score-perfect";
+            } else if (status === 'restrict') {
+                badge.innerText = "⚠️ RESTRICTED";
+                badge.className = "decision-badge score-good"; // Uses Yellow/Orange style
             } else {
                 badge.innerText = `⛔ REJECTED: ${reason}`;
                 badge.className = "decision-badge score-bad";
             }
         }
 
-        // --- 4. DATA & LOADING ---
+        // --- 4. DATA ---
         function loadNextTask() {
-            stopTimer(); // Reset timer while loading
+            stopTimer();
             document.getElementById('loader').style.display = 'flex';
             document.getElementById('workbench').style.display = 'none';
 
-            // Reset UI
             ['content', 'text'].forEach(t => {
                 document.getElementById(`status-${t}`).style.display = 'none';
                 document.querySelectorAll(`#module-${t} .btn-sm`).forEach(b => b.classList.remove('active'));
             });
 
             setTimeout(() => {
-                // Mock Data
                 document.getElementById('content-id').innerText = "884" + Math.floor(Math.random() * 10000);
-                
-                // Inject Task ID into sidebar
                 document.getElementById('sidebar-task-id').innerText = "Task-" + Math.floor(Math.random() * 500);
                 
                 document.getElementById('image-container').innerHTML = `
@@ -257,23 +261,18 @@
                 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('workbench').style.display = 'flex';
-                
-                startTimer(); // START TIMER NOW
+                startTimer();
             }, 500);
         }
 
         function nextTask() {
-            // Increment Counter
             tasksCompleted++;
             document.getElementById('session-counter').innerText = tasksCompleted;
-            
             loadNextTask();
         }
 
-        // Initialize
         renderViolations();
         loadNextTask();
-
     </script>
 </body>
 </html>
