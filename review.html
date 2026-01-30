@@ -134,17 +134,14 @@
         let currentTarget = '';
         let currentScale = 1; let currentRotate = 0; let currentFlip = 1;
         
-        // --- TIMER LOGIC (BUG FIX 1) ---
+        // --- TIMER LOGIC ---
         let timerInterval;
         let secondsElapsed = 0;
 
         function startTimer() {
-            // Stop any existing timer
             clearInterval(timerInterval);
             secondsElapsed = 0;
             document.getElementById('timer').innerText = "00:00:00";
-            
-            // Start new timer
             timerInterval = setInterval(() => {
                 secondsElapsed++;
                 const h = Math.floor(secondsElapsed / 3600).toString().padStart(2, '0');
@@ -185,7 +182,7 @@
 
         // --- RENDER LOGIC ---
         function loadNextTask() {
-            stopTimer(); // Stop timer during loading
+            stopTimer(); 
             document.getElementById('loader').style.display = 'flex';
             document.getElementById('workbench').style.display = 'none';
             resetUI();
@@ -253,11 +250,11 @@
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('workbench').style.display = 'flex';
                 
-                startTimer(); // Start timer fresh for new task
+                startTimer(); 
             }, 500);
         }
 
-        // --- STRICT VALIDATION ---
+        // --- VALIDATION (BUG FIX 1: Restrict Check) ---
         function validateSubmission() {
             const isVisible = (elem) => !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
 
@@ -271,9 +268,19 @@
 
             const textModule = document.getElementById('module-text');
             if (isVisible(textModule)) {
-                if (!textModule.querySelector('.btn-sm.active')) {
+                const activeBtn = textModule.querySelector('.btn-sm.active');
+                if (!activeBtn) {
                     alert("⚠️ Missing decision for TEXT.");
                     return false;
+                }
+                
+                // BUG FIX: Check if Restrict was selected but NO text highlighted
+                if (activeBtn.textContent.trim() === 'Restrict') {
+                    const highlights = textModule.querySelectorAll('.restricted-text');
+                    if (highlights.length === 0) {
+                        alert("⚠️ For Restriction, please highlight the specific words in the text.");
+                        return false;
+                    }
                 }
             }
             return true;
@@ -311,9 +318,8 @@
             document.getElementById('viewer-img-target').style.transform = `scale(${currentScale}) rotate(${currentRotate}deg) scaleX(${currentFlip})`;
         }
 
-        // --- HIGHLIGHT REMOVAL (BUG FIX 2) ---
+        // --- HIGHLIGHT REMOVAL (BUG FIX 3) ---
         function clearAllHighlights() {
-            // Check BOTH text slots
             const boxes = document.querySelectorAll('.text-context-box');
             boxes.forEach(box => {
                 const highlights = box.querySelectorAll('.restricted-text');
@@ -333,7 +339,7 @@
             const selection = window.getSelection();
             if (selection.rangeCount > 0 && !selection.isCollapsed && box.contains(selection.anchorNode)) {
                 
-                clearAllHighlights(); // Ensure single selection across the board
+                clearAllHighlights(); // Ensure single selection logic
 
                 const range = selection.getRangeAt(0);
                 const span = document.createElement('span');
@@ -354,14 +360,14 @@
                 const container = document.getElementById(`module-${t}`);
                 if(container) container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
             });
-            clearAllHighlights(); // Clear highlights on reset
+            clearAllHighlights();
         }
 
         function setStatus(target, status, reason='', preserve=false) {
             const container = document.getElementById(`module-${target}`);
             container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
             
-            // BUG FIX 2: If we are not preserving (e.g. clicking Approve/Reject), clear text highlights
+            // BUG FIX 3: Remove highlight if changing decision
             if (!preserve && target === 'text') {
                 clearAllHighlights();
             }
@@ -378,6 +384,8 @@
         }
 
         let currentTargetForDrawer = '';
+        
+        // --- COMPLETE VIOLATION LIST (BUG FIX 2) ---
         const violations = {
             "Insults": [
                 "Personal Attacks",
@@ -467,7 +475,7 @@
                 "Experience Related"
             ]
         };
-        
+
         function renderViolations() {
             const list = document.getElementById('violationList');
             let h = '';
