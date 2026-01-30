@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function logout() {
-    if(confirm('Logout?')) {
+    if(confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
     }
