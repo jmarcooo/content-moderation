@@ -1,12 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Create Sidebar Element
     const sidebar = document.createElement("div");
     sidebar.className = "sidebar";
 
-    // 1. Get User Data
+    // 2. Get User Data
     const user = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Admin', role: 'Viewer' };
     const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
-    // 2. Define Navigation Links
+    // 3. Define Navigation Links
     const navItems = [
         { name: "📊 Overview", link: "home.html" },
         { name: "👥 User Management", link: "user-management.html" },
@@ -16,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { name: "🔔 Notification Center", link: "#" }
     ];
 
-    // 3. Build HTML Structure
+    // 4. Build HTML
     sidebar.innerHTML = `
         <div class="brand">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--accent-blue)" xmlns="http://www.w3.org/2000/svg">
@@ -34,13 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="user-profile">
             <div class="avatar">${initials}</div>
             <div style="flex-grow:1; overflow:hidden;">
-                <div style="font-weight:bold; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${user.name}</div>
+                <div style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${user.name}</div>
                 
                 <div class="status-dropdown">
-                    <div class="status-trigger" onclick="toggleStatusMenu(event)" style="font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:5px;">
+                    <div class="status-trigger" onclick="toggleStatusMenu(event)">
                         <span class="dot dot-online" id="current-dot"></span>
                         <span id="current-status">Online</span>
-                        <span>▼</span>
+                        <span style="font-size:0.7rem;">▼</span>
                     </div>
                     <ul class="status-menu" id="status-menu">
                         <li onclick="setStatus('online')"><span class="dot dot-online"></span> Online</li>
@@ -53,27 +54,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </div>
             
-            <button class="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">
+            <button class="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color: var(--text-muted);">
                 <span id="theme-icon">🌙</span>
             </button>
         </div>
 
         <div class="sidebar-footer-menu">
             <a href="settings.html">⚙️ Settings</a>
-            <a href="#" onclick="logout()" class="logout-link">🚪 Logout</a>
+            <a href="#" onclick="logout()">🚪 Logout</a>
         </div>
     `;
 
     document.body.prepend(sidebar);
 
-    // Set Active Link
+    // 5. Highlight Active Link
     const currentPage = window.location.pathname.split("/").pop() || "home.html";
     const activeLink = document.querySelector(`.nav-links a[href="${currentPage}"]`);
     if (activeLink) activeLink.classList.add("active");
 
     initTheme();
-    
-    // Start the Inactivity Tracker
     resetInactivityTimer();
 });
 
@@ -98,46 +97,50 @@ function setStatus(statusName) {
     document.getElementById('status-menu').classList.remove('active');
 }
 
+// Close menu when clicking outside
 document.addEventListener('click', () => {
     const menu = document.getElementById('status-menu');
     if (menu) menu.classList.remove('active');
 });
 
+// --- THEME ---
 function initTheme() {
     const theme = localStorage.getItem('theme') || 'light';
     if (theme === 'dark') {
         document.body.classList.add('dark-mode');
         document.getElementById('theme-icon').innerText = '☀️';
+    } else {
+        document.body.classList.add('light-mode');
     }
 }
 
 function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
+    if (document.body.classList.contains('dark-mode')) {
+        document.body.classList.remove('dark-mode');
+        document.body.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+        document.getElementById('theme-icon').innerText = '🌙';
+    } else {
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+        document.getElementById('theme-icon').innerText = '☀️';
+    }
 }
 
-// --- AUTO-IDLE LOGIC ---
+// --- IDLE TIMER ---
 let inactivityTimer;
 
 function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
-    
-    // Set timer for 5 minutes (300,000 ms)
     inactivityTimer = setTimeout(() => {
         const currentStatus = document.getElementById('current-status').innerText.toLowerCase();
-        
-        // Only switch to IDLE if the user is currently ONLINE.
-        // We don't want to interrupt "Break" or "Meeting".
         if (currentStatus === 'online') {
             setStatus('idle');
-            console.log("Auto-switched to Idle due to inactivity.");
         }
-    }, 5 * 60 * 1000); // 5 Minutes
+    }, 300000); // 5 Minutes
 }
 
-// Listen for user activity events
 ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
     document.addEventListener(event, resetInactivityTimer);
 });
