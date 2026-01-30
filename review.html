@@ -65,7 +65,6 @@
 
                     <div class="action-module">
                         <button class="btn-sm btn-approve-sm" onclick="setStatus('content', 'approve')">Approve</button>
-                        <button class="btn-sm btn-restrict-sm" onclick="setStatus('content', 'restrict')">Restrict</button>
                         <button class="btn-sm btn-reject-sm" onclick="openDrawer('content')">Reject</button>
                     </div>
                 </div>
@@ -85,7 +84,6 @@
 
                     <div class="action-module">
                         <button class="btn-sm btn-approve-sm" onclick="setStatus('text', 'approve')">Approve</button>
-                        <button class="btn-sm btn-restrict-sm" onclick="setStatus('text', 'restrict')">Restrict</button>
                         <button class="btn-sm btn-reject-sm" onclick="openDrawer('text')">Reject</button>
                     </div>
                 </div>
@@ -115,7 +113,7 @@
         
         let currentTarget = ''; // 'content' or 'text'
         
-        // --- VIOLATION DATA (From Video) ---
+        // --- VIOLATION DATA ---
         const violations = {
             "Insults": ["Personal Attacks", "Uncivilized Language", "Bullying"],
             "Advertising": ["Gambling", "Phishing", "Commercial Spam"],
@@ -157,11 +155,10 @@
         function toggleSubmenu(element) {
             const submenu = element.nextElementSibling;
             submenu.classList.toggle('active');
-            // Rotate arrow logic could go here
         }
 
         function openDrawer(target) {
-            currentTarget = target; // Remember if we are rejecting Content or Text
+            currentTarget = target; 
             document.getElementById('violationDrawer').classList.add('open');
         }
 
@@ -176,14 +173,13 @@
 
         // --- 3. STATUS LOGIC ---
         function setStatus(target, status, reason = '') {
-            // 1. Reset buttons for this target
+            // 1. Reset buttons
             const container = document.getElementById(`module-${target}`);
             const buttons = container.querySelectorAll('.btn-sm');
             buttons.forEach(b => b.classList.remove('active'));
 
             // 2. Activate clicked button
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
-            if(status === 'restrict') container.querySelector('.btn-restrict-sm').classList.add('active');
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
 
             // 3. Show Badge
@@ -193,9 +189,6 @@
             if (status === 'approve') {
                 badge.innerText = "✅ APPROVED";
                 badge.className = "decision-badge score-perfect";
-            } else if (status === 'restrict') {
-                badge.innerText = "⚠️ RESTRICTED";
-                badge.className = "decision-badge score-good";
             } else {
                 badge.innerText = `⛔ REJECTED: ${reason}`;
                 badge.className = "decision-badge score-bad";
