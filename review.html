@@ -104,7 +104,9 @@
                     </div>
                 </div>
 
-                <div style="margin-top: auto; padding-top: 30px; text-align: right;">
+                <div style="margin-top: auto; padding-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
+                    <button class="btn-cancel" onclick="submitAndExit()">Submit & Exit</button>
+                    
                     <button class="btn-primary" onclick="nextTask()">Submit & Next →</button>
                 </div>
 
@@ -207,15 +209,13 @@
             closeDrawer();
         }
 
-        // --- 3. STATUS LOGIC (Restored Restrict) ---
+        // --- 3. STATUS LOGIC ---
         function setStatus(target, status, reason = '') {
             const container = document.getElementById(`module-${target}`);
             const buttons = container.querySelectorAll('.btn-sm');
             buttons.forEach(b => b.classList.remove('active'));
 
-            // Activate button
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
-            // Check if Restrict button exists (it won't for Content) before adding class
             if(status === 'restrict') {
                 const btn = container.querySelector('.btn-restrict-sm');
                 if(btn) btn.classList.add('active');
@@ -225,13 +225,12 @@
             const badge = document.getElementById(`status-${target}`);
             badge.style.display = 'block';
             
-            // Set Badge Visuals
             if (status === 'approve') {
                 badge.innerText = "✅ APPROVED";
                 badge.className = "decision-badge score-perfect";
             } else if (status === 'restrict') {
                 badge.innerText = "⚠️ RESTRICTED";
-                badge.className = "decision-badge score-good"; // Uses Yellow/Orange style
+                badge.className = "decision-badge score-good";
             } else {
                 badge.innerText = `⛔ REJECTED: ${reason}`;
                 badge.className = "decision-badge score-bad";
@@ -265,10 +264,20 @@
             }, 500);
         }
 
+        // --- 5. NAVIGATION LOGIC ---
+
+        // A. Load Next Task
         function nextTask() {
             tasksCompleted++;
             document.getElementById('session-counter').innerText = tasksCompleted;
             loadNextTask();
+        }
+
+        // B. Submit & Exit (Returns to Menu)
+        function submitAndExit() {
+            // In a real app, this would send an API call first.
+            alert("Decision Saved. Returning to Menu...");
+            window.location.href = 'moderation.html';
         }
 
         renderViolations();
