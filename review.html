@@ -8,7 +8,8 @@
     <style>
         .timer-badge { font-family: monospace; font-size: 1rem; letter-spacing: 1px; font-weight: bold; }
         .restricted-text { background-color: rgba(210, 153, 34, 0.25); border-bottom: 2px solid #d29922; color: #b07b17; font-weight: bold; padding: 0 2px; border-radius: 2px; }
-        /* Hide modules by default, JS will show them */
+        
+        /* Hide modules by default, JS will show them based on queue type */
         #module-content, #module-text { display: none; }
     </style>
 </head>
@@ -148,33 +149,27 @@
                 textBottom: "" 
             };
 
-            // 1. DYNAMIC REVIEW (Image/Video + Title + Content)
+            // 1. DYNAMIC REVIEW
             if (type.includes('dynamic') || type.includes('image') || type.includes('video')) {
-                // Multiple Images
                 const imgCount = Math.floor(Math.random() * 3) + 1;
                 for(let i=0; i<imgCount; i++) task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-                
-                task.textTop = "Check out this crazy win! #gaming #win"; // Title (Moderatable)
-                task.textBottom = "I can't believe I pulled this off. Follow for more clips."; // Content (Moderatable)
+                task.textTop = "Check out this crazy win! #gaming #win"; 
+                task.textBottom = "I can't believe I pulled this off. Follow for more clips."; 
             }
-            
-            // 2. COMMENT REVIEW (Parent Context + Target Comment)
+            // 2. COMMENT REVIEW
             else if (type.includes('comment')) {
-                task.textTop = "Parent Post: Anyone know how to fix the lag bug?"; // Context (Read Only)
-                task.textBottom = "You are trash, uninstall the game."; // Target (Moderatable)
+                task.textTop = "Parent Post: Anyone know how to fix the lag bug?"; 
+                task.textBottom = "You are trash, uninstall the game."; 
             }
-
-            // 3. NICKNAME / PROFILE (Old + New)
+            // 3. NICKNAME / PROFILE
             else if (type.includes('nick') || type.includes('profile')) {
-                task.textTop = "CoolGamer123"; // Old (Read Only)
-                task.textBottom = "Nazi_Killer_88"; // New (Moderatable)
+                task.textTop = "CoolGamer123"; 
+                task.textBottom = "Nazi_Killer_88"; 
             }
-
-            // 4. AVATAR (Single Image Only)
+            // 4. AVATAR
             else if (type.includes('avatar')) {
                 task.images.push(`https://i.pravatar.cc/300?u=${id}`);
             }
-
             return task;
         }
 
@@ -187,12 +182,10 @@
             setTimeout(() => {
                 const task = generateTask();
                 
-                // Fill Metadata
                 document.getElementById('content-id').innerText = task.id;
                 document.getElementById('content-type').innerText = queueName;
                 document.getElementById('sidebar-task-id').innerText = `Task-${task.id}`;
 
-                // --- LAYOUT SWITCHER ---
                 const q = queueName.toLowerCase();
 
                 // MODULE 1: IMAGES
@@ -200,11 +193,9 @@
                 const modContent = document.getElementById('module-content');
                 
                 if (q.includes('avatar')) {
-                    // Avatar: Single circular image
                     modContent.style.display = 'block';
                     imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="openImageViewer(this.src)">`;
                 } else if (q.includes('dynamic') || q.includes('image')) {
-                    // Dynamic: Grid of images
                     modContent.style.display = 'block';
                     imgContainer.innerHTML = task.images.map(src => 
                         `<div class="content-image-card"><img src="${src}" onclick="openImageViewer(this.src)"></div>`
@@ -221,34 +212,27 @@
                 const lblBottom = document.getElementById('label-bottom');
 
                 if (q.includes('avatar')) {
-                    modText.style.display = 'none'; // No text for avatar
+                    modText.style.display = 'none'; 
                 } else {
                     modText.style.display = 'block';
                     slotTop.innerText = task.textTop;
                     slotBottom.innerText = task.textBottom;
 
-                    // CONFIGURE FIELDS based on Type
                     if (q.includes('comment')) {
-                        // Top: Context (Read Only), Bottom: Content (Mod)
                         lblTop.innerText = "Replying To (Context)";
-                        slotTop.className = "text-context-box read-only"; // Grayed out
-                        
+                        slotTop.className = "text-context-box read-only"; 
                         lblBottom.innerText = "Comment to Moderate";
-                        slotBottom.className = "text-context-box moderatable"; // White
+                        slotBottom.className = "text-context-box moderatable"; 
                     } 
                     else if (q.includes('nick') || q.includes('profile')) {
-                        // Top: Old (Read Only), Bottom: New (Mod)
                         lblTop.innerText = "Previous (Current)";
                         slotTop.className = "text-context-box read-only";
-                        
                         lblBottom.innerText = "New Request";
                         slotBottom.className = "text-context-box moderatable";
                     }
                     else if (q.includes('dynamic')) {
-                        // Top: Title (Mod), Bottom: Content (Mod) -> BOTH RESTRICTABLE
                         lblTop.innerText = "Title";
                         slotTop.className = "text-context-box moderatable"; 
-                        
                         lblBottom.innerText = "Content / Caption";
                         slotBottom.className = "text-context-box moderatable"; 
                     }
@@ -257,6 +241,44 @@
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('workbench').style.display = 'flex';
             }, 500);
+        }
+
+        // --- SUBMISSION VALIDATION (THE FIX) ---
+        function validateSubmission() {
+            let isValid = true;
+
+            // 1. Check Content Module (if visible)
+            const contentModule = document.getElementById('module-content');
+            if (contentModule.style.display !== 'none') {
+                const hasDecision = contentModule.querySelector('.btn-sm.active');
+                if (!hasDecision) isValid = false;
+            }
+
+            // 2. Check Text Module (if visible)
+            const textModule = document.getElementById('module-text');
+            if (textModule.style.display !== 'none') {
+                const hasDecision = textModule.querySelector('.btn-sm.active');
+                if (!hasDecision) isValid = false;
+            }
+
+            if (!isValid) {
+                alert("⚠️ Please make a decision for all visible sections before submitting.");
+                return false;
+            }
+            return true;
+        }
+
+        function nextTask() {
+            if (!validateSubmission()) return; // Stop if invalid
+            
+            document.getElementById('session-counter').innerText = ++tasksCompleted;
+            loadNextTask();
+        }
+
+        function submitAndExit() { 
+            if (!validateSubmission()) return; // Stop if invalid
+
+            window.location.href = 'moderation.html'; 
         }
 
         // --- IMAGE VIEWER LOGIC ---
@@ -268,11 +290,7 @@
             updateTransform();
             viewer.style.display = 'flex';
         }
-
-        function closeImageViewer() {
-            document.getElementById('imageViewer').style.display = 'none';
-        }
-
+        function closeImageViewer() { document.getElementById('imageViewer').style.display = 'none'; }
         function transformImage(action) {
             if (action === 'zoomIn') currentScale += 0.2;
             if (action === 'zoomOut') currentScale = Math.max(0.2, currentScale - 0.2);
@@ -281,7 +299,6 @@
             if (action === 'flip') currentFlip = currentFlip * -1;
             updateTransform();
         }
-
         function updateTransform() {
             const img = document.getElementById('viewer-img-target');
             img.style.transform = `scale(${currentScale}, ${currentScale}) rotate(${currentRotate}deg) scaleX(${currentFlip})`;
@@ -290,14 +307,12 @@
         // --- TEXT SELECTION & RESTRICT ---
         function handleTextSelection(slot) {
             const box = document.getElementById(`text-${slot}`);
-            
-            // SECURITY: Only allow highlighting if the box is "moderatable"
-            if (!box.classList.contains('moderatable')) return;
+            if (!box.classList.contains('moderatable')) return; // Ignore read-only
 
             const selection = window.getSelection();
             if (selection.rangeCount > 0 && !selection.isCollapsed && box.contains(selection.anchorNode)) {
                 
-                // Clean old highlights in THIS box
+                // Clean old highlights
                 const highlights = box.querySelectorAll('.restricted-text');
                 highlights.forEach(span => {
                     const textNode = document.createTextNode(span.textContent);
@@ -327,15 +342,13 @@
             });
         }
 
-        // --- STATUS & DRAWER (Same as before) ---
-        // (Keeping these standard function implementations compact for brevity)
+        // --- STATUS & DRAWER ---
         function setStatus(target, status, reason='', preserve=false) {
             const container = document.getElementById(`module-${target}`);
             container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
             
-            if (!preserve && target === 'text') {
-                // Remove highlights logic here if needed, but handleTextSelection handles its own cleanup
-            }
+            // Note: We don't auto-clean highlight here to allow "Restrict" button re-clicks
+            // The handleTextSelection handles the highlight cleaning logic.
 
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
             if(status === 'restrict') container.querySelector('.btn-restrict-sm').classList.add('active');
@@ -348,17 +361,8 @@
             else { badge.innerText=`⛔ REJECTED: ${reason}`; badge.className="decision-badge score-bad"; }
         }
 
-        function nextTask() {
-            document.getElementById('session-counter').innerText = ++tasksCompleted;
-            loadNextTask();
-        }
-
-        function submitAndExit() { window.location.href = 'moderation.html'; }
-
-        // --- VIOLATION DRAWER LOGIC ---
         let currentTargetForDrawer = '';
         const violations = { "Insults": ["Attacks", "Bullying"], "Spam": ["Ads", "Gibberish"], "NSFW": ["Nudity", "Gore"] };
-        
         function renderViolations() {
             const list = document.getElementById('violationList');
             let h = '';
@@ -375,7 +379,7 @@
         renderViolations();
         loadNextTask();
 
-        // Timer Logic
+        // Timer
         let sec = 0; setInterval(() => { 
             sec++; 
             const d = new Date(sec * 1000).toISOString().substr(11, 8);
