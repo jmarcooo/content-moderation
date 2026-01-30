@@ -41,8 +41,9 @@
             window.location.href = 'login.html';
         }
 
-        // --- 2. CONFIGURATION (Added 'aht' data) ---
-        const queueData = [
+        // --- 2. CONFIGURATION ---
+        // Using 'let' so we can re-order it
+        let queueData = [
             { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142, latency: '1m 20s', aht: '12s' },
             { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56,  latency: '3m 45s', aht: '45s' },
             { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890, latency: '0m 30s', aht: '5s' },
@@ -56,8 +57,10 @@
             { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105, latency: '4m 30s', aht: '20s' }
         ];
 
-        // --- 3. VIEW STATE LOGIC ---
+        // --- 3. VIEW STATE & SORT LOGIC ---
         let currentView = localStorage.getItem('modQueueView') || 'card';
+        let sortCol = 'count'; // Default sort column
+        let sortAsc = false;   // Default to Descending (Highest first)
 
         function switchView(viewType) {
             currentView = viewType;
@@ -71,6 +74,62 @@
             document.getElementById('btn-list').classList.toggle('active', currentView === 'list');
         }
 
+        // Helper: Convert "1m 20s" or "45s" to total seconds for sorting
+        function parseTime(timeStr) {
+            if (!timeStr) return 0;
+            let m = 0, s = 0;
+            const mMatch = timeStr.match(/(\d+)m/);
+            const sMatch = timeStr.match(/(\d+)s/);
+            if (mMatch) m = parseInt(mMatch[1]);
+            if (sMatch) s = parseInt(sMatch[1]);
+            return (m * 60) + s;
+        }
+
+        function handleSort(column) {
+            // Toggle direction if clicking same column, otherwise reset to Descending
+            if (sortCol === column) {
+                sortAsc = !sortAsc;
+            } else {
+                sortCol = column;
+                sortAsc = true; // Default new sort to Ascending
+            }
+
+            // Perform the Sort
+            queueData.sort((a, b) => {
+                let valA, valB;
+
+                // Parse values based on column type
+                if (column === 'latency' || column === 'aht') {
+                    valA = parseTime(a[column]);
+                    valB = parseTime(b[column]);
+                } else if (column === 'count') {
+                    valA = a[column];
+                    valB = b[column];
+                } else {
+                    // String sort (Name, Category)
+                    valA = a[column].toLowerCase();
+                    valB = b[column].toLowerCase();
+                }
+
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+
+            renderQueues();
+        }
+
+        // Helper to get Arrow Icon
+        function getSortIcon(column) {
+            if (sortCol !== column) return '<span class="sort-icon">⇅</span>';
+            return sortAsc ? '▲' : '▼';
+        }
+
+        // Helper to check active class
+        function getSortClass(column) {
+            return sortCol === column ? 'active-sort' : '';
+        }
+
         // --- 4. RENDER FUNCTION ---
         function renderQueues() {
             const container = document.getElementById('queue-container');
@@ -82,15 +141,25 @@
                 container.className = 'queue-grid';
             } else {
                 container.className = 'queue-container list-mode';
-                // Add Header Row for List Mode (Updated with AHT)
+                // Add Header Row with Click Events
                 html += `
                 <div class="list-header-row">
-                    <div class="col-tenant">TENANT</div>
-                    <div class="col-name" style="padding-left:20px;">QUEUE NAME</div>
-                    <div class="col-pending">PENDING</div>
-                    <div class="col-latency">LATENCY (AVG)</div>
-                    <div class="col-aht">AVG HANDLE TIME</div>
-                    <div class="col-action">ACTION</div>
+                    <div class="col-tenant ${getSortClass('category')}" onclick="handleSort('category')">
+                        TENANT ${getSortIcon('category')}
+                    </div>
+                    <div class="col-name ${getSortClass('name')}" style="padding-left:20px;" onclick="handleSort('name')">
+                        QUEUE NAME ${getSortIcon('name')}
+                    </div>
+                    <div class="col-pending ${getSortClass('count')}" onclick="handleSort('count')">
+                        PENDING ${getSortIcon('count')}
+                    </div>
+                    <div class="col-latency ${getSortClass('latency')}" onclick="handleSort('latency')">
+                        LATENCY ${getSortIcon('latency')}
+                    </div>
+                    <div class="col-aht ${getSortClass('aht')}" onclick="handleSort('aht')">
+                        AHT ${getSortIcon('aht')}
+                    </div>
+                    <div class="col-action" style="cursor:default">ACTION</div>
                 </div>
                 `;
             }
@@ -103,14 +172,8 @@
                 let priorityClass = 'priority-low';
                 let listPriorityClass = 'list-priority-low';
                 
-                if (queue.count > 100) { 
-                    priorityClass = 'priority-med'; 
-                    listPriorityClass = 'list-priority-med';
-                }
-                if (queue.count > 500) { 
-                    priorityClass = 'priority-high'; 
-                    listPriorityClass = 'list-priority-high';
-                }
+                if (queue.count > 100) { priorityClass = 'priority-med'; listPriorityClass = 'list-priority-med'; }
+                if (queue.count > 500) { priorityClass = 'priority-high'; listPriorityClass = 'list-priority-high'; }
 
                 // --- RENDER BASED ON VIEW ---
                 if (currentView === 'card') {
@@ -130,7 +193,7 @@
                         </div>
                     </div>`;
                 } else {
-                    // LIST LAYOUT (6 Columns)
+                    // LIST LAYOUT
                     return `
                     <div class="queue-list-item ${listPriorityClass}" onclick="openQueue('${queue.name}')">
                         <div class="col-tenant"><span class="badge-tenant">${queue.category}</span></div>
@@ -152,8 +215,10 @@
             alert(`Opening queue: ${queueName}\nLoading pending items...`);
         }
 
-        // Initialize
-        renderQueues();
+        // Initialize (Sort initially by pending count descending)
+        handleSort('count'); 
+        sortAsc = false; // Force descending first load
+        handleSort('count');
     </script>
 </body>
 </html>
