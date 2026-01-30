@@ -9,8 +9,8 @@ const sidebarContent = `
         <li><a href="user-management.html" id="link-users">👥 User Management</a></li>
         <li><a href="moderation.html" id="link-mod">🚫 Moderation Queue</a></li>
         
-        <li><a href="#" id="link-audit">🔍 Quality Audit</a></li>
-        <li><a href="#" id="link-appeal">⚖️ Appeal Center</a></li>
+        <li><a href="audit.html" id="link-audit">🔍 Quality Audit</a></li>
+        <li><a href="appeal-center" id="link-appeal">⚖️ Appeal Center</a></li>
         
         <li><a href="#">⚙️ Settings</a></li>
         <li><a href="login.html" style="margin-top:20px; color:#f85149;">🚪 Logout</a></li>
