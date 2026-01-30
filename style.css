@@ -17,22 +17,16 @@
 }
 
 body.light-mode {
-    --bg-body: #f6f8fa;
-    --bg-card: #ffffff;
-    --bg-input: #ffffff;
-    --border-color: #d0d7de;
-    --text-main: #24292f;
-    --text-muted: #57606a;
-    --text-header: #24292f;
-    --hover-bg: #f3f4f6;
-    --shadow: 0 4px 12px rgba(0,0,0,0.1);
+    --bg-body: #f6f8fa; --bg-card: #ffffff; --bg-input: #ffffff;
+    --border-color: #d0d7de; --text-main: #24292f; --text-muted: #57606a;
+    --text-header: #24292f; --hover-bg: #f3f4f6; --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
 body { background-color: var(--bg-body); color: var(--text-main); font-size: 14px; line-height: 1.5; }
 
 /* =========================================
-   2. SIDEBAR CONTAINER (The Layout Fix)
+   2. SIDEBAR CONTAINER (Fixed Layout)
    ========================================= */
 .sidebar {
     width: 250px;
@@ -43,7 +37,7 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
     top: 0; left: 0;
     padding: 20px;
     display: flex;
-    flex-direction: column; /* This fixes the overlap */
+    flex-direction: column; /* Stacks items vertically */
     z-index: 1000;
 }
 
@@ -53,17 +47,17 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 .brand {
     display: flex; align-items: center; gap: 10px;
     font-size: 1.2rem; font-weight: bold; color: var(--text-header);
-    margin-bottom: 20px; flex-shrink: 0;
+    margin-bottom: 20px; flex-shrink: 0; /* Prevents logo from shrinking */
 }
 
 /* =========================================
-   4. NAVIGATION LINKS (Scrollable)
+   4. NAVIGATION LINKS (The Spacer)
    ========================================= */
 .nav-links {
     list-style: none;
-    flex-grow: 1; /* This pushes the User Profile to the bottom */
+    flex-grow: 1;  /* CRITICAL: This pushes everything else to the bottom */
     overflow-y: auto;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 .nav-links li { margin-bottom: 4px; }
 .nav-links a {
@@ -72,8 +66,7 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
     border-radius: 6px; transition: all 0.2s; font-weight: 500;
 }
 .nav-links a:hover, .nav-links a.active {
-    background-color: var(--hover-bg);
-    color: var(--text-main);
+    background-color: var(--hover-bg); color: var(--text-main);
 }
 
 /* =========================================
@@ -82,7 +75,9 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 .user-profile {
     display: flex; align-items: center; gap: 10px; padding: 12px;
     background-color: var(--bg-body); border: 1px solid var(--border-color);
-    border-radius: 8px; flex-shrink: 0; position: relative;
+    border-radius: 8px; 
+    flex-shrink: 0; /* Prevents squashing */
+    position: relative;
     margin-bottom: 10px;
 }
 .avatar {
@@ -92,7 +87,7 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 }
 
 /* =========================================
-   6. STATUS DROPDOWN (Fixed Visibility)
+   6. STATUS DROPDOWN (Fixed Positioning)
    ========================================= */
 .status-dropdown { position: relative; cursor: pointer; flex-grow: 1; }
 .status-trigger { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.85rem; }
@@ -100,7 +95,7 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 
 .status-menu {
     position: absolute; 
-    bottom: 120%; /* Opens UPWARDS so it is not cut off */
+    bottom: 120%; /* Opens UPWARDS so it's not cut off by window bottom */
     left: 0; width: 100%; min-width: 140px;
     background-color: var(--bg-card); border: 1px solid var(--border-color);
     border-radius: 6px; box-shadow: var(--shadow); padding: 5px;
@@ -110,7 +105,7 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 .status-menu li { padding: 8px; font-size: 0.85rem; color: var(--text-main); cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
 .status-menu li:hover { background-color: var(--hover-bg); }
 
-/* Status Dots */
+/* Dots */
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .dot-online { background: #238636; box-shadow: 0 0 4px #238636; }
 .dot-offline { background: #6e7681; }
@@ -120,13 +115,13 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 .dot-idle { background: #f85149; }
 
 /* =========================================
-   7. SIDEBAR FOOTER (Settings & Logout)
+   7. SIDEBAR FOOTER (Settings/Logout)
    ========================================= */
 .sidebar-footer-menu {
     border-top: 1px solid var(--border-color);
     padding-top: 10px;
     display: flex; flex-direction: column; gap: 2px;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevents squashing */
 }
 .sidebar-footer-menu a {
     display: flex; align-items: center; gap: 10px;
@@ -137,10 +132,10 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 .sidebar-footer-menu a.logout-link:hover { color: #f85149; background: rgba(248,81,73,0.1); }
 
 /* =========================================
-   8. MAIN CONTENT LAYOUT (Prevents Overlap)
+   8. MAIN CONTENT LAYOUT
    ========================================= */
 .main-content { 
-    margin-left: 250px; 
+    margin-left: 250px; /* Pushes content right to respect sidebar */
     padding: 40px; 
     min-height: 100vh;
 }
@@ -197,7 +192,7 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 .section-header { font-size: 0.8rem; font-weight: bold; color: #2da44e; text-transform: uppercase; margin-bottom: 15px; }
 
 /* =========================================
-   13. IMAGE & MEDIA VIEWER (Your Zoom Logic)
+   13. IMAGE & MEDIA VIEWER
    ========================================= */
 .image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
 .content-image-card { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: var(--bg-body); cursor: zoom-in; }
@@ -213,7 +208,7 @@ body { background-color: var(--bg-body); color: var(--text-main); font-size: 14p
 .close-viewer { position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer; z-index: 3001; }
 
 /* =========================================
-   14. TEXT REVIEW & HIGHLIGHTS (Your Text Logic)
+   14. TEXT REVIEW & HIGHLIGHTS
    ========================================= */
 .text-context-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; background: var(--bg-input); margin-bottom: 10px; font-size: 0.95rem; line-height: 1.6; }
 .text-context-box.read-only { background-color: var(--hover-bg); border-left: 4px solid var(--border-color); color: var(--text-muted); cursor: default; user-select: none; }
