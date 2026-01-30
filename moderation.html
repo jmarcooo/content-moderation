@@ -13,6 +13,16 @@
             <h1>Moderation Queues</h1>
             
             <div style="display: flex; align-items: center;">
+                
+                <select id="sortDropdown" class="sort-select" onchange="handleDropdownSort(this.value)">
+                    <option value="count-desc">Pending (Highest)</option>
+                    <option value="count-asc">Pending (Lowest)</option>
+                    <option value="latency-desc">Latency (Slowest)</option>
+                    <option value="latency-asc">Latency (Fastest)</option>
+                    <option value="aht-desc">AHT (Slowest)</option>
+                    <option value="aht-asc">AHT (Fastest)</option>
+                </select>
+
                 <div class="view-switcher">
                     <button id="btn-card" class="view-btn" onclick="switchView('card')" title="Card View">
                         ⊞
@@ -22,7 +32,7 @@
                     </button>
                 </div>
 
-                <div style="text-align: right;">
+                <div style="text-align: right; margin-left: 20px;">
                     <span style="color:var(--text-muted); font-size:0.9rem;">Total Pending:</span>
                     <strong id="total-pending" style="font-size:1.2rem; color:var(--text-header); margin-left:5px;">0</strong>
                 </div>
@@ -42,16 +52,13 @@
         }
 
         // --- 2. CONFIGURATION ---
-        // Using 'let' so we can re-order it
         let queueData = [
             { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142, latency: '1m 20s', aht: '12s' },
             { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56,  latency: '3m 45s', aht: '45s' },
             { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890, latency: '0m 30s', aht: '5s' },
-            
             { id: 'gp_img',   category: 'GP', name: 'Dynamic Image Review', count: 23,  latency: '5m 10s', aht: '15s' },
             { id: 'gp_com',   category: 'GP', name: 'Comment Review',       count: 45,  latency: '1m 05s', aht: '4s' },
             { id: 'gp_vid',   category: 'GP', name: 'Dynamic Video Review', count: 12,  latency: '8m 20s', aht: '55s' },
-            
             { id: 'comm_ava', category: 'Community', name: 'Avatar Review',    count: 310, latency: '2m 15s', aht: '8s' },
             { id: 'comm_nick', category: 'Community', name: 'Nickname Review',  count: 67,  latency: '0m 50s', aht: '3s' },
             { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105, latency: '4m 30s', aht: '20s' }
@@ -59,14 +66,18 @@
 
         // --- 3. VIEW STATE & SORT LOGIC ---
         let currentView = localStorage.getItem('modQueueView') || 'card';
-        let sortCol = 'count'; // Default sort column
-        let sortAsc = false;   // Default to Descending (Highest first)
+        let sortCol = 'count'; 
+        let sortAsc = false;   // Default: Highest first (Descending)
 
         function switchView(viewType) {
             currentView = viewType;
             localStorage.setItem('modQueueView', viewType);
             renderQueues();
             updateViewButtons();
+            
+            // Show/Hide Dropdown based on view? 
+            // Optional: You can hide the dropdown in List view if you prefer clicking headers.
+            // For now, we keep it visible in both for consistency.
         }
 
         function updateViewButtons() {
@@ -74,7 +85,7 @@
             document.getElementById('btn-list').classList.toggle('active', currentView === 'list');
         }
 
-        // Helper: Convert "1m 20s" or "45s" to total seconds for sorting
+        // Helper: Convert time string to seconds
         function parseTime(timeStr) {
             if (!timeStr) return 0;
             let m = 0, s = 0;
@@ -85,47 +96,66 @@
             return (m * 60) + s;
         }
 
-        function handleSort(column) {
-            // Toggle direction if clicking same column, otherwise reset to Descending
-            if (sortCol === column) {
-                sortAsc = !sortAsc;
-            } else {
-                sortCol = column;
-                sortAsc = true; // Default new sort to Ascending
-            }
-
-            // Perform the Sort
+        // --- SORTING ENGINE ---
+        function executeSort() {
             queueData.sort((a, b) => {
                 let valA, valB;
 
-                // Parse values based on column type
-                if (column === 'latency' || column === 'aht') {
-                    valA = parseTime(a[column]);
-                    valB = parseTime(b[column]);
-                } else if (column === 'count') {
-                    valA = a[column];
-                    valB = b[column];
+                if (sortCol === 'latency' || sortCol === 'aht') {
+                    valA = parseTime(a[sortCol]);
+                    valB = parseTime(b[sortCol]);
+                } else if (sortCol === 'count') {
+                    valA = a[sortCol];
+                    valB = b[sortCol];
                 } else {
-                    // String sort (Name, Category)
-                    valA = a[column].toLowerCase();
-                    valB = b[column].toLowerCase();
+                    valA = a[sortCol].toLowerCase();
+                    valB = b[sortCol].toLowerCase();
                 }
 
                 if (valA < valB) return sortAsc ? -1 : 1;
                 if (valA > valB) return sortAsc ? 1 : -1;
                 return 0;
             });
-
             renderQueues();
         }
 
-        // Helper to get Arrow Icon
+        // Handler for List Header Clicks
+        function handleHeaderSort(column) {
+            if (sortCol === column) {
+                sortAsc = !sortAsc;
+            } else {
+                sortCol = column;
+                sortAsc = true; 
+            }
+            // Update Dropdown to match
+            syncDropdown();
+            executeSort();
+        }
+
+        // Handler for Dropdown Change
+        function handleDropdownSort(value) {
+            const [col, dir] = value.split('-'); // e.g., "count-desc"
+            sortCol = col;
+            sortAsc = (dir === 'asc');
+            executeSort();
+        }
+
+        // Sync dropdown to match current sort state
+        function syncDropdown() {
+            const dir = sortAsc ? 'asc' : 'desc';
+            const val = `${sortCol}-${dir}`;
+            const dropdown = document.getElementById('sortDropdown');
+            // If option exists, select it
+            if (dropdown.querySelector(`option[value="${val}"]`)) {
+                dropdown.value = val;
+            }
+        }
+
+        // Icons for List Headers
         function getSortIcon(column) {
             if (sortCol !== column) return '<span class="sort-icon">⇅</span>';
             return sortAsc ? '▲' : '▼';
         }
-
-        // Helper to check active class
         function getSortClass(column) {
             return sortCol === column ? 'active-sort' : '';
         }
@@ -141,22 +171,21 @@
                 container.className = 'queue-grid';
             } else {
                 container.className = 'queue-container list-mode';
-                // Add Header Row with Click Events
                 html += `
                 <div class="list-header-row">
-                    <div class="col-tenant ${getSortClass('category')}" onclick="handleSort('category')">
+                    <div class="col-tenant ${getSortClass('category')}" onclick="handleHeaderSort('category')">
                         TENANT ${getSortIcon('category')}
                     </div>
-                    <div class="col-name ${getSortClass('name')}" style="padding-left:20px;" onclick="handleSort('name')">
+                    <div class="col-name ${getSortClass('name')}" style="padding-left:20px;" onclick="handleHeaderSort('name')">
                         QUEUE NAME ${getSortIcon('name')}
                     </div>
-                    <div class="col-pending ${getSortClass('count')}" onclick="handleSort('count')">
+                    <div class="col-pending ${getSortClass('count')}" onclick="handleHeaderSort('count')">
                         PENDING ${getSortIcon('count')}
                     </div>
-                    <div class="col-latency ${getSortClass('latency')}" onclick="handleSort('latency')">
+                    <div class="col-latency ${getSortClass('latency')}" onclick="handleHeaderSort('latency')">
                         LATENCY ${getSortIcon('latency')}
                     </div>
-                    <div class="col-aht ${getSortClass('aht')}" onclick="handleSort('aht')">
+                    <div class="col-aht ${getSortClass('aht')}" onclick="handleHeaderSort('aht')">
                         AHT ${getSortIcon('aht')}
                     </div>
                     <div class="col-action" style="cursor:default">ACTION</div>
@@ -177,19 +206,27 @@
 
                 // --- RENDER BASED ON VIEW ---
                 if (currentView === 'card') {
-                    // CARD LAYOUT
+                    // IMPROVED CARD LAYOUT
                     return `
                     <div class="queue-card ${priorityClass}" onclick="openQueue('${queue.name}')">
                         <div>
                             <div class="queue-type">${queue.category}</div>
                             <div class="queue-title">${queue.name}</div>
                         </div>
-                        <div class="queue-stat">
-                            <div>
-                                <div class="count-number">${queue.count.toLocaleString()}</div>
-                                <div class="count-label">Pending Items</div>
+                        
+                        <div>
+                            <div class="count-number">${queue.count.toLocaleString()}</div>
+                            <div class="count-label">Pending Items</div>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="card-stat-item" title="Average Latency">
+                                ⏱ <span class="card-stat-val">${queue.latency}</span>
                             </div>
-                            <button class="btn-review">Review →</button>
+                            <div class="card-stat-item" title="Average Handle Time">
+                                ⚡ <span class="card-stat-val">${queue.aht}</span>
+                            </div>
+                            <button class="btn-review" style="padding: 2px 8px; font-size: 0.75rem;">Review</button>
                         </div>
                     </div>`;
                 } else {
@@ -215,10 +252,8 @@
             alert(`Opening queue: ${queueName}\nLoading pending items...`);
         }
 
-        // Initialize (Sort initially by pending count descending)
-        handleSort('count'); 
-        sortAsc = false; // Force descending first load
-        handleSort('count');
+        // Initialize Sorting
+        executeSort();
     </script>
 </body>
 </html>
