@@ -13,11 +13,11 @@
             font-weight: bold;
         }
 
-        /* NEW STYLE: For the highlighted text */
+        /* Highlight Style */
         .restricted-text {
-            background-color: rgba(210, 153, 34, 0.25); /* Light Orange background */
-            border-bottom: 2px solid #d29922; /* Solid underline */
-            color: #b07b17; /* Darker orange text */
+            background-color: rgba(210, 153, 34, 0.25);
+            border-bottom: 2px solid #d29922;
+            color: #b07b17;
             font-weight: bold;
             padding: 0 2px;
             border-radius: 2px;
@@ -100,7 +100,7 @@
                         <span id="status-text" class="decision-badge"></span>
                     </div>
 
-                    <div class="text-context-box">
+                    <div class="text-context-box" onmouseup="handleTextSelection()">
                         <div id="text-content" style="margin-bottom: 10px; font-weight: 500;"></div>
                         <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 10px;">
                             <strong>Context:</strong> User was replying to a thread.
@@ -109,7 +109,7 @@
 
                     <div class="action-module">
                         <button class="btn-sm btn-approve-sm" onclick="setStatus('text', 'approve')">Approve</button>
-                        <button class="btn-sm btn-restrict-sm" onmousedown="event.preventDefault()" onclick="setStatus('text', 'restrict')">Restrict</button>
+                        <button class="btn-sm btn-restrict-sm" onclick="setStatus('text', 'restrict')">Restrict</button>
                         <button class="btn-sm btn-reject-sm" onclick="openDrawer('text')">Reject</button>
                     </div>
                 </div>
@@ -200,46 +200,69 @@
         function closeDrawer() { document.getElementById('violationDrawer').classList.remove('open'); }
         function confirmReject(reason) { setStatus(currentTarget, 'reject', reason); closeDrawer(); }
 
-        // --- 3. STATUS LOGIC (With Highlight Feature) ---
-        function setStatus(target, status, reason = '') {
+        // --- NEW: CLEANUP FUNCTION ---
+        function clearHighlights() {
+            const textBox = document.getElementById('text-content');
+            const highlights = textBox.querySelectorAll('.restricted-text');
+            highlights.forEach(span => {
+                const textNode = document.createTextNode(span.textContent);
+                span.parentNode.replaceChild(textNode, span);
+            });
+            textBox.normalize();
+        }
+
+        // --- NEW: AUTO-RESTRICT ON HIGHLIGHT ---
+        function handleTextSelection() {
+            const selection = window.getSelection();
+            const textBox = document.getElementById('text-content');
+
+            // Only proceed if text is selected AND it's inside our text box
+            if (selection.rangeCount > 0 && !selection.isCollapsed && textBox.contains(selection.anchorNode)) {
+                
+                // 1. Clean previous highlights (if you want single selection only)
+                clearHighlights();
+
+                // 2. Wrap new selection
+                const range = selection.getRangeAt(0);
+                const span = document.createElement('span');
+                span.className = 'restricted-text';
+                try {
+                    range.surroundContents(span);
+                    selection.removeAllRanges(); // Clear selection UI so user sees the yellow style
+                    
+                    // 3. AUTO-TRIGGER RESTRICT STATUS
+                    // We pass 'true' to preserveHighlights so setStatus doesn't wipe what we just did
+                    setStatus('text', 'restrict', '', true);
+
+                } catch (e) {
+                    console.log("Selection error");
+                }
+            }
+        }
+
+        // --- 3. STATUS LOGIC ---
+        // Added 'preserveHighlights' flag
+        function setStatus(target, status, reason = '', preserveHighlights = false) {
             const container = document.getElementById(`module-${target}`);
             const buttons = container.querySelectorAll('.btn-sm');
             buttons.forEach(b => b.classList.remove('active'));
 
+            // Step 1: Clean highlights unless we specifically asked to keep them (e.g., from the selection handler)
+            if (target === 'text' && !preserveHighlights) {
+                clearHighlights();
+            }
+
+            // Step 2: Activate Buttons
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
             
-            // --- NEW: RESTRICT / HIGHLIGHT LOGIC ---
             if(status === 'restrict') {
                 const btn = container.querySelector('.btn-restrict-sm');
                 if(btn) btn.classList.add('active');
-                
-                // If this is the TEXT module, check for selection
-                if(target === 'text') {
-                    const selection = window.getSelection();
-                    // Ensure there is a selection and it's inside our text box
-                    if (selection.rangeCount > 0 && !selection.isCollapsed) {
-                        const range = selection.getRangeAt(0);
-                        const textBox = document.getElementById('text-content');
-                        
-                        // Security check: ensure we are only highlighting inside the text box
-                        if (textBox.contains(range.commonAncestorContainer)) {
-                            const span = document.createElement('span');
-                            span.className = 'restricted-text'; // Apply the yellow highlight style
-                            try {
-                                range.surroundContents(span);
-                                // clear selection after highlighting to make it look clean
-                                selection.removeAllRanges();
-                            } catch (e) {
-                                console.log("Complex selection (crossing tags) not supported in this prototype");
-                            }
-                        }
-                    }
-                }
             }
-
+            
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
 
-            // Update Badge
+            // Step 3: Update Badge
             const badge = document.getElementById(`status-${target}`);
             badge.style.display = 'block';
             
