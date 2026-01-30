@@ -41,19 +41,19 @@
             window.location.href = 'login.html';
         }
 
-        // --- 2. CONFIGURATION (Added Latency Data) ---
+        // --- 2. CONFIGURATION (Added 'aht' data) ---
         const queueData = [
-            { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142, latency: '1m 20s' },
-            { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56,  latency: '3m 45s' },
-            { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890, latency: '0m 30s' },
+            { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142, latency: '1m 20s', aht: '12s' },
+            { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56,  latency: '3m 45s', aht: '45s' },
+            { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890, latency: '0m 30s', aht: '5s' },
             
-            { id: 'gp_img',   category: 'GP', name: 'Dynamic Image Review', count: 23,  latency: '5m 10s' },
-            { id: 'gp_com',   category: 'GP', name: 'Comment Review',       count: 45,  latency: '1m 05s' },
-            { id: 'gp_vid',   category: 'GP', name: 'Dynamic Video Review', count: 12,  latency: '8m 20s' },
+            { id: 'gp_img',   category: 'GP', name: 'Dynamic Image Review', count: 23,  latency: '5m 10s', aht: '15s' },
+            { id: 'gp_com',   category: 'GP', name: 'Comment Review',       count: 45,  latency: '1m 05s', aht: '4s' },
+            { id: 'gp_vid',   category: 'GP', name: 'Dynamic Video Review', count: 12,  latency: '8m 20s', aht: '55s' },
             
-            { id: 'comm_ava', category: 'Community', name: 'Avatar Review',    count: 310, latency: '2m 15s' },
-            { id: 'comm_nick', category: 'Community', name: 'Nickname Review',  count: 67,  latency: '0m 50s' },
-            { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105, latency: '4m 30s' }
+            { id: 'comm_ava', category: 'Community', name: 'Avatar Review',    count: 310, latency: '2m 15s', aht: '8s' },
+            { id: 'comm_nick', category: 'Community', name: 'Nickname Review',  count: 67,  latency: '0m 50s', aht: '3s' },
+            { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105, latency: '4m 30s', aht: '20s' }
         ];
 
         // --- 3. VIEW STATE LOGIC ---
@@ -82,13 +82,14 @@
                 container.className = 'queue-grid';
             } else {
                 container.className = 'queue-container list-mode';
-                // Add Header Row for List Mode
+                // Add Header Row for List Mode (Updated with AHT)
                 html += `
                 <div class="list-header-row">
                     <div class="col-tenant">TENANT</div>
-                    <div class="col-name">QUEUE NAME</div>
-                    <div class="col-pending">PENDING TASKS</div>
+                    <div class="col-name" style="padding-left:20px;">QUEUE NAME</div>
+                    <div class="col-pending">PENDING</div>
                     <div class="col-latency">LATENCY (AVG)</div>
+                    <div class="col-aht">AVG HANDLE TIME</div>
                     <div class="col-action">ACTION</div>
                 </div>
                 `;
@@ -129,13 +130,14 @@
                         </div>
                     </div>`;
                 } else {
-                    // LIST LAYOUT (Fixed Columns)
+                    // LIST LAYOUT (6 Columns)
                     return `
                     <div class="queue-list-item ${listPriorityClass}" onclick="openQueue('${queue.name}')">
                         <div class="col-tenant"><span class="badge-tenant">${queue.category}</span></div>
                         <div class="col-name">${queue.name}</div>
                         <div class="col-pending">${queue.count.toLocaleString()} <span class="sub-text">Tasks</span></div>
-                        <div class="col-latency"><span class="latency-icon">⏱</span> ${queue.latency}</div>
+                        <div class="col-latency"><span class="icon-muted">⏱</span> ${queue.latency}</div>
+                        <div class="col-aht"><span class="icon-muted">⚡</span> ${queue.aht}</div>
                         <div class="col-action"><button class="btn-review">Review</button></div>
                     </div>`;
                 }
