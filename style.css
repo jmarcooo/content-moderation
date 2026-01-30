@@ -661,3 +661,37 @@ body.dark-mode .status-Active { color: #58a6ff; }
     transition: transform 0.2s;
 }
 .avatar-display:hover { transform: scale(1.05); border-color: var(--accent-blue); }
+
+/* =========================================
+   15. SIDEBAR FOOTER (Settings & Logout)
+   ========================================= */
+.sidebar-footer-menu {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-footer-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: var(--text-muted); /* Slightly dimmer than main links */
+    font-size: 0.9rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.sidebar-footer-menu a:hover {
+    background-color: rgba(248, 81, 73, 0.1); /* Light red tint for danger/exit actions */
+    color: #f85149;
+}
+
+.sidebar-footer-menu a.settings-link:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-main);
+}
