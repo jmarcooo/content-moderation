@@ -246,9 +246,13 @@
         }
 
         // --- 5. NAVIGATION ---
-        function openQueue(queueName) {
-            // Navigate to the Review Page with the queue name in the URL
-            window.location.href = `review.html?queue=${encodeURIComponent(queueName)}`;
+            function openQueue(queueName) {
+            // Find the queue object in our data to get the correct Tenant (Category)
+            const queue = queueData.find(q => q.name === queueName);
+            const tenant = queue ? queue.category : 'BP'; // Default to BP if not found
+
+            // Pass both Queue Name AND Tenant to the next page
+            window.location.href = `review.html?queue=${encodeURIComponent(queueName)}&tenant=${encodeURIComponent(tenant)}`;
         }
 
         // Initialize Sorting & Render
