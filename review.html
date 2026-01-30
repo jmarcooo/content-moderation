@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review Task</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific style for the timer to look like a digital clock */
+        .timer-badge {
+            font-family: monospace;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
@@ -17,8 +26,14 @@
                 <a href="moderation.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem;">← Back to Queues</a>
                 <h1 id="queue-title" style="margin-top: 5px;">Dynamic Review</h1>
             </div>
-            <div>
-                <span class="badge status-Active">Task ID: <span id="header-task-id">---</span></span>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="badge status-Active">
+                    Handling Time: <span id="timer" class="timer-badge">00:00:00</span>
+                </span>
+                <span class="badge" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-main);">
+                    Tasks Moderated: <span id="session-counter" style="font-weight:bold;">0</span>
+                </span>
             </div>
         </div>
 
@@ -47,6 +62,7 @@
 
                 <div class="info-card">
                     <div class="info-header">Moderation Info</div>
+                    <div class="info-row"><span class="label">Task ID:</span> <span class="value" id="sidebar-task-id" style="font-family:monospace;">--</span></div>
                     <div class="info-row"><span class="label">Reviewer ID:</span> <span class="value">198124305</span></div>
                     <div class="info-row"><span class="label">Name:</span> <span class="value" id="reviewer-name">Admin</span></div>
                 </div>
@@ -111,8 +127,31 @@
         const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Admin' };
         document.getElementById('reviewer-name').innerText = currentUser.name;
         
-        let currentTarget = ''; // 'content' or 'text'
-        
+        let currentTarget = '';
+        let tasksCompleted = 0; // Counter for session
+
+        // --- TIMER LOGIC ---
+        let timerInterval;
+        let secondsElapsed = 0;
+
+        function startTimer() {
+            clearInterval(timerInterval); // Stop previous
+            secondsElapsed = 0;
+            document.getElementById('timer').innerText = "00:00:00";
+            
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const h = Math.floor(secondsElapsed / 3600).toString().padStart(2, '0');
+                const m = Math.floor((secondsElapsed % 3600) / 60).toString().padStart(2, '0');
+                const s = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
         // --- VIOLATION DATA ---
         const violations = {
             "Insults": ["Personal Attacks", "Uncivilized Language", "Bullying"],
@@ -133,7 +172,6 @@
         function renderViolations() {
             const container = document.getElementById('violationList');
             let html = '';
-            
             for (const [category, subs] of Object.entries(violations)) {
                 html += `
                 <div class="violation-category">
@@ -173,16 +211,13 @@
 
         // --- 3. STATUS LOGIC ---
         function setStatus(target, status, reason = '') {
-            // 1. Reset buttons
             const container = document.getElementById(`module-${target}`);
             const buttons = container.querySelectorAll('.btn-sm');
             buttons.forEach(b => b.classList.remove('active'));
 
-            // 2. Activate clicked button
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
 
-            // 3. Show Badge
             const badge = document.getElementById(`status-${target}`);
             badge.style.display = 'block';
             
@@ -195,8 +230,9 @@
             }
         }
 
-        // --- 4. MOCK DATA & LOADING ---
+        // --- 4. DATA & LOADING ---
         function loadNextTask() {
+            stopTimer(); // Reset timer while loading
             document.getElementById('loader').style.display = 'flex';
             document.getElementById('workbench').style.display = 'none';
 
@@ -209,7 +245,10 @@
             setTimeout(() => {
                 // Mock Data
                 document.getElementById('content-id').innerText = "884" + Math.floor(Math.random() * 10000);
-                document.getElementById('header-task-id').innerText = "Task-" + Math.floor(Math.random() * 500);
+                
+                // Inject Task ID into sidebar
+                document.getElementById('sidebar-task-id').innerText = "Task-" + Math.floor(Math.random() * 500);
+                
                 document.getElementById('image-container').innerHTML = `
                     <div class="content-image-card">
                         <img src="https://picsum.photos/400/250?random=${Math.random()}" alt="Content">
@@ -218,10 +257,16 @@
                 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('workbench').style.display = 'flex';
+                
+                startTimer(); // START TIMER NOW
             }, 500);
         }
 
         function nextTask() {
+            // Increment Counter
+            tasksCompleted++;
+            document.getElementById('session-counter').innerText = tasksCompleted;
+            
             loadNextTask();
         }
 
