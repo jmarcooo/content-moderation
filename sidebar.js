@@ -2,11 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.createElement("div");
     sidebar.className = "sidebar";
 
-    // 1. Get User
     const user = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Admin', role: 'Viewer' };
     const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
-    // 2. Navigation
     const navItems = [
         { name: "📊 Overview", link: "home.html" },
         { name: "👥 User Management", link: "user-management.html" },
@@ -16,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { name: "🔔 Notification Center", link: "#" }
     ];
 
-    // 3. FORCE STRUCTURE
     sidebar.innerHTML = `
         <div class="brand">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--accent-blue)" xmlns="http://www.w3.org/2000/svg">
@@ -33,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="avatar">${initials}</div>
             <div style="flex-grow:1; overflow:hidden;">
                 <div style="font-weight:bold; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${user.name}</div>
-                
                 <div class="status-dropdown">
                     <div class="status-trigger" onclick="toggleStatusMenu(event)">
                         <span class="dot dot-online" id="current-dot"></span>
@@ -50,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     </ul>
                 </div>
             </div>
-            
             <button class="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color: var(--text-muted);">
                 <span id="theme-icon">🌙</span>
             </button>
@@ -64,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.body.prepend(sidebar);
 
-    // Active Link
     const currentPage = window.location.pathname.split("/").pop() || "home.html";
     const activeLink = document.querySelector(`.nav-links a[href="${currentPage}"]`);
     if (activeLink) activeLink.classList.add("active");
@@ -73,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
     resetInactivityTimer();
 });
 
-// --- UTILS ---
 function logout() {
     if(confirm('Logout?')) {
         localStorage.removeItem('currentUser');
@@ -83,8 +76,7 @@ function logout() {
 
 function toggleStatusMenu(e) {
     e.stopPropagation();
-    const menu = document.getElementById('status-menu');
-    menu.classList.toggle('active');
+    document.getElementById('status-menu').classList.toggle('active');
 }
 
 function setStatus(statusName) {
@@ -127,12 +119,7 @@ function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
         const currentStatus = document.getElementById('current-status').innerText.toLowerCase();
-        if (currentStatus === 'online') {
-            setStatus('idle');
-        }
+        if (currentStatus === 'online') setStatus('idle');
     }, 300000); // 5 mins
 }
-
-['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
-    document.addEventListener(event, resetInactivityTimer);
-});
+['mousemove', 'keydown', 'click', 'scroll'].forEach(event => document.addEventListener(event, resetInactivityTimer));
