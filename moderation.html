@@ -74,10 +74,6 @@
             localStorage.setItem('modQueueView', viewType);
             renderQueues();
             updateViewButtons();
-            
-            // Show/Hide Dropdown based on view? 
-            // Optional: You can hide the dropdown in List view if you prefer clicking headers.
-            // For now, we keep it visible in both for consistency.
         }
 
         function updateViewButtons() {
@@ -171,12 +167,13 @@
                 container.className = 'queue-grid';
             } else {
                 container.className = 'queue-container list-mode';
+                // LIST HEADER
                 html += `
                 <div class="list-header-row">
                     <div class="col-tenant ${getSortClass('category')}" onclick="handleHeaderSort('category')">
                         TENANT ${getSortIcon('category')}
                     </div>
-                    <div class="col-name ${getSortClass('name')}" style="padding-left:20px;" onclick="handleHeaderSort('name')">
+                    <div class="col-name ${getSortClass('name')}" onclick="handleHeaderSort('name')">
                         QUEUE NAME ${getSortIcon('name')}
                     </div>
                     <div class="col-pending ${getSortClass('count')}" onclick="handleHeaderSort('count')">
@@ -206,7 +203,7 @@
 
                 // --- RENDER BASED ON VIEW ---
                 if (currentView === 'card') {
-                    // IMPROVED CARD LAYOUT
+                    // CARD LAYOUT
                     return `
                     <div class="queue-card ${priorityClass}" onclick="openQueue('${queue.name}')">
                         <div>
@@ -248,11 +245,13 @@
             updateViewButtons();
         }
 
+        // --- 5. NAVIGATION ---
         function openQueue(queueName) {
-            alert(`Opening queue: ${queueName}\nLoading pending items...`);
+            // Navigate to the Review Page with the queue name in the URL
+            window.location.href = `review.html?queue=${encodeURIComponent(queueName)}`;
         }
 
-        // Initialize Sorting
+        // Initialize Sorting & Render
         executeSort();
     </script>
 </body>
