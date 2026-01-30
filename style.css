@@ -267,3 +267,60 @@ body.dark-mode .status-Active { color: #58a6ff; }
 .modal-content { background-color: var(--bg-card); padding: 2rem; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; max-width: 400px; box-shadow: var(--shadow); }
 .modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-header); border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+
+/* =========================================
+   11. SORT DROPDOWN & IMPROVED CARDS
+   ========================================= */
+
+/* The Sort Dropdown styling */
+.sort-select {
+    background-color: var(--bg-input);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-right: 15px; /* Space between dropdown and switcher */
+    cursor: pointer;
+    outline: none;
+}
+.sort-select:focus {
+    border-color: var(--accent-blue);
+}
+
+/* IMPROVED CARD LAYOUT (To show Latency/AHT) */
+.queue-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 200px; /* Slightly taller to fit footer */
+    position: relative;
+    padding-bottom: 50px; /* Space for the footer */
+}
+
+/* Card Data Footer (New) */
+.card-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-top: 1px solid var(--border-color);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--bg-card); /* Matches card bg */
+    border-radius: 0 0 8px 8px;
+}
+
+.card-stat-item {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.card-stat-val {
+    font-weight: 600;
+    color: var(--text-main);
+    font-family: monospace;
+}
