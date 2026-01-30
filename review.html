@@ -9,7 +9,7 @@
         .timer-badge { font-family: monospace; font-size: 1rem; letter-spacing: 1px; font-weight: bold; }
         .restricted-text { background-color: rgba(210, 153, 34, 0.25); border-bottom: 2px solid #d29922; color: #b07b17; font-weight: bold; padding: 0 2px; border-radius: 2px; }
         
-        /* Hide modules by default */
+        /* CSS Hides modules by default */
         #module-content, #module-text { display: none; }
     </style>
 </head>
@@ -62,7 +62,7 @@
                 
                 <div id="module-content">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div class="section-header">CONTENT (IMAGES/VIDEO)</div>
+                        <div class="section-header">CONTENT</div>
                         <span id="status-content" class="decision-badge"></span>
                     </div>
                     <div class="image-grid" id="image-container"></div>
@@ -75,7 +75,7 @@
 
                 <div id="module-text" style="margin-top: 30px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div class="section-header">TEXT / CAPTION</div>
+                        <div class="section-header">TEXT</div>
                         <span id="status-text" class="decision-badge"></span>
                     </div>
 
@@ -132,46 +132,29 @@
         document.getElementById('queue-title').innerText = `${tenant} ${queueName}`;
         
         let currentTarget = '';
-        let currentScale = 1;
-        let currentRotate = 0;
-        let currentFlip = 1;
+        let currentScale = 1; let currentRotate = 0; let currentFlip = 1;
         
-        // --- MOCK DATA GENERATOR ---
+        // --- MOCK DATA ---
         function generateTask() {
             const id = Math.floor(Math.random() * 99999);
             const type = queueName.toLowerCase();
-            
-            let task = { 
-                id, type, 
-                userId: "720" + Math.floor(Math.random()*1000),
-                images: [], 
-                textTop: "", 
-                textBottom: "" 
-            };
+            let task = { id, type, userId: "720" + Math.floor(Math.random()*1000), images: [], textTop: "", textBottom: "" };
 
-            // 1. DYNAMIC REVIEW
             if (type.includes('dynamic') || type.includes('image') || type.includes('video')) {
                 const imgCount = Math.floor(Math.random() * 3) + 1;
                 for(let i=0; i<imgCount; i++) task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
                 task.textTop = "Check out this crazy win! #gaming #win"; 
                 task.textBottom = "I can't believe I pulled this off. Follow for more clips."; 
             }
-            // 2. COMMENT REVIEW (Now with Random Images!)
             else if (type.includes('comment')) {
                 task.textTop = "Parent Post: Anyone know how to fix the lag bug?"; 
                 task.textBottom = "You are trash, uninstall the game.";
-                
-                // 50% chance a comment has an attached image
-                if (Math.random() > 0.5) {
-                    task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-                }
+                if (Math.random() > 0.5) task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
             }
-            // 3. NICKNAME / PROFILE
             else if (type.includes('nick') || type.includes('profile')) {
                 task.textTop = "CoolGamer123"; 
                 task.textBottom = "Nazi_Killer_88"; 
             }
-            // 4. AVATAR
             else if (type.includes('avatar')) {
                 task.images.push(`https://i.pravatar.cc/300?u=${id}`);
             }
@@ -193,14 +176,12 @@
 
                 const q = queueName.toLowerCase();
 
-                // --- MODULE 1: IMAGES (Smart Detection) ---
+                // IMAGES
                 const imgContainer = document.getElementById('image-container');
                 const modContent = document.getElementById('module-content');
                 
-                // If the task HAS images, show the module
                 if (task.images.length > 0) {
-                    modContent.style.display = 'block';
-                    
+                    modContent.style.display = 'block'; // Visually show
                     if (q.includes('avatar')) {
                         imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="openImageViewer(this.src)">`;
                     } else {
@@ -209,10 +190,10 @@
                         ).join('');
                     }
                 } else {
-                    modContent.style.display = 'none';
+                    modContent.style.display = 'none'; // Visually hide
                 }
 
-                // --- MODULE 2: TEXT ---
+                // TEXT
                 const modText = document.getElementById('module-text');
                 const slotTop = document.getElementById('text-top');
                 const slotBottom = document.getElementById('text-bottom');
@@ -251,19 +232,28 @@
             }, 500);
         }
 
-        // --- VALIDATION ---
+        // --- STRICT VALIDATION (THE FIX) ---
         function validateSubmission() {
-            let isValid = true;
+            // Helper to check if an element is truly visible
+            const isVisible = (elem) => !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
+
             const contentModule = document.getElementById('module-content');
-            if (contentModule.style.display !== 'none') {
-                if (!contentModule.querySelector('.btn-sm.active')) isValid = false;
+            if (isVisible(contentModule)) {
+                if (!contentModule.querySelector('.btn-sm.active')) {
+                    alert("⚠️ Missing decision for CONTENT.");
+                    return false;
+                }
             }
+
             const textModule = document.getElementById('module-text');
-            if (textModule.style.display !== 'none') {
-                if (!textModule.querySelector('.btn-sm.active')) isValid = false;
+            if (isVisible(textModule)) {
+                if (!textModule.querySelector('.btn-sm.active')) {
+                    alert("⚠️ Missing decision for TEXT.");
+                    return false;
+                }
             }
-            if (!isValid) alert("⚠️ Please make a decision for all visible sections.");
-            return isValid;
+
+            return true;
         }
 
         function nextTask() {
@@ -280,8 +270,7 @@
         // --- IMAGE VIEWER ---
         function openImageViewer(src) {
             const viewer = document.getElementById('imageViewer');
-            const img = document.getElementById('viewer-img-target');
-            img.src = src;
+            document.getElementById('viewer-img-target').src = src;
             currentScale = 1; currentRotate = 0; currentFlip = 1;
             updateTransform();
             viewer.style.display = 'flex';
@@ -292,26 +281,29 @@
             if (action === 'zoomOut') currentScale = Math.max(0.2, currentScale - 0.2);
             if (action === 'rotateR') currentRotate += 90;
             if (action === 'rotateL') currentRotate -= 90;
-            if (action === 'flip') currentFlip = currentFlip * -1;
+            if (action === 'flip') currentFlip *= -1;
             updateTransform();
         }
         function updateTransform() {
-            const img = document.getElementById('viewer-img-target');
-            img.style.transform = `scale(${currentScale}, ${currentScale}) rotate(${currentRotate}deg) scaleX(${currentFlip})`;
+            document.getElementById('viewer-img-target').style.transform = `scale(${currentScale}) rotate(${currentRotate}deg) scaleX(${currentFlip})`;
         }
 
         // --- TEXT SELECT ---
         function handleTextSelection(slot) {
             const box = document.getElementById(`text-${slot}`);
             if (!box.classList.contains('moderatable')) return;
+
             const selection = window.getSelection();
             if (selection.rangeCount > 0 && !selection.isCollapsed && box.contains(selection.anchorNode)) {
+                // Clear old
                 const highlights = box.querySelectorAll('.restricted-text');
                 highlights.forEach(span => {
                     const textNode = document.createTextNode(span.textContent);
                     span.parentNode.replaceChild(textNode, span);
                 });
                 box.normalize();
+
+                // New highlight
                 const range = selection.getRangeAt(0);
                 const span = document.createElement('span');
                 span.className = 'restricted-text';
@@ -323,7 +315,7 @@
             }
         }
 
-        // --- UI UTILS ---
+        // --- UTILS ---
         function resetUI() {
             ['content', 'text'].forEach(t => {
                 const badge = document.getElementById(`status-${t}`);
@@ -336,6 +328,9 @@
         function setStatus(target, status, reason='', preserve=false) {
             const container = document.getElementById(`module-${target}`);
             container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
+            
+            // Note: We leave cleaning of highlights to the selection handler or explicit clear
+            
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
             if(status === 'restrict') container.querySelector('.btn-restrict-sm').classList.add('active');
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
@@ -370,7 +365,6 @@
             const d = new Date(sec * 1000).toISOString().substr(11, 8);
             document.getElementById('timer').innerText = d; 
         }, 1000);
-
     </script>
 </body>
 </html>
