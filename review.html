@@ -10,7 +10,7 @@
 
     <script src="sidebar.js"></script>
 
-    <main class="main-content" style="padding-bottom: 100px;">
+    <main class="main-content" style="padding-bottom: 50px;">
         
         <div class="header" style="margin-bottom: 10px; border-bottom: none; padding-bottom: 0;">
             <div>
@@ -29,7 +29,6 @@
         <div id="workbench" class="workbench-container" style="display: none;">
             
             <div class="left-sidebar">
-                
                 <div class="info-card">
                     <div class="info-header">Content Info</div>
                     <div class="info-row"><span class="label">Content ID:</span> <span class="value" id="content-id">--</span></div>
@@ -51,35 +50,60 @@
                     <div class="info-row"><span class="label">Reviewer ID:</span> <span class="value">198124305</span></div>
                     <div class="info-row"><span class="label">Name:</span> <span class="value" id="reviewer-name">Admin</span></div>
                 </div>
-
             </div>
 
             <div class="content-canvas">
                 
-                <div>
-                    <div class="section-header">PICTURES</div>
+                <div id="module-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-header">CONTENT</div>
+                        <span id="status-content" class="decision-badge"></span>
+                    </div>
+                    
                     <div class="image-grid" id="image-container">
                         </div>
-                </div>
 
-                <div>
-                    <div class="section-header">TEXT</div>
-                    <div class="text-context-box">
-                        <div id="text-content" style="margin-bottom: 10px; font-weight: 500;"></div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 10px;">
-                            <strong>Context:</strong> User was replying to a thread about "Gaming Tips".
-                        </div>
+                    <div class="action-module">
+                        <button class="btn-sm btn-approve-sm" onclick="setStatus('content', 'approve')">Approve</button>
+                        <button class="btn-sm btn-restrict-sm" onclick="setStatus('content', 'restrict')">Restrict</button>
+                        <button class="btn-sm btn-reject-sm" onclick="openDrawer('content')">Reject</button>
                     </div>
                 </div>
 
-            </div>
+                <div id="module-text" style="margin-top: 30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-header">TEXT</div>
+                        <span id="status-text" class="decision-badge"></span>
+                    </div>
 
+                    <div class="text-context-box">
+                        <div id="text-content" style="margin-bottom: 10px; font-weight: 500;"></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 10px;">
+                            <strong>Context:</strong> User was replying to a thread.
+                        </div>
+                    </div>
+
+                    <div class="action-module">
+                        <button class="btn-sm btn-approve-sm" onclick="setStatus('text', 'approve')">Approve</button>
+                        <button class="btn-sm btn-restrict-sm" onclick="setStatus('text', 'restrict')">Restrict</button>
+                        <button class="btn-sm btn-reject-sm" onclick="openDrawer('text')">Reject</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: auto; padding-top: 30px; text-align: right;">
+                    <button class="btn-primary" onclick="nextTask()">Submit & Next →</button>
+                </div>
+
+            </div>
         </div>
 
-        <div class="action-bar">
-            <button class="btn-action btn-skip" onclick="nextTask()">Skip <span class="shortcut-key">[Space]</span></button>
-            <button class="btn-action btn-reject" onclick="decide('reject')">Reject <span class="shortcut-key">[R]</span></button>
-            <button class="btn-action btn-approve" onclick="decide('approve')">Approve <span class="shortcut-key">[A]</span></button>
+        <div id="violationDrawer" class="violation-drawer">
+            <div class="drawer-header">
+                <span>Select Violation Reason</span>
+                <span style="cursor:pointer;" onclick="closeDrawer()">✕</span>
+            </div>
+            <div class="drawer-content" id="violationList">
+                </div>
         </div>
 
     </main>
@@ -88,92 +112,130 @@
         // --- 1. SETUP ---
         const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Admin' };
         document.getElementById('reviewer-name').innerText = currentUser.name;
+        
+        let currentTarget = ''; // 'content' or 'text'
+        
+        // --- VIOLATION DATA (From Video) ---
+        const violations = {
+            "Insults": ["Personal Attacks", "Uncivilized Language", "Bullying"],
+            "Advertising": ["Gambling", "Phishing", "Commercial Spam"],
+            "Pornography": ["Nudity", "Sexual Acts", "Suggestive"],
+            "Violence": ["Blood", "Physical Assault", "Weapons"],
+            "Terrorism": ["Symbols", "Propaganda"],
+            "Involving Minors": ["Endangerment", "Sexualization"],
+            "Involved in Politics": ["Hate Speech", "Misinformation"],
+            "Unauthorized Solicitation": ["Scams", "Begging"],
+            "Disturbing Content": ["Gore", "Disgusting"],
+            "Suicide and Self-Harm": ["Promotion", "Methods"],
+            "Low Quality Content": ["Spam", "Gibberish"],
+            "Company Negative": ["Slander", "Fake News"]
+        };
 
-        // --- 2. MOCK DATA GENERATOR ---
-        function generateMockTask() {
-            // Random IDs and Dates
-            const contentId = "115" + Math.floor(Math.random() * 9000000000);
-            const userId = "720" + Math.floor(Math.random() * 500000000);
-            const now = new Date();
-            const pubTime = now.toISOString().split('T')[0] + " " + now.toLocaleTimeString();
+        // --- 2. DRAWER LOGIC ---
+        function renderViolations() {
+            const container = document.getElementById('violationList');
+            let html = '';
             
-            // Random Stats
-            const userLevel = Math.floor(Math.random() * 10) + 1;
-            const violations = Math.floor(Math.random() * 3);
-            const followers = Math.floor(Math.random() * 500);
-
-            // Mock Images (Using picsum for placeholders)
-            const images = [];
-            const imgCount = Math.floor(Math.random() * 3) + 1; // 1 to 3 images
-            for(let i=0; i<imgCount; i++) {
-                images.push({
-                    src: `https://picsum.photos/300/200?random=${Math.random()}`,
-                    status: 'Wait for Review'
-                });
+            for (const [category, subs] of Object.entries(violations)) {
+                html += `
+                <div class="violation-category">
+                    <div class="category-trigger" onclick="toggleSubmenu(this)">
+                        ${category} <span>▼</span>
+                    </div>
+                    <div class="violation-submenu">
+                        ${subs.map(sub => `
+                            <div class="violation-option" onclick="confirmReject('${category} - ${sub}')">
+                                <span class="radio-mimic"></span> ${sub}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
             }
-
-            // Mock Text
-            const phrases = ["Check out my new gear!", "Is this allowed?", "Add me for tips.", "Selling account $50", "Just a random selfie."];
-            const text = phrases[Math.floor(Math.random() * phrases.length)];
-
-            return {
-                contentId, userId, pubTime, userLevel, violations, followers, images, text
-            };
+            container.innerHTML = html;
         }
 
-        // --- 3. RENDER FUNCTION ---
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            submenu.classList.toggle('active');
+            // Rotate arrow logic could go here
+        }
+
+        function openDrawer(target) {
+            currentTarget = target; // Remember if we are rejecting Content or Text
+            document.getElementById('violationDrawer').classList.add('open');
+        }
+
+        function closeDrawer() {
+            document.getElementById('violationDrawer').classList.remove('open');
+        }
+
+        function confirmReject(reason) {
+            setStatus(currentTarget, 'reject', reason);
+            closeDrawer();
+        }
+
+        // --- 3. STATUS LOGIC ---
+        function setStatus(target, status, reason = '') {
+            // 1. Reset buttons for this target
+            const container = document.getElementById(`module-${target}`);
+            const buttons = container.querySelectorAll('.btn-sm');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            // 2. Activate clicked button
+            if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
+            if(status === 'restrict') container.querySelector('.btn-restrict-sm').classList.add('active');
+            if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
+
+            // 3. Show Badge
+            const badge = document.getElementById(`status-${target}`);
+            badge.style.display = 'block';
+            
+            if (status === 'approve') {
+                badge.innerText = "✅ APPROVED";
+                badge.className = "decision-badge score-perfect";
+            } else if (status === 'restrict') {
+                badge.innerText = "⚠️ RESTRICTED";
+                badge.className = "decision-badge score-good";
+            } else {
+                badge.innerText = `⛔ REJECTED: ${reason}`;
+                badge.className = "decision-badge score-bad";
+            }
+        }
+
+        // --- 4. MOCK DATA & LOADING ---
         function loadNextTask() {
             document.getElementById('loader').style.display = 'flex';
             document.getElementById('workbench').style.display = 'none';
 
+            // Reset UI
+            ['content', 'text'].forEach(t => {
+                document.getElementById(`status-${t}`).style.display = 'none';
+                document.querySelectorAll(`#module-${t} .btn-sm`).forEach(b => b.classList.remove('active'));
+            });
+
             setTimeout(() => {
-                const task = generateMockTask();
-
-                // Fill Metadata
-                document.getElementById('header-task-id').innerText = task.contentId.substring(0, 8) + "...";
-                document.getElementById('content-id').innerText = task.contentId;
-                document.getElementById('publish-time').innerText = task.pubTime;
-                document.getElementById('user-id').innerText = task.userId;
-                document.getElementById('user-level').innerText = task.userLevel;
-                document.getElementById('reg-time').innerText = "2025-12-06"; // Static for now
-                document.getElementById('viol-hist').innerText = task.violations;
-                document.getElementById('followers').innerText = task.followers;
-
-                // Render Images
-                const imgHTML = task.images.map((img, index) => `
+                // Mock Data
+                document.getElementById('content-id').innerText = "884" + Math.floor(Math.random() * 10000);
+                document.getElementById('header-task-id').innerText = "Task-" + Math.floor(Math.random() * 500);
+                document.getElementById('image-container').innerHTML = `
                     <div class="content-image-card">
-                        <img src="${img.src}" alt="Content">
-                        <div class="image-meta">
-                            <span style="color:#d29922;">●</span> Initial Review
-                        </div>
-                    </div>
-                `).join('');
-                document.getElementById('image-container').innerHTML = imgHTML;
-
-                // Render Text
-                document.getElementById('text-content').innerText = task.text;
-
+                        <img src="https://picsum.photos/400/250?random=${Math.random()}" alt="Content">
+                    </div>`;
+                document.getElementById('text-content').innerText = "This game is actually pretty fun if you ignore the bugs.";
+                
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('workbench').style.display = 'flex';
             }, 500);
         }
 
-        // --- 4. ACTIONS ---
-        function decide(action) {
-            console.log("Decision:", action);
+        function nextTask() {
             loadNextTask();
         }
-        function nextTask() { loadNextTask(); }
 
-        // --- 5. HOTKEYS ---
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'a') decide('approve');
-            if (e.key.toLowerCase() === 'r') decide('reject');
-            if (e.code === 'Space') nextTask();
-        });
-
-        // Start
+        // Initialize
+        renderViolations();
         loadNextTask();
+
     </script>
 </body>
 </html>
