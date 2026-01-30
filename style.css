@@ -2,6 +2,7 @@
    1. COLOR VARIABLES (DEFAULT = LIGHT MODE)
    ========================================= */
 :root {
+    /* Light Mode (Default) */
     --bg-body: #f6f8fa;
     --bg-sidebar: #ffffff;
     --bg-card: #ffffff;
@@ -16,6 +17,7 @@
     --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+/* Dark Mode Overrides */
 body.dark-mode {
     --bg-body: #0d1117;
     --bg-sidebar: #161b22;
@@ -76,7 +78,7 @@ body {
 .avatar { width: 32px; height: 32px; background-color: #238636; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
 
 .theme-btn {
-    background: transparent; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; padding: 6px 10px; font-size: 1rem; transition: all 0.2s;
+    background: transparent; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; padding: 6px 10px; font-size: 1rem; transition: all 0.2s; color: var(--text-main);
 }
 .theme-btn:hover { background-color: var(--hover-bg); transform: scale(1.05); }
 
@@ -94,7 +96,7 @@ td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); font-size
 tr:hover { background-color: var(--hover-bg); }
 
 /* =========================================
-   5. CARDS & DASHBOARD
+   5. CARDS (Dashboard & Grid View)
    ========================================= */
 .dashboard-grid, .queue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-top: 10px; margin-bottom: 2rem; }
 
@@ -113,9 +115,7 @@ tr:hover { background-color: var(--hover-bg); }
 .trend.up { color: #238636; }
 .trend.down { color: #f85149; }
 
-/* =========================================
-   6. MODERATION QUEUE CARDS
-   ========================================= */
+/* Moderation Queue Card Specifics */
 .queue-card { display: flex; flex-direction: column; justify-content: space-between; height: 180px; cursor: pointer; }
 .queue-card:hover { transform: translateY(-4px); border-color: var(--accent-blue); }
 .queue-title { font-size: 1rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
@@ -130,21 +130,21 @@ tr:hover { background-color: var(--hover-bg); }
 .queue-card:hover .btn-review { background-color: var(--accent-blue); color: white; border-color: var(--accent-blue); }
 
 /* =========================================
-   7. ACTIVITY LIST
+   6. ACTIVITY LIST & COMPONENTS
    ========================================= */
 .section-title { font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-header); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
 .activity-list { list-style: none; margin-top: 10px; }
 .activity-item { padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; display: flex; justify-content: space-between; color: var(--text-main); }
 .activity-item span { color: var(--text-muted); font-size: 0.8rem; }
 
-/* =========================================
-   8. FORMS & BUTTONS
-   ========================================= */
 .form-group { margin-bottom: 1.2rem; }
 label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; }
 input, select { width: 100%; padding: 10px; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); outline: none; transition: border 0.2s; }
 input:focus, select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3); }
 
+/* =========================================
+   7. BUTTONS & STATUS BADGES
+   ========================================= */
 .btn-primary { background-color: #238636; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
 .btn-primary:hover { background-color: #2ea043; }
 .btn-cancel { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
@@ -157,7 +157,7 @@ body.dark-mode .status-Active { color: #58a6ff; }
 .status-Banned { background-color: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.4); }
 
 /* =========================================
-   9. STATUS DROPDOWN (Fixed)
+   8. STATUS DROPDOWN (Sidebar)
    ========================================= */
 .status-dropdown { position: relative; margin-top: 4px; }
 .status-trigger { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); transition: background 0.2s; border: 1px solid transparent; }
@@ -171,7 +171,7 @@ body.dark-mode .status-Active { color: #58a6ff; }
 
 @keyframes popUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* DOTS */
+/* Status Dots */
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 .dot-online   { background-color: #238636; box-shadow: 0 0 0 2px rgba(35, 134, 54, 0.2); }
 .dot-break    { background-color: #d29922; }
@@ -181,29 +181,13 @@ body.dark-mode .status-Active { color: #58a6ff; }
 .dot-training { background-color: #8957e5; }
 .dot-offline  { background-color: #6e7681; }
 
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-overlay); backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background-color: var(--bg-card); padding: 2rem; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; max-width: 400px; box-shadow: var(--shadow); }
-.modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-header); border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
-
 /* =========================================
-   10. VIEW SWITCHER & LIST MODE (Fixed)
+   9. VIEW SWITCHER & LIST MODE
    ========================================= */
 
 /* Switcher Container */
-.view-switcher {
-    display: flex;
-    gap: 4px;
-    background-color: var(--bg-input);
-    border: 1px solid var(--border-color);
-    padding: 4px;
-    border-radius: 6px;
-    margin-right: 20px;
-}
-
-.view-btn {
-    background: transparent; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; color: var(--text-muted); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-}
+.view-switcher { display: flex; gap: 4px; background-color: var(--bg-input); border: 1px solid var(--border-color); padding: 4px; border-radius: 6px; margin-right: 20px; }
+.view-btn { background: transparent; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; color: var(--text-muted); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .view-btn:hover { color: var(--text-main); }
 .view-btn.active { background-color: var(--bg-card); color: var(--accent-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
@@ -214,11 +198,11 @@ body.dark-mode .status-Active { color: #58a6ff; }
     gap: 8px;
 }
 
-/* 1. The Header Row (Only visible in list mode) */
+/* 1. Header Row (6 Columns) */
 .list-header-row {
     display: grid;
-    /* Define 5 columns: Tenant | Name | Pending | Latency | Action */
-    grid-template-columns: 100px 2fr 1fr 1fr 100px; 
+    /* Columns: Tenant | Name | Pending | Latency | AHT | Action */
+    grid-template-columns: 80px 2.5fr 1fr 1fr 1fr 100px; 
     padding: 0 20px;
     margin-bottom: 5px;
     font-size: 0.75rem;
@@ -226,13 +210,13 @@ body.dark-mode .status-Active { color: #58a6ff; }
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    align-items: center;
 }
 
-/* 2. The List Item Row */
+/* 2. List Item Row (6 Columns) */
 .queue-list-item {
     display: grid;
-    /* Must match the header columns exactly */
-    grid-template-columns: 100px 2fr 1fr 1fr 100px;
+    grid-template-columns: 80px 2.5fr 1fr 1fr 1fr 100px; 
     align-items: center;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -242,36 +226,27 @@ body.dark-mode .status-Active { color: #58a6ff; }
     cursor: pointer;
     box-shadow: var(--shadow);
 }
-
-.queue-list-item:hover {
-    transform: translateX(4px);
-    border-color: var(--accent-blue);
-    background-color: var(--hover-bg);
-}
+.queue-list-item:hover { transform: translateX(4px); border-color: var(--accent-blue); background-color: var(--hover-bg); }
 
 /* Column Styling */
 .col-tenant { display: flex; align-items: center; }
-.badge-tenant { 
-    background-color: var(--hover-bg); 
-    border: 1px solid var(--border-color); 
-    color: var(--text-muted); 
-    padding: 2px 8px; 
-    border-radius: 4px; 
-    font-size: 0.75rem; 
-    font-weight: bold; 
-    text-transform: uppercase; 
-}
-
-.col-name { font-weight: 600; color: var(--text-main); font-size: 1rem; }
+.badge-tenant { background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; min-width: 50px; text-align: center; }
+.col-name { font-weight: 600; color: var(--text-main); font-size: 1rem; padding-left: 20px; }
 .col-pending { font-weight: bold; color: var(--text-header); font-size: 1rem; }
 .sub-text { font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 4px; }
-
-.col-latency { font-family: monospace; color: var(--text-main); font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-.latency-icon { color: var(--text-muted); font-size: 1rem; }
-
+.col-latency, .col-aht { font-family: monospace; color: var(--text-main); font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+.icon-muted { color: var(--text-muted); font-size: 1rem; }
 .col-action { text-align: right; }
 
-/* Priority Indicators (Left Border) */
+/* List Priority Stripes */
 .list-priority-high { border-left: 4px solid #f85149; }
 .list-priority-med  { border-left: 4px solid #d29922; }
 .list-priority-low  { border-left: 4px solid #238636; }
+
+/* =========================================
+   10. MODALS
+   ========================================= */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-overlay); backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background-color: var(--bg-card); padding: 2rem; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; max-width: 400px; box-shadow: var(--shadow); }
+.modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-header); border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
