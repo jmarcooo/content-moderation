@@ -1,125 +1,147 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const sidebar = document.createElement("div");
-    sidebar.className = "sidebar";
-
-    const user = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Admin', role: 'Viewer' };
-    const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-
-    const navItems = [
-        { name: "📊 Overview", link: "home.html" },
-        { name: "👥 User Management", link: "user-management.html" },
-        { name: "⛔ Moderation Queue", link: "moderation.html" },
-        { name: "🔍 Quality Audit", link: "audit.html" },
-        { name: "⚖️ Appeal Center", link: "appeals.html" },
-        { name: "🔔 Notification Center", link: "#" }
-    ];
-
-    sidebar.innerHTML = `
-        <div class="brand">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--accent-blue)" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 11.99H7V10.99H17V11.99H12Z"/>
-            </svg>
-            AdminPanel
-        </div>
+// ===========================================
+// 1. SIDEBAR HTML
+// ===========================================
+const sidebarContent = `
+<nav class="sidebar">
+    <div class="brand">🛡️ AdminPanel</div>
+    <ul class="nav-links">
+        <li><a href="home.html" id="link-home">📊 Overview</a></li>
+        <li><a href="user-management.html" id="link-users">👥 User Management</a></li>
+        <li><a href="moderation.html" id="link-mod">🚫 Moderation Queue</a></li>
         
-        <ul class="nav-links">
-            ${navItems.map(item => `<li><a href="${item.link}">${item.name}</a></li>`).join('')}
-        </ul>
-
-        <div class="user-profile">
-            <div class="avatar">${initials}</div>
-            <div style="flex-grow:1; overflow:hidden;">
-                <div style="font-weight:bold; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${user.name}</div>
+        <li><a href="#" id="link-audit">🔍 Quality Audit</a></li>
+        <li><a href="#" id="link-appeal">⚖️ Appeal Center</a></li>
+        
+        <li><a href="#">⚙️ Settings</a></li>
+        <li><a href="login.html" style="margin-top:20px; color:#f85149;">🚪 Logout</a></li>
+    </ul>
+    
+    <div class="user-profile">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="avatar">A</div>
+            <div>
+                <div><strong>Admin</strong></div>
+                
                 <div class="status-dropdown">
-                    <div class="status-trigger" onclick="toggleStatusMenu(event)">
-                        <span class="dot dot-online" id="current-dot"></span>
-                        <span id="current-status">Online</span>
-                        <span style="font-size:0.7rem;">▼</span>
+                    <div class="status-trigger" onclick="toggleStatusMenu()">
+                        <span id="current-dot" class="dot dot-online"></span>
+                        <span id="current-text">Online</span>
+                        <span style="font-size: 0.7em; opacity: 0.5;">▼</span>
                     </div>
-                    <ul class="status-menu" id="status-menu">
-                        <li onclick="setStatus('online')"><span class="dot dot-online"></span> Online</li>
-                        <li onclick="setStatus('break')"><span class="dot dot-break"></span> Break</li>
-                        <li onclick="setStatus('lunch')"><span class="dot dot-lunch"></span> Lunch</li>
-                        <li onclick="setStatus('meeting')"><span class="dot dot-meeting"></span> Meeting</li>
-                        <li onclick="setStatus('idle')"><span class="dot dot-idle"></span> Idle</li>
-                        <li onclick="setStatus('offline')"><span class="dot dot-offline"></span> Offline</li>
+
+                    <ul id="status-menu" class="status-menu">
+                        <li onclick="setStatus('online', 'Online')"><span class="dot dot-online"></span> Online</li>
+                        <li onclick="setStatus('break', 'Break')"><span class="dot dot-break"></span> Break</li>
+                        <li onclick="setStatus('lunch', 'Lunch')"><span class="dot dot-lunch"></span> Lunch</li>
+                        <li onclick="setStatus('meeting', 'Meeting')"><span class="dot dot-meeting"></span> Meeting</li>
+                        <li onclick="setStatus('idle', 'Idle')"><span class="dot dot-idle"></span> Idle</li>
+                        <li onclick="setStatus('training', 'Training')"><span class="dot dot-training"></span> Training</li>
+                        <li onclick="setStatus('offline', 'Offline')"><span class="dot dot-offline"></span> Offline</li>
                     </ul>
                 </div>
             </div>
-            <button class="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color: var(--text-muted);">
-                <span id="theme-icon">🌙</span>
-            </button>
         </div>
 
-        <div class="sidebar-footer-menu">
-            <a href="settings.html">⚙️ Settings</a>
-            <a href="#" onclick="logout()" class="logout-link">🚪 Logout</a>
-        </div>
-    `;
+        <button onclick="toggleTheme()" class="theme-btn" title="Toggle Theme">
+            <span id="theme-icon">☀️</span>
+        </button>
+    </div>
+</nav>
+`;
 
-    document.body.prepend(sidebar);
+// Inject Sidebar
+document.body.insertAdjacentHTML('afterbegin', sidebarContent);
 
-    const currentPage = window.location.pathname.split("/").pop() || "home.html";
-    const activeLink = document.querySelector(`.nav-links a[href="${currentPage}"]`);
-    if (activeLink) activeLink.classList.add("active");
+// Highlight Active Link
+const path = window.location.pathname;
+if (path.includes('home.html')) document.getElementById('link-home').classList.add('active');
+if (path.includes('user-management.html')) document.getElementById('link-users').classList.add('active');
+if (path.includes('moderation.html')) document.getElementById('link-mod').classList.add('active');
+// Future-proofing: If you create these files later, they will auto-highlight
+if (path.includes('audit.html')) document.getElementById('link-audit').classList.add('active');
+if (path.includes('appeals.html')) document.getElementById('link-appeal').classList.add('active');
 
-    initTheme();
-    resetInactivityTimer();
-});
+// ===========================================
+// 2. THEME LOGIC
+// ===========================================
+const savedTheme = localStorage.getItem('appTheme') || 'light';
+const themeIcon = document.getElementById('theme-icon');
 
-function logout() {
-    if(confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('currentUser');
-        window.location.href = 'login.html';
-    }
+if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeIcon.innerText = '🌙';
+} else {
+    themeIcon.innerText = '☀️';
 }
 
-function toggleStatusMenu(e) {
-    e.stopPropagation();
-    document.getElementById('status-menu').classList.toggle('active');
-}
-
-function setStatus(statusName) {
-    document.getElementById('current-status').innerText = statusName.charAt(0).toUpperCase() + statusName.slice(1);
-    document.getElementById('current-dot').className = `dot dot-${statusName}`;
-    document.getElementById('status-menu').classList.remove('active');
-}
-
-document.addEventListener('click', () => {
-    const menu = document.getElementById('status-menu');
-    if (menu) menu.classList.remove('active');
-});
-
-function initTheme() {
-    const theme = localStorage.getItem('theme') || 'light';
-    if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
-        document.getElementById('theme-icon').innerText = '☀️';
-    } else {
-        document.body.classList.add('light-mode');
-    }
-}
-
-function toggleTheme() {
-    if (document.body.classList.contains('dark-mode')) {
-        document.body.classList.remove('dark-mode');
-        document.body.classList.add('light-mode');
-        localStorage.setItem('theme', 'light');
+window.toggleTheme = function() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    if (isDark) {
+        localStorage.setItem('appTheme', 'dark');
         document.getElementById('theme-icon').innerText = '🌙';
     } else {
-        document.body.classList.remove('light-mode');
-        document.body.classList.add('dark-mode');
-        localStorage.setItem('theme', 'dark');
+        localStorage.setItem('appTheme', 'light');
         document.getElementById('theme-icon').innerText = '☀️';
+    }
+};
+
+// ===========================================
+// 3. STATUS LOGIC (Refined Auto-Idle)
+// ===========================================
+
+window.toggleStatusMenu = function() {
+    const menu = document.getElementById('status-menu');
+    menu.classList.toggle('active');
+}
+
+document.addEventListener('click', function(event) {
+    const dropdown = document.querySelector('.status-dropdown');
+    const menu = document.getElementById('status-menu');
+    if (dropdown && !dropdown.contains(event.target)) {
+        menu.classList.remove('active');
+    }
+});
+
+window.setStatus = function(type, label) {
+    document.getElementById('current-text').innerText = label;
+    document.getElementById('current-dot').className = `dot dot-${type}`;
+    document.getElementById('status-menu').classList.remove('active');
+    
+    localStorage.setItem('userStatus', JSON.stringify({ type, label }));
+    
+    if (type !== 'online') {
+        clearTimeout(idleTimer);
+    } else {
+        resetIdleTimer();
     }
 }
 
-let inactivityTimer;
-function resetInactivityTimer() {
-    clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => {
-        const currentStatus = document.getElementById('current-status').innerText.toLowerCase();
-        if (currentStatus === 'online') setStatus('idle');
-    }, 300000); // 5 mins
+const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
+if (savedStatus) {
+    setStatus(savedStatus.type, savedStatus.label);
 }
-['mousemove', 'keydown', 'click', 'scroll'].forEach(event => document.addEventListener(event, resetInactivityTimer));
+
+// AUTO-IDLE LOGIC
+let idleTimer;
+const IDLE_LIMIT = 5 * 60 * 1000; // 5 Minutes
+
+function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    const currentLabel = document.getElementById('current-text').innerText;
+
+    if (currentLabel === 'Idle') {
+        setStatus('online', 'Online');
+        return; 
+    }
+
+    if (currentLabel === 'Online') {
+        idleTimer = setTimeout(() => {
+            setStatus('idle', 'Idle');
+        }, IDLE_LIMIT);
+    }
+}
+
+window.onload = resetIdleTimer;
+document.onmousemove = resetIdleTimer;
+document.onkeypress = resetIdleTimer;
+document.onclick = resetIdleTimer;
