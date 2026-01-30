@@ -134,6 +134,28 @@
         let currentTarget = '';
         let currentScale = 1; let currentRotate = 0; let currentFlip = 1;
         
+        // --- TIMER LOGIC (BUG FIX 1) ---
+        let timerInterval;
+        let secondsElapsed = 0;
+
+        function startTimer() {
+            // Stop any existing timer
+            clearInterval(timerInterval);
+            secondsElapsed = 0;
+            document.getElementById('timer').innerText = "00:00:00";
+            
+            // Start new timer
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const h = Math.floor(secondsElapsed / 3600).toString().padStart(2, '0');
+                const m = Math.floor((secondsElapsed % 3600) / 60).toString().padStart(2, '0');
+                const s = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        function stopTimer() { clearInterval(timerInterval); }
+
         // --- MOCK DATA ---
         function generateTask() {
             const id = Math.floor(Math.random() * 99999);
@@ -163,6 +185,7 @@
 
         // --- RENDER LOGIC ---
         function loadNextTask() {
+            stopTimer(); // Stop timer during loading
             document.getElementById('loader').style.display = 'flex';
             document.getElementById('workbench').style.display = 'none';
             resetUI();
@@ -229,6 +252,8 @@
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('workbench').style.display = 'flex';
+                
+                startTimer(); // Start timer fresh for new task
             }, 500);
         }
 
@@ -286,6 +311,20 @@
             document.getElementById('viewer-img-target').style.transform = `scale(${currentScale}) rotate(${currentRotate}deg) scaleX(${currentFlip})`;
         }
 
+        // --- HIGHLIGHT REMOVAL (BUG FIX 2) ---
+        function clearAllHighlights() {
+            // Check BOTH text slots
+            const boxes = document.querySelectorAll('.text-context-box');
+            boxes.forEach(box => {
+                const highlights = box.querySelectorAll('.restricted-text');
+                highlights.forEach(span => {
+                    const textNode = document.createTextNode(span.textContent);
+                    span.parentNode.replaceChild(textNode, span);
+                });
+                box.normalize();
+            });
+        }
+
         // --- TEXT SELECT ---
         function handleTextSelection(slot) {
             const box = document.getElementById(`text-${slot}`);
@@ -293,12 +332,8 @@
 
             const selection = window.getSelection();
             if (selection.rangeCount > 0 && !selection.isCollapsed && box.contains(selection.anchorNode)) {
-                const highlights = box.querySelectorAll('.restricted-text');
-                highlights.forEach(span => {
-                    const textNode = document.createTextNode(span.textContent);
-                    span.parentNode.replaceChild(textNode, span);
-                });
-                box.normalize();
+                
+                clearAllHighlights(); // Ensure single selection across the board
 
                 const range = selection.getRangeAt(0);
                 const span = document.createElement('span');
@@ -319,12 +354,18 @@
                 const container = document.getElementById(`module-${t}`);
                 if(container) container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
             });
+            clearAllHighlights(); // Clear highlights on reset
         }
 
         function setStatus(target, status, reason='', preserve=false) {
             const container = document.getElementById(`module-${target}`);
             container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
             
+            // BUG FIX 2: If we are not preserving (e.g. clicking Approve/Reject), clear text highlights
+            if (!preserve && target === 'text') {
+                clearAllHighlights();
+            }
+
             if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
             if(status === 'restrict') container.querySelector('.btn-restrict-sm').classList.add('active');
             if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
@@ -337,8 +378,6 @@
         }
 
         let currentTargetForDrawer = '';
-        
-        // --- NEW VIOLATION DATA ---
         const violations = {
             "Insults": [
                 "Personal Attacks",
@@ -428,7 +467,7 @@
                 "Experience Related"
             ]
         };
-
+        
         function renderViolations() {
             const list = document.getElementById('violationList');
             let h = '';
@@ -445,11 +484,6 @@
         renderViolations();
         loadNextTask();
 
-        let sec = 0; setInterval(() => { 
-            sec++; 
-            const d = new Date(sec * 1000).toISOString().substr(11, 8);
-            document.getElementById('timer').innerText = d; 
-        }, 1000);
     </script>
 </body>
 </html>
