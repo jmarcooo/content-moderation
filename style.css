@@ -191,18 +191,19 @@ body.dark-mode .status-Active { color: #58a6ff; }
 .view-btn:hover { color: var(--text-main); }
 .view-btn.active { background-color: var(--bg-card); color: var(--accent-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-/* --- LIST VIEW GRID LAYOUT --- */
+/* --- LIST VIEW GRID LAYOUT (Fixed Overlap) --- */
 .queue-container.list-mode {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-/* 1. Header Row (6 Columns) */
+/* 1. Header Row - Updated Widths & Added Gap */
 .list-header-row {
     display: grid;
-    /* Columns: Tenant | Name | Pending | Latency | AHT | Action */
-    grid-template-columns: 80px 2.5fr 1fr 1fr 1fr 100px; 
+    /* Changed first column from 80px to 120px to fit "COMMUNITY" */
+    grid-template-columns: 120px 2.5fr 1fr 1fr 1fr 100px; 
+    gap: 15px; /* FORCE SPACE between columns */
     padding: 0 20px;
     margin-bottom: 5px;
     font-size: 0.75rem;
@@ -213,10 +214,12 @@ body.dark-mode .status-Active { color: #58a6ff; }
     align-items: center;
 }
 
-/* 2. List Item Row (6 Columns) */
+/* 2. List Item Row - Updated Widths & Added Gap */
 .queue-list-item {
     display: grid;
-    grid-template-columns: 80px 2.5fr 1fr 1fr 1fr 100px; 
+    /* Must match header columns exactly */
+    grid-template-columns: 120px 2.5fr 1fr 1fr 1fr 100px; 
+    gap: 15px; /* FORCE SPACE between columns */
     align-items: center;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -226,22 +229,51 @@ body.dark-mode .status-Active { color: #58a6ff; }
     cursor: pointer;
     box-shadow: var(--shadow);
 }
-.queue-list-item:hover { transform: translateX(4px); border-color: var(--accent-blue); background-color: var(--hover-bg); }
+
+.queue-list-item:hover {
+    transform: translateX(4px);
+    border-color: var(--accent-blue);
+    background-color: var(--hover-bg);
+}
 
 /* Column Styling */
 .col-tenant { display: flex; align-items: center; }
-.badge-tenant { background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; min-width: 50px; text-align: center; }
-.col-name { font-weight: 600; color: var(--text-main); font-size: 1rem; padding-left: 20px; }
+
+.badge-tenant { 
+    background-color: var(--hover-bg); 
+    border: 1px solid var(--border-color); 
+    color: var(--text-muted); 
+    padding: 4px 10px; 
+    border-radius: 6px; 
+    font-size: 0.75rem; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    min-width: 50px;
+    text-align: center;
+    white-space: nowrap; /* Prevents text wrapping */
+}
+
+/* Removed padding-left since "gap" handles the spacing now */
+.col-name { 
+    font-weight: 600; 
+    color: var(--text-main); 
+    font-size: 1rem; 
+}
+
 .col-pending { font-weight: bold; color: var(--text-header); font-size: 1rem; }
 .sub-text { font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 4px; }
-.col-latency, .col-aht { font-family: monospace; color: var(--text-main); font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+
+.col-latency, .col-aht { 
+    font-family: monospace; 
+    color: var(--text-main); 
+    font-size: 0.9rem; 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+}
+
 .icon-muted { color: var(--text-muted); font-size: 1rem; }
 .col-action { text-align: right; }
-
-/* List Priority Stripes */
-.list-priority-high { border-left: 4px solid #f85149; }
-.list-priority-med  { border-left: 4px solid #d29922; }
-.list-priority-low  { border-left: 4px solid #238636; }
 
 /* =========================================
    10. MODALS
