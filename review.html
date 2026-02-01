@@ -1,36 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Task</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .timer-badge { font-family: monospace; font-size: 1rem; letter-spacing: 1px; font-weight: bold; }
+        .restricted-text { background-color: rgba(210, 153, 34, 0.25); border-bottom: 2px solid #d29922; color: #b07b17; font-weight: bold; padding: 0 2px; border-radius: 2px; }
+        
+        /* CSS Hides modules by default */
+        #module-content, #module-text { display: none; }
+    </style>
+</head>
 <body>
-    <script src="config.js"></script>
-    <script src="auth.js"></script>
-    <script src="review-logic.js"></script>
+
     <script src="sidebar.js"></script>
 
-    <main class="main-content">
-       </main>
-
-    <script>
-        // Init Logic
-        Auth.requireLogin();
+    <main class="main-content" style="padding-bottom: 50px;">
         
-        const taskManager = new TaskManager();
-        const imageViewer = new ImageViewer();
+        <div class="header" style="margin-bottom: 10px; border-bottom: none; padding-bottom: 0;">
+            <div>
+                <a href="moderation.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem;">← Back to Queues</a>
+                <h1 id="queue-title" style="margin-top: 5px;">Loading...</h1>
+            </div>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="badge status-Active">Time: <span id="timer" class="timer-badge">00:00:00</span></span>
+                <span class="badge" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-main);">
+                    Done: <span id="session-counter" style="font-weight:bold;">0</span>
+                </span>
+            </div>
+        </div>
 
-        // Load Violations from Config
-        function renderViolations() {
-            const list = document.getElementById('violationList');
-            // Use Config.violations instead of hardcoded object
-            for(let [category, reasons] of Object.entries(Config.violations)) {
-                // ... render logic ...
-            }
-        }
+        <div id="loader" style="display: flex; justify-content: center; align-items: center; height: 60vh; font-size: 1.2rem; color: var(--text-muted);">
+            <div>⚡ Fetching next task...</div>
+        </div>
 
-        // Helper global functions to bind to HTML onclicks
-        window.transformImage = (action) => imageViewer.transform(action);
-        window.nextTask = () => {
-            // Validation logic...
-            taskManager.loadNextTask();
-        };
+        <div id="workbench" class="workbench-container" style="display: none;">
+            
+            <div class="left-sidebar">
+                <div class="info-card">
+                    <div class="info-header">Content Info</div>
+                    <div class="info-row"><span class="label">Content ID:</span> <span class="value" id="content-id">--</span></div>
+                    <div class="info-row"><span class="label">Type:</span> <span class="value" id="content-type">--</span></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-header">User Info</div>
+                    <div class="info-row"><span class="label">User ID:</span> <span class="value" id="user-id">--</span></div>
+                    <div class="info-row"><span class="label">Level:</span> <span class="value" id="user-level">--</span></div>
+                    <div class="info-row"><span class="label">Violations:</span> <span class="value" id="viol-hist" style="color:#f85149">0</span></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-header">Moderation Info</div>
+                    <div class="info-row"><span class="label">Task ID:</span> <span class="value" id="sidebar-task-id" style="font-family:monospace;">--</span></div>
+                    <div class="info-row"><span class="label">Reviewer:</span> <span class="value" id="reviewer-name">Admin</span></div>
+                </div>
+            </div>
 
-        renderViolations();
-        taskManager.loadNextTask();
-    </script>
-</body>
+            <div class="content-canvas">
+                
+                <div id="module-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-header">CONTENT</div>
+                        <span id="status-content" class="decision-badge"></span>
+                    </div>
+                    <div class="image-grid" id="image-container"></div>
+                    
+                    <div class="action-module">
+                        <button class="btn-sm btn-approve-sm" onclick="ReviewApp.setStatus('content', 'approve')">Approve</button>
+                        <button class="btn-sm btn-reject-sm" onclick="ReviewApp.openDrawer('content')">Reject</button>
+                    </div>
+                </div>
+
+                <div id="module-text" style="margin-top: 30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-header">TEXT</div>
+                        <span id="status-text" class="decision-badge"></span>
+                    </div>
+
+                    <div id="text-wrapper-top" style="margin-bottom: 15px;">
+                        <div class="label" id="label-top" style="margin-bottom:4px; font-weight:bold;">Context</div>
+                        <div id="text-top" class="text-context-box" onmouseup="ReviewApp.handleTextSelection('top')"></div>
+                    </div>
+
+                    <div id="text-wrapper-bottom">
+                        <div class="label" id="label-bottom" style="margin-bottom:4px; font-weight:bold;">Content</div>
+                        <div id="text-bottom" class="text-context-box" onmouseup="ReviewApp.handleTextSelection('bottom')"></div>
+                    </div>
+
+                    <div class="action-module">
+                        <button class="btn-sm btn-approve-sm" onclick="ReviewApp.setStatus('text', 'approve')">Approve</button>
+                        <button class="btn-sm btn-restrict-sm" onmousedown="event.preventDefault()" onclick="ReviewApp.setStatus('text', 'restrict')">Restrict</button>
+                        <button class="btn-sm btn-reject-sm" onclick="ReviewApp.openDrawer('text')">Reject</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: auto; padding-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
+                    <button class="btn-cancel" onclick="ReviewApp.submitAndExit()">Submit & Exit</button>
+                    <button class="btn-primary" onclick="ReviewApp.nextTask()">Submit & Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="violationDrawer" class="violation-drawer">
+            <div class="drawer-header"><span>Select Reason</span><span style="cursor:pointer;" onclick="ReviewApp.closeDrawer()">✕</span></div>
+            <div class="drawer-content" id="violationList"></div>
+        </div>
+
+        <div id="imageViewer" class="viewer-overlay">
+            <span class="close-viewer" onclick="ImageViewer.close()">×</span>
+            <div class="viewer-content">
+                <img id="viewer-img-target" src="" class="viewer-image" alt="Zoom View">
+            </div>
+            <div class="viewer-controls">
+                <button class="viewer-btn" onclick="ImageViewer.transform('zoomIn')" title="Zoom In">➕</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('zoomOut')" title="Zoom Out">➖</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('rotateL')" title="Rotate Left">↺</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('rotateR')" title="Rotate Right">↻</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('flip')" title="Flip Horizontal">⇄</
