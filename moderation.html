@@ -44,27 +44,24 @@
 
     </main>
 
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
     <script src="sidebar.js"></script>
+
     <script>
-        // --- 1. AUTH GUARD ---
-        if (!localStorage.getItem('currentUser')) {
-            window.location.href = 'login.html';
-        }
+        // --- 2. AUTH GUARD (Refactored) ---
+        // Uses the centralized Auth object to check login status
+        Auth.requireLogin();
 
-        // --- 2. CONFIGURATION ---
-        let queueData = [
-            { id: 'bp_img',   category: 'BP', name: 'Dynamic Image Review', count: 142, latency: '1m 20s', aht: '12s' },
-            { id: 'bp_vid',   category: 'BP', name: 'Dynamic Video Review', count: 56,  latency: '3m 45s', aht: '45s' },
-            { id: 'bp_com',   category: 'BP', name: 'Comment Review',       count: 890, latency: '0m 30s', aht: '5s' },
-            { id: 'gp_img',   category: 'GP', name: 'Dynamic Image Review', count: 23,  latency: '5m 10s', aht: '15s' },
-            { id: 'gp_com',   category: 'GP', name: 'Comment Review',       count: 45,  latency: '1m 05s', aht: '4s' },
-            { id: 'gp_vid',   category: 'GP', name: 'Dynamic Video Review', count: 12,  latency: '8m 20s', aht: '55s' },
-            { id: 'comm_ava', category: 'Community', name: 'Avatar Review',    count: 310, latency: '2m 15s', aht: '8s' },
-            { id: 'comm_nick', category: 'Community', name: 'Nickname Review',  count: 67,  latency: '0m 50s', aht: '3s' },
-            { id: 'comm_prof', category: 'Community', name: 'Profile Review',   count: 105, latency: '4m 30s', aht: '20s' }
-        ];
+        // --- 3. CONFIGURATION (Refactored) ---
+        // Instead of hardcoding the array here, we map over the Config
+        // and add a random mock count to simulate real-time data.
+        let queueData = Config.queues.map(q => ({
+            ...q,
+            count: Math.floor(Math.random() * 500) // Mock dynamic pending count
+        }));
 
-        // --- 3. VIEW STATE & SORT LOGIC ---
+        // --- 4. VIEW STATE & SORT LOGIC ---
         let currentView = localStorage.getItem('modQueueView') || 'card';
         let sortCol = 'count'; 
         let sortAsc = false;   // Default: Highest first (Descending)
@@ -81,7 +78,7 @@
             document.getElementById('btn-list').classList.toggle('active', currentView === 'list');
         }
 
-        // Helper: Convert time string to seconds
+        // Helper: Convert time string to seconds for sorting
         function parseTime(timeStr) {
             if (!timeStr) return 0;
             let m = 0, s = 0;
@@ -92,7 +89,7 @@
             return (m * 60) + s;
         }
 
-        // --- SORTING ENGINE ---
+        // --- 5. SORTING ENGINE ---
         function executeSort() {
             queueData.sort((a, b) => {
                 let valA, valB;
@@ -123,7 +120,6 @@
                 sortCol = column;
                 sortAsc = true; 
             }
-            // Update Dropdown to match
             syncDropdown();
             executeSort();
         }
@@ -141,7 +137,6 @@
             const dir = sortAsc ? 'asc' : 'desc';
             const val = `${sortCol}-${dir}`;
             const dropdown = document.getElementById('sortDropdown');
-            // If option exists, select it
             if (dropdown.querySelector(`option[value="${val}"]`)) {
                 dropdown.value = val;
             }
@@ -156,7 +151,7 @@
             return sortCol === column ? 'active-sort' : '';
         }
 
-        // --- 4. RENDER FUNCTION ---
+        // --- 6. RENDER FUNCTION ---
         function renderQueues() {
             const container = document.getElementById('queue-container');
             let total = 0;
@@ -245,8 +240,8 @@
             updateViewButtons();
         }
 
-        // --- 5. NAVIGATION ---
-            function openQueue(queueName) {
+        // --- 7. NAVIGATION ---
+        function openQueue(queueName) {
             // Find the queue object in our data to get the correct Tenant (Category)
             const queue = queueData.find(q => q.name === queueName);
             const tenant = queue ? queue.category : 'BP'; // Default to BP if not found
