@@ -11,32 +11,57 @@
         <div class="header"><h1>Settings</h1></div>
         
         <div class="info-card">
-            <h3>Profile Settings</h3>
-            <p style="color:var(--text-muted)">Manage your account preferences here.</p>
-        </div>
+            <div class="settings-section">
+                <h3>Appearance</h3>
+                <div class="settings-row">
+                    <div>
+                        <div class="switch-label">Dark Mode</div>
+                        <div class="switch-desc">Adjust the appearance to reduce eye strain.</div>
+                    </div>
+                    <button id="theme-toggle-btn" class="btn-cancel" onclick="toggleTheme()">
+                        Switch Theme
+                    </button>
+                </div>
+            </div>
 
-        <div class="info-card" style="margin-top: 20px;">
-            <h3>Language / 语言</h3>
-            <p style="color:var(--text-muted)">Select your interface language.</p>
-            
-            <select id="langSelect" class="form-group" style="max-width: 200px; margin-top: 10px;" onchange="changeLanguage(this.value)">
-                <option value="en">English</option>
-                <option value="zh">中文 (Chinese)</option>
-            </select>
+            <div class="settings-section" style="border-bottom:none;">
+                <h3>Language / 语言</h3>
+                <div class="settings-row">
+                    <div>
+                        <div class="switch-label">Interface Language</div>
+                        <div class="switch-desc">Select your preferred language.</div>
+                    </div>
+                    <select id="langSelect" style="width: auto;" onchange="changeLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="zh">中文 (Chinese)</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
     </main>
 
     <script>
-        // Set the dropdown to the current saved language
+        // Set Language Dropdown
         const currentLang = localStorage.getItem('appLang') || 'en';
         document.getElementById('langSelect').value = currentLang;
 
-        // Function to save and reload
         function changeLanguage(lang) {
             localStorage.setItem('appLang', lang);
-            location.reload(); // Reloads page to apply new language
+            location.reload(); 
         }
+
+        // Update Button Text based on current theme
+        function updateBtnText() {
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('theme-toggle-btn').innerText = isDark ? "Switch to Light Mode" : "Switch to Dark Mode";
+        }
+        
+        // Listen for changes
+        updateBtnText();
+        window.addEventListener('themeChanged', updateBtnText);
+        // Also update on click immediately
+        document.getElementById('theme-toggle-btn').addEventListener('click', () => setTimeout(updateBtnText, 50));
     </script>
 </body>
 </html>
