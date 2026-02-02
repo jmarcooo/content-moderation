@@ -46,47 +46,76 @@ body {
 }
 
 /* =========================================
-   UPDATED SIDEBAR LINKS & ICONS
+   3. SIDEBAR (Updated for SVG Icons)
    ========================================= */
-.nav-links a { 
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Brand / Logo Area */
+.brand { 
+    font-size: 1.2rem; 
+    font-weight: bold; 
+    color: var(--text-header); 
+    margin-bottom: 2rem; 
     display: flex; 
-    align-items: center;
-    justify-content: flex-start; /* Aligns items to the left */
-    gap: 12px; /* Space between Icon and Text */
+    align-items: center; 
+    gap: 12px; /* Space between logo and text */
+}
+
+/* Force Brand Icon Size */
+.brand svg, .brand-icon {
+    width: 28px;
+    height: 28px;
+    fill: var(--accent-blue);
+    flex-shrink: 0;
+}
+
+/* Navigation Links */
+.nav-links { list-style: none; flex-grow: 1; }
+.nav-links li { margin-bottom: 4px; }
+
+.nav-links a { 
+    display: flex;              /* Critical: Aligns Icon + Text in a row */
+    align-items: center;        /* Vertical Center */
+    gap: 12px;                  /* Space between Icon and Text */
     padding: 10px 12px; 
     text-decoration: none; 
-    color: var(--text-muted); /* Default to muted color */
+    color: var(--text-muted); 
     border-radius: 6px; 
     transition: all 0.2s; 
     font-size: 0.95rem; 
     font-weight: 500;
 }
 
+/* Force Sidebar Icon Size */
+.nav-links a svg, .nav-icon {
+    width: 20px !important;     /* Force small size */
+    height: 20px !important;
+    fill: currentColor;         /* Inherit text color */
+    flex-shrink: 0;             /* Prevent squishing */
+    display: block;
+}
+
+/* Hover & Active States */
 .nav-links a:hover, .nav-links a.active { 
     background-color: var(--hover-bg); 
-    color: var(--text-header); /* Darker text on active */
-}
-
-/* Specific color for active icon/text if needed */
-.nav-links a.active .nav-icon {
-    fill: var(--accent-blue);
-    color: var(--accent-blue);
-}
-.nav-links a.active {
     color: var(--text-header); 
-    font-weight: 600;
 }
 
-/* The SVG Icon Style */
-.nav-icon {
-    width: 20px;
-    height: 20px;
-    fill: currentColor; /* Inherits text color */
-    opacity: 0.85;
-    flex-shrink: 0;
+/* Highlight Active Icon with Blue */
+.nav-links a.active svg {
+    fill: var(--accent-blue);
 }
 
-/* Badge Logic: Pushes badge to the far right */
+/* Notification Badge (Pushes to right) */
 .sidebar-badge {
     margin-left: auto; 
     background-color: #f85149; 
@@ -98,13 +127,45 @@ body {
     line-height: 1.2;
 }
 
-/* Brand Icon */
-.brand-icon {
-    width: 24px;
-    height: 24px;
-    fill: var(--accent-blue);
-    margin-right: 10px;
+/* User Profile Section */
+.user-profile { 
+    border-top: 1px solid var(--border-color); 
+    padding-top: 15px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 10px; 
+    font-size: 0.9rem; 
+    margin-top: auto;
 }
+
+.avatar { 
+    width: 32px; 
+    height: 32px; 
+    background-color: #238636; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    color: white; 
+    flex-shrink: 0;
+}
+
+.theme-btn {
+    background: transparent; 
+    border: 1px solid var(--border-color); 
+    border-radius: 6px; 
+    cursor: pointer; 
+    padding: 6px; /* Reduced padding */
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; 
+    color: var(--text-main);
+}
+.theme-btn svg { width: 18px; height: 18px; fill: currentColor; }
+.theme-btn:hover { background-color: var(--hover-bg); transform: scale(1.05); }
+
 /* =========================================
    4. CONTENT & TABLES
    ========================================= */
