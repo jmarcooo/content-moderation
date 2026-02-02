@@ -5,7 +5,9 @@
         "password": "password123", 
         "role": "Admin",
         "name": "Marco",
-        "status": "Active",
+        "email": "marco@digiplus.com.ph",
+        "status": "Online",
+        "last_status_update": "2026-02-02T08:00:00.000Z",
         "createdAt": "1/26/2026, 4:39:00 PM"
     },
     {
@@ -14,7 +16,9 @@
         "password": "modpass",
         "role": "Moderator",
         "name": "Jane Doe",
-        "status": "Active",
+        "email": "jane.doe@digiplus.com.ph",
+        "status": "Break",
+        "last_status_update": "2026-02-02T12:15:00.000Z",
         "createdAt": "1/26/2026, 5:15:00 PM"
     }
 ]
