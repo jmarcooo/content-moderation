@@ -177,16 +177,20 @@ const ReviewApp = {
         });
     },
 
-    // FIX: Optimized robust selection logic using extractContents
+    // FIX: Optimized robust selection logic
     handleTextSelection(slot) {
         const box = document.getElementById(`text-${slot}`);
         if (!box || !box.classList.contains('moderatable')) return;
 
         const selection = window.getSelection();
+        
+        // 1. Guard Clause: If no text selected, do nothing
         if (selection.rangeCount === 0 || selection.isCollapsed) return;
 
+        // 2. Guard Clause: Ensure selection is inside the box
         if (!box.contains(selection.anchorNode) || !box.contains(selection.focusNode)) return;
 
+        // 3. Guard Clause: Ensure meaningful text
         const text = selection.toString();
         if (!text || text.trim().length === 0) return;
 
@@ -195,12 +199,15 @@ const ReviewApp = {
         try {
             const span = document.createElement('span');
             span.className = 'restricted-text';
-            
-            // Critical Fix: Physically move text nodes into the span
-            span.appendChild(range.extractContents());
+            span.textContent = text; 
+
+            // 4. Force Delete and Replace
+            range.deleteContents();
             range.insertNode(span);
             
             selection.removeAllRanges();
+            
+            // 5. Activate "Restricted" Button
             this.setStatus('text', 'restrict', '', true);
         } catch (e) { 
             console.error("Highlighting failed", e); 
@@ -209,7 +216,7 @@ const ReviewApp = {
 
     renderViolations() {
         if (typeof Config === 'undefined' || !Config.violations) {
-            console.error("❌ Config.violations is missing. Check config.js syntax.");
+            console.error("Config.violations is missing. Check config.js syntax.");
             return;
         }
         const list = document.getElementById('violationList');
