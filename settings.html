@@ -120,35 +120,31 @@
             }
         };
 
-        const T = TEXT[APP_LANG_SET];
+        // FIXED: Renamed 'T' to 'T_SET' to avoid conflict with sidebar.js
+        const T_SET = TEXT[APP_LANG_SET];
 
         // --- 2. APPLY TRANSLATIONS ---
-        document.getElementById('txt-header').innerText = T.header;
-        document.getElementById('txt-appear-title').innerText = T.appearTitle;
-        document.getElementById('txt-dark-mode').innerText = T.darkMode;
-        document.getElementById('txt-dark-desc').innerText = T.darkDesc;
-        document.getElementById('txt-lang-title').innerText = T.langTitle;
-        document.getElementById('txt-lang-label').innerText = T.langLabel;
-        document.getElementById('txt-lang-desc').innerText = T.langDesc;
+        document.getElementById('txt-header').innerText = T_SET.header;
+        document.getElementById('txt-appear-title').innerText = T_SET.appearTitle;
+        document.getElementById('txt-dark-mode').innerText = T_SET.darkMode;
+        document.getElementById('txt-dark-desc').innerText = T_SET.darkDesc;
+        document.getElementById('txt-lang-title').innerText = T_SET.langTitle;
+        document.getElementById('txt-lang-label').innerText = T_SET.langLabel;
+        document.getElementById('txt-lang-desc').innerText = T_SET.langDesc;
 
         // --- 3. THEME LOGIC ---
-        // Determine button text based on current theme
         function updateThemeButtonText() {
             const isDark = document.body.classList.contains('dark-mode');
             const btn = document.getElementById('btn-theme-toggle');
-            btn.innerText = isDark ? T.btnLight : T.btnDark;
+            btn.innerText = isDark ? T_SET.btnLight : T_SET.btnDark;
         }
 
-        // Initialize Button Text
         updateThemeButtonText();
-
-        // Listen for theme changes (triggered from sidebar or this button)
         window.addEventListener('themeChanged', updateThemeButtonText);
         
-        // Wrap the toggle to also update text immediately
         const originalToggle = window.toggleTheme;
         window.toggleTheme = function() {
-            if(originalToggle) originalToggle(); // Call sidebar's toggle
+            if(originalToggle) originalToggle(); 
             setTimeout(updateThemeButtonText, 50);
         };
 
