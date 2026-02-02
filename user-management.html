@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for the status table to match the clean look */
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .dot-green { background-color: #238636; }
+        .dot-orange { background-color: #d29922; }
+        .dot-gray { background-color: #6e7681; }
+        .btn-sm { padding: 4px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); background: var(--bg-body); border-radius: 4px; cursor: pointer; }
+        .btn-sm:hover { background: var(--hover-bg); border-color: var(--accent-blue); color: var(--accent-blue); }
+    </style>
 </head>
 <body>
 
@@ -23,7 +32,7 @@
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                     </svg>
                     <h3>User Status</h3>
-                    <p>Overview of active and banned user statistics.</p>
+                    <p>Real-time status monitoring of moderators.</p>
                 </div>
 
                 <div class="notif-card" onclick="switchSection('view-accounts')">
@@ -37,7 +46,7 @@
         </div>
 
         <div id="view-accounts" style="display: none;">
-            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to User Management</div>
+            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to Dashboard</div>
             <div class="header">
                 <h1>Accounts</h1>
                 <button class="btn-primary" onclick="openAddModal()">+ Add User</button>
@@ -61,27 +70,26 @@
         </div>
 
         <div id="view-status" style="display: none;">
-            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to User Management</div>
+            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to Dashboard</div>
             <div class="header">
-                <h1>User Status</h1>
+                <h1>Moderator Status Monitor</h1>
             </div>
 
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>Active Users</h3>
-                    <div class="number" id="stat-active">0</div>
-                    <div class="trend up">Operational</div>
-                </div>
-                <div class="card">
-                    <h3>Banned Users</h3>
-                    <div class="number" id="stat-banned">0</div>
-                    <div class="trend down">Restricted access</div>
-                </div>
-                <div class="card">
-                    <h3>Total Registered</h3>
-                    <div class="number" id="stat-total">0</div>
-                    <div class="trend">All time</div>
-                </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Tasks Moderated</th>
+                            <th>Average Handling Time</th>
+                            <th>Status</th>
+                            <th>Status Duration</th>
+                            <th>Change Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modStatusBody">
+                        </tbody>
+                </table>
             </div>
         </div>
 
@@ -141,8 +149,8 @@
             
             document.getElementById(id).style.display = 'block';
             
-            // If switching to status, refresh stats
-            if(id === 'view-status') calculateStats();
+            // Render specific view logic
+            if(id === 'view-status') renderModStatus();
         }
 
         let users = [];
@@ -159,9 +167,9 @@
                 } catch (err) { console.error("Error loading users"); }
             }
             render();
-            calculateStats();
         }
 
+        // --- RENDER ACCOUNTS TABLE ---
         function render() {
             const tbody = document.getElementById('userTableBody');
             if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found.</td></tr>'; return; }
@@ -180,16 +188,52 @@
             `).join('');
         }
 
-        function calculateStats() {
-            const active = users.filter(u => u.status === 'Active').length;
-            const banned = users.filter(u => u.status === 'Banned').length;
-            const total = users.length;
+        // --- RENDER MODERATOR STATUS TABLE ---
+        function renderModStatus() {
+            const tbody = document.getElementById('modStatusBody');
+            
+            // Filter only Moderators
+            const moderators = users.filter(u => u.role === 'Moderator');
 
-            document.getElementById('stat-active').innerText = active;
-            document.getElementById('stat-banned').innerText = banned;
-            document.getElementById('stat-total').innerText = total;
+            if (moderators.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No moderators found in the system. Add a user with role "Moderator" in Accounts.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = moderators.map(u => {
+                // Generate Mock Data for demo purposes since JSON doesn't have live metrics
+                const tasks = Math.floor(Math.random() * 500) + 50;
+                const aht = (Math.random() * 60 + 10).toFixed(0); // 10s to 70s
+                const statuses = ['Online', 'Break', 'Offline', 'Meeting'];
+                // Deterministic random based on ID so it doesn't flicker too much
+                const statusIndex = u.id.slice(-1) % statuses.length; 
+                const currentStatus = statuses[statusIndex];
+                
+                let dotColor = 'dot-gray';
+                if(currentStatus === 'Online') dotColor = 'dot-green';
+                if(currentStatus === 'Break' || currentStatus === 'Meeting') dotColor = 'dot-orange';
+
+                const duration = Math.floor(Math.random() * 3) + "h " + Math.floor(Math.random() * 59) + "m";
+
+                return `
+                <tr>
+                    <td>
+                        <div style="font-weight:600; color:var(--text-header);">${u.username}@contentmod.com</div>
+                    </td>
+                    <td>${tasks}</td>
+                    <td>${aht}s</td>
+                    <td>
+                        <span class="status-dot ${dotColor}"></span>${currentStatus}
+                    </td>
+                    <td style="font-family:monospace;">${duration}</td>
+                    <td>
+                        <button class="btn-sm" onclick="alert('Changing status for ${u.username}...')">Change Status ▼</button>
+                    </td>
+                </tr>
+            `}).join('');
         }
 
+        // --- COMMON UTILS ---
         function getExcelDate() {
             const date = new Date();
             const excelEpoch = new Date(1899, 11, 30);
@@ -217,7 +261,7 @@
                 password: 'password123',
                 createdAt: now
             });
-            save(); render(); calculateStats(); closeModal('addModal'); document.getElementById('addForm').reset();
+            save(); render(); closeModal('addModal'); document.getElementById('addForm').reset();
         });
 
         function openEdit(id) {
@@ -238,14 +282,14 @@
                 users[idx].name = document.getElementById('editName').value;
                 users[idx].role = document.getElementById('editRole').value;
                 users[idx].status = document.getElementById('editStatus').value;
-                save(); render(); calculateStats(); closeModal('editModal');
+                save(); render(); closeModal('editModal');
             }
         });
 
         function delUser(id) {
             if(confirm('Delete user?')) { 
                 users = users.filter(u => u.id.toString() !== id.toString());
-                save(); render(); calculateStats();
+                save(); render(); 
             }
         }
 
