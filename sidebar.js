@@ -5,11 +5,10 @@ const APP_LANG = localStorage.getItem('appLang') || 'en';
 
 const TRANSLATIONS = {
     en: { brand: "AdminPanel", overview: "Overview", users: "User Management", mod: "Moderation Queue", audit: "Quality Audit", appeal: "Appeal Center", notifs: "Notifications", settings: "Settings", logout: "Logout", online: "Online", offline: "Offline" },
-    zh: { brand: "管理后台", overview: "总览",用户管理: "User Management", mod: "审核队列", audit: "质量质检", appeal: "申诉中心", notifs: "通知中心", settings: "设置", logout: "退出登录", online: "在线", offline: "离线" }
+    zh: { brand: "管理后台", overview: "总览", users: "用户管理", mod: "审核队列", audit: "质量质检", appeal: "申诉中心", notifs: "通知中心", settings: "设置", logout: "退出登录", online: "在线", offline: "离线" }
 };
 const T = TRANSLATIONS[APP_LANG];
 
-// SVGs
 const ICONS = {
     brand: `<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>`,
     overview: `<svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>`,
@@ -24,10 +23,7 @@ const ICONS = {
 
 const sidebarContent = `
 <nav class="sidebar">
-    <div class="brand">
-        ${ICONS.brand}
-        <span>${T.brand}</span>
-    </div>
+    <div class="brand">${ICONS.brand}<span>${T.brand}</span></div>
     
     <ul class="nav-links">
         <li><a href="home.html" id="link-home">${ICONS.overview}<span>${T.overview}</span></a></li>
@@ -48,13 +44,11 @@ const sidebarContent = `
         <div class="avatar">A</div>
         <div class="profile-info">
             <div class="profile-name">Admin</div>
-            
             <div class="profile-status" id="status-trigger">
                 <span id="current-dot" class="dot dot-online"></span>
                 <span id="current-text">${T.online}</span>
                 <span class="status-caret">▼</span>
             </div>
-
             <a href="javascript:Auth.logout()" class="logout-link">
                 ${ICONS.logout}
                 <span>${T.logout}</span>
@@ -76,51 +70,50 @@ const sidebarContent = `
 document.body.insertAdjacentHTML('afterbegin', sidebarContent);
 
 // ===========================================
-// 2. SIDEBAR LOGIC (Initialize immediately after injection)
+// 2. LOGIC INITIALIZATION
 // ===========================================
-(function initSidebarLogic() {
+// Use setTimeout to ensure the inserted HTML is available in the DOM
+setTimeout(() => {
+    // --- Active Link Logic ---
+    const path = window.location.pathname;
+    if (path.includes('home.html')) document.getElementById('link-home')?.classList.add('active');
+    if (path.includes('user-management.html')) document.getElementById('link-users')?.classList.add('active');
+    if (path.includes('moderation.html')) document.getElementById('link-mod')?.classList.add('active');
+    if (path.includes('audit.html')) document.getElementById('link-audit')?.classList.add('active');
+    if (path.includes('appeal-center.html')) document.getElementById('link-appeal')?.classList.add('active');
+    if (path.includes('notifications.html')) document.getElementById('link-notifs')?.classList.add('active');
+    if (path.includes('settings.html')) document.getElementById('link-settings')?.classList.add('active');
+
     // --- Status Dropdown Logic ---
     const statusTrigger = document.getElementById('status-trigger');
     const statusMenu = document.getElementById('status-menu');
     const currentLabel = document.getElementById('current-text');
     const currentDot = document.getElementById('current-dot');
 
-    if (!statusTrigger || !statusMenu) {
-        console.error("Status dropdown elements not found during initialization.");
-        return;
+    if (statusTrigger && statusMenu) {
+        statusTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            statusMenu.classList.toggle('active');
+        });
+
+        statusMenu.querySelectorAll('li').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const type = item.getAttribute('data-status');
+                const label = item.getAttribute('data-label');
+                currentLabel.innerText = label;
+                currentDot.className = `dot dot-${type}`;
+                statusMenu.classList.remove('active');
+                localStorage.setItem('userStatus', JSON.stringify({ type, label }));
+            });
+        });
     }
-
-    // Toggle menu click
-    statusTrigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        statusMenu.classList.toggle('active');
-    });
-
-    // Handle item selection (using Event Delegation)
-    statusMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const item = e.target.closest('li');
-        if (!item) return;
-
-        const type = item.getAttribute('data-status');
-        const label = item.getAttribute('data-label');
-
-        // Update UI
-        currentLabel.innerText = label;
-        currentDot.className = `dot dot-${type}`;
-
-        // Close menu
-        statusMenu.classList.remove('active');
-
-        // Save to storage
-        localStorage.setItem('userStatus', JSON.stringify({ type, label }));
-    });
 
     // Close menu on click outside
     document.addEventListener('click', (e) => {
-         if (statusMenu.classList.contains('active') && !statusTrigger.contains(e.target)) {
-             statusMenu.classList.remove('active');
-         }
+        if (statusMenu && statusMenu.classList.contains('active')) {
+            statusMenu.classList.remove('active');
+        }
     });
 
     // Init Status from Storage
@@ -129,25 +122,10 @@ document.body.insertAdjacentHTML('afterbegin', sidebarContent);
         currentLabel.innerText = savedStatus.label;
         currentDot.className = `dot dot-${savedStatus.type}`;
     }
-})();
 
+}, 100);
 
-// ===========================================
-// 3. GLOBAL PAGE LOGIC
-// ===========================================
-document.addEventListener("DOMContentLoaded", () => {
-    // --- Active Link Logic ---
-    const path = window.location.pathname;
-    if (path.includes('home.html')) document.getElementById('link-home').classList.add('active');
-    if (path.includes('user-management.html')) document.getElementById('link-users').classList.add('active');
-    if (path.includes('moderation.html')) document.getElementById('link-mod').classList.add('active');
-    if (path.includes('audit.html')) document.getElementById('link-audit').classList.add('active');
-    if (path.includes('appeal-center.html')) document.getElementById('link-appeal').classList.add('active');
-    if (path.includes('notifications.html')) document.getElementById('link-notifs').classList.add('active');
-    if (path.includes('settings.html')) document.getElementById('link-settings').classList.add('active');
-});
-
-// Theme Logic (Window functions used by Settings page)
+// --- Theme Logic ---
 const savedTheme = localStorage.getItem('appTheme') || 'light';
 if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
@@ -157,7 +135,7 @@ window.toggleTheme = function() {
     window.dispatchEvent(new Event('themeChanged'));
 };
 
-// Simple Auth Placeholder if auth.js isn't loaded
+// --- Auth Placeholder ---
 if (typeof Auth === 'undefined') {
     window.Auth = { logout: () => { window.location.href='login.html'; } };
 }
