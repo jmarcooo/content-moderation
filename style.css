@@ -12,6 +12,8 @@
     --border-color: #d0d7de;
     --hover-bg: #f3f4f6;
     --accent-blue: #0969da;
+    --danger-red: #da3633;
+    --sidebar-width: 260px;
     --modal-overlay: rgba(0,0,0,0.5);
     --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
@@ -27,6 +29,7 @@ body.dark-mode {
     --border-color: #30363d;
     --hover-bg: #21262d;
     --accent-blue: #58a6ff;
+    --danger-red: #f85149;
     --modal-overlay: rgba(0,0,0,0.7);
     --shadow: 0 8px 24px rgba(0,0,0,0.5);
 }
@@ -46,10 +49,10 @@ body {
 }
 
 /* =========================================
-   3. SIDEBAR (Updated for SVG Icons)
+   3. SIDEBAR (Redesigned)
    ========================================= */
 .sidebar {
-    width: 250px;
+    width: var(--sidebar-width);
     background-color: var(--bg-sidebar);
     border-right: 1px solid var(--border-color);
     padding: 20px;
@@ -61,143 +64,164 @@ body {
 
 /* Brand / Logo Area */
 .brand { 
-    font-size: 1.2rem; 
+    font-size: 1.1rem; 
     font-weight: bold; 
     color: var(--text-header); 
-    margin-bottom: 2rem; 
+    margin-bottom: 1.5rem; 
     display: flex; 
     align-items: center; 
-    gap: 12px; /* Space between logo and text */
+    gap: 10px;
+    padding-left: 10px;
 }
-
-/* Force Brand Icon Size */
-.brand svg, .brand-icon {
-    width: 28px;
-    height: 28px;
-    fill: var(--accent-blue);
-    flex-shrink: 0;
-}
+.brand svg { width: 24px; height: 24px; fill: var(--text-header); }
 
 /* Navigation Links */
-.nav-links { 
-    list-style: none; 
-    /* flex-grow: 1;  <-- REMOVE THIS LINE */
-    margin-bottom: 0;
-}
-
-.nav-links li { margin-bottom: 4px; }
-
-/* The user profile no longer needs auto margin if the logout list handles it, 
-   but we keep it just in case to ensure it sits at the very bottom */
-.user-profile { 
-    border-top: none; /* Removed border since Logout list has one */
-    padding-top: 15px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    gap: 10px; 
-    font-size: 0.9rem; 
-    /* margin-top: auto; <-- You can keep or remove this, sidebar.js handles the push */
-}
-
+.nav-links { list-style: none; margin-bottom: 10px; }
 .nav-links li { margin-bottom: 4px; }
 
 .nav-links a { 
-    display: flex;              /* Critical: Aligns Icon + Text in a row */
-    align-items: center;        /* Vertical Center */
-    gap: 12px;                  /* Space between Icon and Text */
+    display: flex; align-items: center; gap: 12px;
     padding: 10px 12px; 
     text-decoration: none; 
     color: var(--text-muted); 
     border-radius: 6px; 
     transition: all 0.2s; 
-    font-size: 0.95rem; 
+    font-size: 0.9rem; 
     font-weight: 500;
 }
-
-/* Force Sidebar Icon Size */
-.nav-links a svg, .nav-icon {
-    width: 20px !important;     /* Force small size */
-    height: 20px !important;
-    fill: currentColor;         /* Inherit text color */
-    flex-shrink: 0;             /* Prevent squishing */
-    display: block;
-}
-
-/* Hover & Active States */
 .nav-links a:hover, .nav-links a.active { 
     background-color: var(--hover-bg); 
     color: var(--text-header); 
 }
+.nav-links a svg { width: 18px; height: 18px; fill: currentColor; opacity: 0.8; }
+.nav-links a.active svg { fill: var(--accent-blue); opacity: 1; }
 
-/* Highlight Active Icon with Blue */
-.nav-links a.active svg {
-    fill: var(--accent-blue);
-}
-
-/* Notification Badge (Pushes to right) */
 .sidebar-badge {
     margin-left: auto; 
-    background-color: #f85149; 
+    background-color: var(--danger-red); 
     color: white;
-    font-size: 0.75rem;
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 10px;
-    line-height: 1.2;
+    font-size: 0.7rem; font-weight: bold;
+    padding: 2px 6px; border-radius: 10px;
 }
 
-/* User Profile Section */
+/* Spacer to push Settings/Profile to bottom */
+.sidebar-spacer { margin-top: auto; }
+
+/* User Profile Section (Redesigned) */
 .user-profile { 
     border-top: 1px solid var(--border-color); 
     padding-top: 15px; 
+    margin-top: 10px;
     display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    gap: 10px; 
-    font-size: 0.9rem; 
-    margin-top: auto;
+    gap: 12px; 
 }
 
 .avatar { 
-    width: 32px; 
-    height: 32px; 
-    background-color: #238636; 
+    width: 38px; height: 38px; 
+    background-color: #238636; /* GitHub Green */
     border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-weight: bold; 
-    color: white; 
+    display: flex; align-items: center; justify-content: center; 
+    font-weight: bold; color: white; font-size: 1rem;
     flex-shrink: 0;
 }
 
-.theme-btn {
-    background: transparent; 
-    border: 1px solid var(--border-color); 
-    border-radius: 6px; 
-    cursor: pointer; 
-    padding: 6px; /* Reduced padding */
-    width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s; 
-    color: var(--text-main);
+.profile-info {
+    display: flex; flex-direction: column; justify-content: center;
+    font-size: 0.85rem;
+    width: 100%;
 }
-.theme-btn svg { width: 18px; height: 18px; fill: currentColor; }
-.theme-btn:hover { background-color: var(--hover-bg); transform: scale(1.05); }
+
+.profile-name {
+    font-weight: 600; color: var(--text-header);
+    margin-bottom: 2px;
+}
+
+/* Status Line */
+.profile-status {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--text-muted); cursor: pointer;
+    font-size: 0.8rem; margin-bottom: 4px;
+}
+.profile-status:hover { color: var(--text-main); }
+.status-caret { font-size: 0.7rem; opacity: 0.7; }
+
+/* Logout Link */
+.logout-link {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--danger-red); text-decoration: none;
+    font-size: 0.8rem; font-weight: 500;
+    margin-top: 2px;
+}
+.logout-link:hover { text-decoration: underline; }
+.logout-icon { width: 12px; height: 12px; fill: currentColor; }
+
+/* Status Menu Dropdown (Fixed Position) */
+.status-menu { 
+    display: none; position: absolute; bottom: 80px; left: 60px; 
+    width: 160px; background-color: var(--bg-card); 
+    border: 1px solid var(--border-color); 
+    box-shadow: var(--shadow); border-radius: 6px; 
+    z-index: 999; padding: 5px; 
+}
+.status-menu.active { display: block; }
+.status-menu li { 
+    padding: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; 
+    font-size: 0.85rem; color: var(--text-main); border-radius: 4px; 
+}
+.status-menu li:hover { background-color: var(--hover-bg); }
+
+/* Dots */
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot-online { background-color: #238636; }
+.dot-offline { background-color: #6e7681; }
+.dot-break { background-color: #d29922; }
+.dot-lunch { background-color: #f0883e; }
+.dot-meeting { background-color: #0969da; }
+.dot-idle { background-color: #da3633; }
+.dot-training { background-color: #8957e5; }
 
 /* =========================================
-   4. CONTENT & TABLES
+   4. CONTENT AREA
    ========================================= */
 .main-content { flex-grow: 1; padding: 2rem; overflow-y: auto; width: 100%; }
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
 h1 { font-size: 1.5rem; color: var(--text-header); }
 
-.table-container { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; box-shadow: var(--shadow); }
-table { width: 100%; border-collapse: collapse; text-align: left; }
-th { background-color: var(--hover-bg); color: var(--text-muted); padding: 12px 16px; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
-td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-main); }
-tr:hover { background-color: var(--hover-bg); }
+/* Cards */
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+.card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+.card .number { font-size: 2rem; font-weight: bold; color: var(--text-header); margin: 10px 0; }
+.trend { font-size: 0.8rem; }
+.trend.up { color: #238636; }
+.trend.down { color: #cf222e; }
+
+/* Notification Grid */
+.notif-dashboard-grid { display: flex; gap: 20px; margin-top: 20px; }
+.notif-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 30px; flex: 1; cursor: pointer; transition: transform 0.2s, border-color 0.2s; box-shadow: var(--shadow); }
+.notif-card:hover { transform: translateY(-4px); border-color: var(--accent-blue); }
+.notif-icon { width: 40px; height: 40px; fill: #d29922; margin-bottom: 15px; } /* Gold color from screenshot */
+
+/* Notification List & Forms */
+.activity-list { list-style: none; }
+.activity-item { padding: 12px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-main); }
+.activity-item span { color: var(--text-muted); font-size: 0.8rem; }
+
+/* Inputs/Buttons */
+.btn-primary { background-color: #238636; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.btn-cancel { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-header); }
+.form-group input, .form-group select { width: 100%; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); }
+
+/* Theme Toggle in Settings */
+.settings-section { margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+.settings-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+.switch-label { font-weight: 600; color: var(--text-header); }
+.switch-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+/* Back Link */
+.back-link { cursor: pointer; color: var(--text-muted); margin-bottom: 15px; display: inline-block; }
+.back-link:hover { color: var(--accent-blue); }
 
 /* =========================================
    5. CARDS (Dashboard & Grid View)
