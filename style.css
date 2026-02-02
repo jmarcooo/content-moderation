@@ -588,6 +588,18 @@ body.dark-mode .status-Active { color: #58a6ff; }
     user-select: none; /* Prevent selection */
 }
 
+/* FIX: Restricted Highlight Styles */
+.restricted-text {
+    background-color: rgba(210, 153, 34, 0.4); 
+    border-bottom: 2px solid #d29922; 
+    color: #7a5209; 
+    font-weight: bold; 
+    padding: 0; /* Tightened to baseline */
+    display: inline; /* Prevents misalignment box issues */
+    line-height: 1;
+    border-radius: 0; 
+}
+
 /* Image Viewer Modal (Overlay) */
 .viewer-overlay {
     display: none;
