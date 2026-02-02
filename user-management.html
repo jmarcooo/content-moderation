@@ -6,7 +6,8 @@
     <title>User Management</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        /* Specific tweaks for status monitor to fix alignment */
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
         .dot-green { background-color: #238636; }
         .dot-orange { background-color: #d29922; }
         .dot-gray { background-color: #6e7681; }
@@ -14,8 +15,17 @@
         .dot-purple { background-color: #8957e5; }
         .dot-red { background-color: #da3633; }
 
-        .btn-sm { padding: 4px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); background: var(--bg-body); border-radius: 4px; cursor: pointer; }
+        .btn-sm { padding: 4px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); background: var(--bg-body); border-radius: 4px; cursor: pointer; white-space: nowrap; }
         .btn-sm:hover { background: var(--hover-bg); border-color: var(--accent-blue); color: var(--accent-blue); }
+        
+        /* Adjust column widths to look like the design */
+        #modStatusTable th:nth-child(1) { width: 30%; } /* Email */
+        #modStatusTable th:nth-child(2) { width: 15%; } /* Tasks */
+        #modStatusTable th:nth-child(3) { width: 15%; } /* AHT */
+        #modStatusTable th:nth-child(4) { width: 15%; } /* Status */
+        #modStatusTable th:nth-child(5) { width: 15%; } /* Duration */
+        #modStatusTable th:nth-child(6) { width: 10%; text-align: right; } /* Action */
+        #modStatusTable td:nth-child(6) { text-align: right; }
     </style>
 </head>
 <body>
@@ -79,7 +89,7 @@
             </div>
 
             <div class="table-container">
-                <table>
+                <table id="modStatusTable" class="mod-table">
                     <thead>
                         <tr>
                             <th>Email</th>
@@ -133,7 +143,10 @@
                     <select id="editStatus">
                         <option>Online</option>
                         <option>Offline</option>
-                        <option>Banned</option>
+                        <option>Break</option>
+                        <option>Lunch</option>
+                        <option>Meeting</option>
+                        <option>Idle</option>
                     </select>
                 </div>
                 <div class="modal-actions">
@@ -165,10 +178,8 @@
         let users = [];
 
         async function init() {
-            // Force reload from JSON if the structure in localStorage is old (missing email)
-            // For production, you'd have better migration logic. Here we just fetch if key missing or user choice.
-            // But for this demo, let's try to fetch if we suspect data is stale or if it's the first load.
-            const stored = localStorage.getItem('mockUsers_v3'); // Changed key to force fresh load for this update
+            // NOTE: Changing key to force reload because of JSON structure changes
+            const stored = localStorage.getItem('mockUsers_v4'); 
             if (stored) {
                 users = JSON.parse(stored);
             } else {
@@ -202,42 +213,46 @@
 
         function getBadgeClass(status) {
             if (status === 'Banned') return 'status-Banned';
-            return 'status-Active'; // Treat Online, Offline, Break as "Active" account status visually in this table
+            return 'status-Active'; 
         }
 
         // --- RENDER MODERATOR STATUS TABLE ---
         function renderModStatus() {
             const tbody = document.getElementById('modStatusBody');
             
-            // Filter only Moderators and Admins (assuming Admins also mod)
-            const moderators = users.filter(u => u.role === 'Moderator' || u.role === 'Admin');
+            // 1. STRICT FILTER: Only Moderators (not Admins, not Users)
+            const moderators = users.filter(u => u.role === 'Moderator');
 
             if (moderators.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No moderators found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">No users with role "Moderator" found.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = moderators.map(u => {
-                // Mock Metrics
+                // Mock Metrics (since not in JSON)
                 const tasks = Math.floor(Math.random() * 500) + 50;
                 const aht = (Math.random() * 60 + 10).toFixed(0);
                 
-                // Color Logic
+                // 2. STATUS DOT LOGIC based on "status" in JSON
                 let dotColor = 'dot-gray'; // Default Offline
-                if(u.status === 'Online') dotColor = 'dot-green';
-                if(u.status === 'Break' || u.status === 'Lunch') dotColor = 'dot-orange';
-                if(u.status === 'Meeting') dotColor = 'dot-blue';
-                if(u.status === 'Training') dotColor = 'dot-purple';
-                if(u.status === 'Idle') dotColor = 'dot-red';
+                const s = u.status;
+                if(s === 'Online') dotColor = 'dot-green';
+                if(s === 'Break' || s === 'Lunch') dotColor = 'dot-orange';
+                if(s === 'Meeting') dotColor = 'dot-blue';
+                if(s === 'Training') dotColor = 'dot-purple';
+                if(s === 'Idle') dotColor = 'dot-red';
 
-                // Duration Calculation
+                // 3. DURATION LOGIC based on "last_status_update" in JSON
                 let durationStr = "--";
                 if (u.last_status_update) {
                     const diffMs = new Date() - new Date(u.last_status_update);
-                    const diffMins = Math.floor(diffMs / 60000);
-                    const hrs = Math.floor(diffMins / 60);
-                    const mins = diffMins % 60;
-                    durationStr = `${hrs}h ${mins}m`;
+                    // Handle case where date might be invalid or future
+                    if (!isNaN(diffMs) && diffMs >= 0) {
+                        const diffMins = Math.floor(diffMs / 60000);
+                        const hrs = Math.floor(diffMins / 60);
+                        const mins = diffMins % 60;
+                        durationStr = `${hrs}h ${mins}m`;
+                    }
                 }
 
                 return `
@@ -248,11 +263,14 @@
                     <td>${tasks}</td>
                     <td>${aht}s</td>
                     <td>
-                        <span class="status-dot ${dotColor}"></span>${u.status}
+                        <div style="display:flex; align-items:center;">
+                            <span class="status-dot ${dotColor}"></span>
+                            ${u.status}
+                        </div>
                     </td>
-                    <td style="font-family:monospace;">${durationStr}</td>
+                    <td style="font-family:monospace; color:var(--text-main);">${durationStr}</td>
                     <td>
-                        <button class="btn-sm" onclick="alert('Simulated: Changing status for ${u.username}...')">Change Status ▼</button>
+                        <button class="btn-sm" onclick="alert('Changing status for ${u.username}...')">Change Status ▼</button>
                     </td>
                 </tr>
             `}).join('');
@@ -283,7 +301,7 @@
                 email: document.getElementById('addEmail').value,
                 username: document.getElementById('addUsername').value,
                 role: document.getElementById('addRole').value,
-                status: 'Offline', // Default new user status
+                status: 'Offline', 
                 last_status_update: new Date().toISOString(),
                 password: 'password123',
                 createdAt: now
@@ -308,7 +326,6 @@
             const idx = users.findIndex(u => u.id.toString() === id.toString());
             if (idx > -1) {
                 const newStatus = document.getElementById('editStatus').value;
-                // If status changed, update timestamp
                 if (users[idx].status !== newStatus) {
                     users[idx].last_status_update = new Date().toISOString();
                 }
@@ -317,7 +334,9 @@
                 users[idx].role = document.getElementById('editRole').value;
                 users[idx].status = newStatus;
                 
-                save(); render(); closeModal('editModal');
+                save(); render(); 
+                if(document.getElementById('view-status').style.display === 'block') renderModStatus();
+                closeModal('editModal');
             }
         });
 
@@ -328,7 +347,7 @@
             }
         }
 
-        function save() { localStorage.setItem('mockUsers_v3', JSON.stringify(users)); }
+        function save() { localStorage.setItem('mockUsers_v4', JSON.stringify(users)); }
         
         init();
 
