@@ -8,27 +8,83 @@
 </head>
 <body>
 
+    <script src="sidebar.js"></script>
+
     <main class="main-content">
-        <div class="header">
-            <h1>User Management</h1>
-            <button class="btn-primary" onclick="openAddModal()">+ Add User</button>
+        
+        <div id="view-dashboard">
+            <div class="header">
+                <h1>User Management</h1>
+            </div>
+
+            <div class="notif-dashboard-grid">
+                <div class="notif-card" onclick="switchSection('view-status')">
+                    <svg class="notif-icon" viewBox="0 0 24 24" style="fill:#0969da;">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                    <h3>User Status</h3>
+                    <p>Overview of active and banned user statistics.</p>
+                </div>
+
+                <div class="notif-card" onclick="switchSection('view-accounts')">
+                    <svg class="notif-icon" viewBox="0 0 24 24" style="fill:#238636;">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    <h3>Accounts</h3>
+                    <p>Manage registered users and edit details.</p>
+                </div>
+            </div>
         </div>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Created At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="userTableBody"></tbody>
-            </table>
+        <div id="view-accounts" style="display: none;">
+            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to User Management</div>
+            <div class="header">
+                <h1>Accounts</h1>
+                <button class="btn-primary" onclick="openAddModal()">+ Add User</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
         </div>
+
+        <div id="view-status" style="display: none;">
+            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to User Management</div>
+            <div class="header">
+                <h1>User Status</h1>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>Active Users</h3>
+                    <div class="number" id="stat-active">0</div>
+                    <div class="trend up">Operational</div>
+                </div>
+                <div class="card">
+                    <h3>Banned Users</h3>
+                    <div class="number" id="stat-banned">0</div>
+                    <div class="trend down">Restricted access</div>
+                </div>
+                <div class="card">
+                    <h3>Total Registered</h3>
+                    <div class="number" id="stat-total">0</div>
+                    <div class="trend">All time</div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <div id="addModal" class="modal-overlay">
@@ -71,11 +127,22 @@
         </div>
     </div>
 
-    <script src="sidebar.js"></script>
     <script>
         // --- AUTH GUARD ---
         if (!localStorage.getItem('currentUser')) {
             window.location.href = 'login.html';
+        }
+
+        // --- NAVIGATION LOGIC ---
+        function switchSection(id) {
+            document.getElementById('view-dashboard').style.display = 'none';
+            document.getElementById('view-accounts').style.display = 'none';
+            document.getElementById('view-status').style.display = 'none';
+            
+            document.getElementById(id).style.display = 'block';
+            
+            // If switching to status, refresh stats
+            if(id === 'view-status') calculateStats();
         }
 
         let users = [];
@@ -92,6 +159,7 @@
                 } catch (err) { console.error("Error loading users"); }
             }
             render();
+            calculateStats();
         }
 
         function render() {
@@ -110,6 +178,16 @@
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function calculateStats() {
+            const active = users.filter(u => u.status === 'Active').length;
+            const banned = users.filter(u => u.status === 'Banned').length;
+            const total = users.length;
+
+            document.getElementById('stat-active').innerText = active;
+            document.getElementById('stat-banned').innerText = banned;
+            document.getElementById('stat-total').innerText = total;
         }
 
         function getExcelDate() {
@@ -139,7 +217,7 @@
                 password: 'password123',
                 createdAt: now
             });
-            save(); render(); closeModal('addModal'); document.getElementById('addForm').reset();
+            save(); render(); calculateStats(); closeModal('addModal'); document.getElementById('addForm').reset();
         });
 
         function openEdit(id) {
@@ -160,19 +238,22 @@
                 users[idx].name = document.getElementById('editName').value;
                 users[idx].role = document.getElementById('editRole').value;
                 users[idx].status = document.getElementById('editStatus').value;
-                save(); render(); closeModal('editModal');
+                save(); render(); calculateStats(); closeModal('editModal');
             }
         });
 
         function delUser(id) {
             if(confirm('Delete user?')) { 
                 users = users.filter(u => u.id.toString() !== id.toString());
-                save(); render(); 
+                save(); render(); calculateStats();
             }
         }
 
         function save() { localStorage.setItem('mockUsers_v2', JSON.stringify(users)); }
+        
+        // Initialize
         init();
+
     </script>
 </body>
 </html>
