@@ -681,3 +681,52 @@ body.dark-mode .status-Active { color: #58a6ff; }
     transition: transform 0.2s;
 }
 .avatar-display:hover { transform: scale(1.05); border-color: var(--accent-blue); }
+
+/* =========================================
+   NOTIFICATION BELL
+   ========================================= */
+.notification-wrapper {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.notification-wrapper:hover {
+    background-color: var(--hover-bg);
+}
+
+.bell-icon {
+    width: 24px;
+    height: 24px;
+    fill: var(--text-muted);
+    transition: fill 0.2s;
+}
+
+.notification-wrapper:hover .bell-icon {
+    fill: var(--text-main);
+}
+
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #f85149; /* Red color */
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 10px;
+    display: flex; /* Starts hidden if 0, controlled by JS */
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-body); /* Creates the "cutout" effect around the badge */
+    padding: 0 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
