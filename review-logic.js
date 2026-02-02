@@ -177,27 +177,39 @@ const ReviewApp = {
         });
     },
 
-    // FIX: Optimized robust selection logic
+    // FIX: Completely rewritten selection handler
     handleTextSelection(slot) {
         const box = document.getElementById(`text-${slot}`);
-        if (!box.classList.contains('moderatable')) return;
+        if (!box || !box.classList.contains('moderatable')) return;
 
         const selection = window.getSelection();
-        if (selection.rangeCount > 0 && !selection.isCollapsed && box.contains(selection.anchorNode)) {
-            const range = selection.getRangeAt(0);
-            
-            // Create span and extract selection into it
+        if (selection.rangeCount === 0 || selection.isCollapsed) return;
+
+        // Ensure we are selecting inside the correct box
+        if (!box.contains(selection.anchorNode) || !box.contains(selection.focusNode)) return;
+
+        const text = selection.toString();
+        // Prevent highlighting empty spaces or "ghost" selections
+        if (!text || text.trim().length === 0) return;
+
+        const range = selection.getRangeAt(0);
+        
+        try {
+            // Create the wrapper
             const span = document.createElement('span');
             span.className = 'restricted-text';
+            span.textContent = text; 
+
+            // Manually replace content. This is safer than extractContents() which can leave
+            // empty artifacts if the browser miscalculates text nodes.
+            range.deleteContents();
+            range.insertNode(span);
             
-            try {
-                // Moving contents into the span ensures the span isn't "empty"
-                span.appendChild(range.extractContents());
-                range.insertNode(span);
-                
-                selection.removeAllRanges();
-                this.setStatus('text', 'restrict', '', true);
-            } catch (e) { console.error("Highlight error:", e); }
+            // Cleanup
+            selection.removeAllRanges();
+            this.setStatus('text', 'restrict', '', true);
+        } catch (e) { 
+            console.error("Highlighting failed", e); 
         }
     },
 
