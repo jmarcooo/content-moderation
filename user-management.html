@@ -36,7 +36,7 @@
         
         <div id="view-dashboard">
             <div class="header">
-                <h1>User Management</h1>
+                <h1 id="txt-main-title">User Management</h1>
             </div>
 
             <div class="notif-dashboard-grid">
@@ -44,38 +44,32 @@
                     <svg class="notif-icon" viewBox="0 0 24 24" style="fill:#0969da;">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                     </svg>
-                    <h3>User Status</h3>
-                    <p>Real-time status monitoring of moderators.</p>
+                    <h3 id="txt-card-status-title">User Status</h3>
+                    <p id="txt-card-status-desc">Real-time status monitoring of moderators.</p>
                 </div>
 
                 <div class="notif-card" onclick="switchSection('view-accounts')">
                     <svg class="notif-icon" viewBox="0 0 24 24" style="fill:#238636;">
                         <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
                     </svg>
-                    <h3>Accounts</h3>
-                    <p>Manage registered users and edit details.</p>
+                    <h3 id="txt-card-acc-title">Accounts</h3>
+                    <p id="txt-card-acc-desc">Manage registered users and edit details.</p>
                 </div>
             </div>
         </div>
 
         <div id="view-accounts" style="display: none;">
-            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to Dashboard</div>
+            <div onclick="switchSection('view-dashboard')" class="back-link" id="txt-back-link-1">← Back to Dashboard</div>
             <div class="header">
-                <h1>Accounts</h1>
-                <button class="btn-primary" onclick="openAddModal()">+ Add User</button>
+                <h1 id="txt-acc-header">Accounts</h1>
+                <button class="btn-primary" onclick="openAddModal()" id="txt-btn-add">+ Add User</button>
             </div>
 
             <div class="table-container">
                 <table>
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Created At</th>
-                            <th>Actions</th>
-                        </tr>
+                        <tr id="table-head-accounts">
+                            </tr>
                     </thead>
                     <tbody id="userTableBody"></tbody>
                 </table>
@@ -83,22 +77,16 @@
         </div>
 
         <div id="view-status" style="display: none;">
-            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to Dashboard</div>
+            <div onclick="switchSection('view-dashboard')" class="back-link" id="txt-back-link-2">← Back to Dashboard</div>
             <div class="header">
-                <h1>Moderator Status Monitor</h1>
+                <h1 id="txt-mod-header">Moderator Status Monitor</h1>
             </div>
 
             <div class="table-container">
                 <table id="modStatusTable" class="mod-table">
                     <thead>
-                        <tr>
-                            <th>Email</th>
-                            <th>Tasks Moderated</th>
-                            <th>Average Handling Time</th>
-                            <th>Status</th>
-                            <th>Status Duration</th>
-                            <th>Change Status</th>
-                        </tr>
+                        <tr id="table-head-status">
+                            </tr>
                     </thead>
                     <tbody id="modStatusBody">
                         </tbody>
@@ -110,18 +98,18 @@
 
     <div id="addModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-header">Register New User</div>
+            <div class="modal-header" id="txt-modal-add-title">Register New User</div>
             <form id="addForm">
-                <div class="form-group"><label>Full Name</label><input type="text" id="addName" required placeholder="e.g. Jon Odono"></div>
-                <div class="form-group"><label>Email</label><input type="email" id="addEmail" required placeholder="e.g. jon@contentmod.com"></div>
-                <div class="form-group"><label>Username</label><input type="text" id="addUsername" required placeholder="e.g. jodono"></div>
+                <div class="form-group"><label id="lbl-fullname">Full Name</label><input type="text" id="addName" required placeholder="e.g. Jon Odono"></div>
+                <div class="form-group"><label id="lbl-email">Email</label><input type="email" id="addEmail" required placeholder="e.g. jon@contentmod.com"></div>
+                <div class="form-group"><label id="lbl-username">Username</label><input type="text" id="addUsername" required placeholder="e.g. jodono"></div>
                 <div class="form-group">
-                    <label>Role</label>
+                    <label id="lbl-role">Role</label>
                     <select id="addRole"><option>User</option><option>Moderator</option><option>Admin</option></select>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal('addModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Create</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('addModal')" id="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btn-create">Create</button>
                 </div>
             </form>
         </div>
@@ -154,17 +142,56 @@
     </div>
 
     <script>
-        // --- 1. ICONS DEFINITION (WITH EXPLICIT SIZE) ---
-        // Added width/height/fill to ensure they appear even if CSS misses them
+        // --- 1. ICONS DEFINITION ---
         const ICON_EDIT = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
         const ICON_DELETE = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+
+        // --- 2. TRANSLATION DICTIONARY ---
+        const APP_LANG_PAGE = localStorage.getItem('appLang') || 'en';
+        
+        const PAGE_TEXT = {
+            en: {
+                mainTitle: "User Management",
+                cardStatusTitle: "User Status",
+                cardStatusDesc: "Real-time status monitoring of moderators.",
+                cardAccTitle: "Accounts",
+                cardAccDesc: "Manage registered users and edit details.",
+                backDashboard: "← Back to Dashboard",
+                accHeader: "Accounts",
+                btnAdd: "+ Add User",
+                modHeader: "Moderator Status Monitor",
+                // Table Headers
+                thId: "ID", thName: "Name", thRole: "Role", thStatus: "Status", thCreated: "Created At", thActions: "Actions",
+                thEmail: "Email", thTasks: "Tasks Moderated", thAht: "Average Handling Time", thDuration: "Status Duration", thChange: "Change Status",
+                // Modal
+                modalAddTitle: "Register New User", lblName: "Full Name", lblEmail: "Email", lblUser: "Username", lblRole: "Role", btnCancel: "Cancel", btnCreate: "Create"
+            },
+            zh: {
+                mainTitle: "用户管理",
+                cardStatusTitle: "用户状态",
+                cardStatusDesc: "实时监控审核员状态。",
+                cardAccTitle: "账号管理",
+                cardAccDesc: "管理注册用户及编辑详情。",
+                backDashboard: "← 返回面板",
+                accHeader: "账号列表",
+                btnAdd: "+ 添加用户",
+                modHeader: "审核员状态监控",
+                // Table Headers
+                thId: "ID", thName: "姓名", thRole: "角色", thStatus: "状态", thCreated: "创建时间", thActions: "操作",
+                thEmail: "邮箱", thTasks: "审核任务数", thAht: "平均处理时长", thDuration: "状态持续时间", thChange: "更改状态",
+                // Modal
+                modalAddTitle: "注册新用户", lblName: "全名", lblEmail: "邮箱", lblUser: "用户名", lblRole: "角色", btnCancel: "取消", btnCreate: "创建"
+            }
+        };
+
+        const T_PAGE = PAGE_TEXT[APP_LANG_PAGE];
 
         // --- AUTH GUARD ---
         if (!localStorage.getItem('currentUser')) {
             window.location.href = 'login.html';
         }
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION LOGIC ---
         function switchSection(id) {
             document.getElementById('view-dashboard').style.display = 'none';
             document.getElementById('view-accounts').style.display = 'none';
@@ -172,14 +199,15 @@
             
             document.getElementById(id).style.display = 'block';
             
-            // If switching to status view, render that specific table
             if(id === 'view-status') renderModStatus();
         }
 
         let users = [];
 
         async function init() {
-            // Updated key to force refresh with new JSON structure
+            // APPLY TRANSLATIONS
+            applyTranslations();
+
             const stored = localStorage.getItem('mockUsers_v6'); 
             if (stored) {
                 users = JSON.parse(stored);
@@ -193,7 +221,51 @@
             render();
         }
 
-        // --- RENDER ACCOUNTS TABLE (Uses account_status) ---
+        function applyTranslations() {
+            // Dashboard
+            document.getElementById('txt-main-title').innerText = T_PAGE.mainTitle;
+            document.getElementById('txt-card-status-title').innerText = T_PAGE.cardStatusTitle;
+            document.getElementById('txt-card-status-desc').innerText = T_PAGE.cardStatusDesc;
+            document.getElementById('txt-card-acc-title').innerText = T_PAGE.cardAccTitle;
+            document.getElementById('txt-card-acc-desc').innerText = T_PAGE.cardAccDesc;
+
+            // Headers & Buttons
+            document.getElementById('txt-back-link-1').innerText = T_PAGE.backDashboard;
+            document.getElementById('txt-back-link-2').innerText = T_PAGE.backDashboard;
+            document.getElementById('txt-acc-header').innerText = T_PAGE.accHeader;
+            document.getElementById('txt-btn-add').innerText = T_PAGE.btnAdd;
+            document.getElementById('txt-mod-header').innerText = T_PAGE.modHeader;
+
+            // Modal
+            document.getElementById('txt-modal-add-title').innerText = T_PAGE.modalAddTitle;
+            document.getElementById('lbl-fullname').innerText = T_PAGE.lblName;
+            document.getElementById('lbl-email').innerText = T_PAGE.lblEmail;
+            document.getElementById('lbl-username').innerText = T_PAGE.lblUser;
+            document.getElementById('lbl-role').innerText = T_PAGE.lblRole;
+            document.getElementById('btn-cancel').innerText = T_PAGE.btnCancel;
+            document.getElementById('btn-create').innerText = T_PAGE.btnCreate;
+
+            // Dynamic Table Headers
+            document.getElementById('table-head-accounts').innerHTML = `
+                <th>${T_PAGE.thId}</th>
+                <th>${T_PAGE.thName}</th>
+                <th>${T_PAGE.thRole}</th>
+                <th>${T_PAGE.thStatus}</th>
+                <th>${T_PAGE.thCreated}</th>
+                <th>${T_PAGE.thActions}</th>
+            `;
+
+            document.getElementById('table-head-status').innerHTML = `
+                <th>${T_PAGE.thEmail}</th>
+                <th>${T_PAGE.thTasks}</th>
+                <th>${T_PAGE.thAht}</th>
+                <th>${T_PAGE.thStatus}</th>
+                <th>${T_PAGE.thDuration}</th>
+                <th>${T_PAGE.thChange}</th>
+            `;
+        }
+
+        // --- RENDER ACCOUNTS TABLE ---
         function render() {
             const tbody = document.getElementById('userTableBody');
             if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found.</td></tr>'; return; }
@@ -218,11 +290,9 @@
             return 'status-Active'; 
         }
 
-        // --- RENDER MODERATOR STATUS TABLE (Uses real-time status) ---
+        // --- RENDER MODERATOR STATUS TABLE ---
         function renderModStatus() {
             const tbody = document.getElementById('modStatusBody');
-            
-            // Filter: Only Moderators
             const moderators = users.filter(u => u.role === 'Moderator');
 
             if (moderators.length === 0) {
@@ -231,11 +301,9 @@
             }
 
             tbody.innerHTML = moderators.map(u => {
-                // Mock metrics
                 const tasks = Math.floor(Math.random() * 500) + 50;
                 const aht = (Math.random() * 60 + 10).toFixed(0);
                 
-                // Color logic for real-time status
                 let dotColor = 'dot-gray';
                 const s = u.status || 'Offline'; 
                 if(s === 'Online') dotColor = 'dot-green';
@@ -244,7 +312,6 @@
                 if(s === 'Training') dotColor = 'dot-purple';
                 if(s === 'Idle') dotColor = 'dot-red';
 
-                // Duration Calculation
                 let durationStr = "--";
                 if (u.last_status_update) {
                     const diffMs = new Date() - new Date(u.last_status_update);
@@ -271,7 +338,7 @@
                     </td>
                     <td style="font-family:monospace; color:var(--text-main);">${durationStr}</td>
                     <td>
-                        <button class="btn-sm" onclick="alert('Simulated: Changing status for ${u.username}...')">Change Status ▼</button>
+                        <button class="btn-sm" onclick="alert('Simulated: Changing status for ${u.username}...')">${T_PAGE.thChange} ▼</button>
                     </td>
                 </tr>
             `}).join('');
@@ -318,7 +385,6 @@
             document.getElementById('editName').value = u.name;
             document.getElementById('editEmail').value = u.email || "";
             document.getElementById('editRole').value = u.role;
-            // Load account_status
             document.getElementById('editAccountStatus').value = u.account_status || 'Active';
             document.getElementById('editModal').style.display = 'flex';
         }
@@ -331,9 +397,7 @@
                 users[idx].name = document.getElementById('editName').value;
                 users[idx].email = document.getElementById('editEmail').value;
                 users[idx].role = document.getElementById('editRole').value;
-                // Save account_status
                 users[idx].account_status = document.getElementById('editAccountStatus').value;
-                
                 save(); render(); 
                 if(document.getElementById('view-status').style.display === 'block') renderModStatus();
                 closeModal('editModal');
