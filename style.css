@@ -63,9 +63,27 @@ body {
 .nav-links { list-style: none; flex-grow: 1; }
 .nav-links li { margin-bottom: 8px; }
 .nav-links a { 
-    display: block; padding: 10px 12px; text-decoration: none; 
-    color: var(--text-main); border-radius: 6px; transition: background 0.2s; font-size: 0.95rem; 
+    display: flex; /* CHANGED from block to flex */
+    align-items: center;
+    justify-content: space-between; /* Pushes badge to the right */
+    padding: 10px 12px; 
+    text-decoration: none; 
+    color: var(--text-main); 
+    border-radius: 6px; 
+    transition: background 0.2s; 
+    font-size: 0.95rem; 
 }
+
+.sidebar-badge {
+    background-color: #f85149; /* Red */
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    line-height: 1;
+}
+
 .nav-links a:hover, .nav-links a.active { background-color: var(--hover-bg); color: var(--accent-blue); }
 
 .user-profile { 
