@@ -18,13 +18,12 @@
         .btn-sm { padding: 4px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); background: var(--bg-body); border-radius: 4px; cursor: pointer; white-space: nowrap; }
         .btn-sm:hover { background: var(--hover-bg); border-color: var(--accent-blue); color: var(--accent-blue); }
         
-        /* Adjust column widths to look like the design */
-        #modStatusTable th:nth-child(1) { width: 30%; } /* Email */
-        #modStatusTable th:nth-child(2) { width: 15%; } /* Tasks */
-        #modStatusTable th:nth-child(3) { width: 15%; } /* AHT */
-        #modStatusTable th:nth-child(4) { width: 15%; } /* Status */
-        #modStatusTable th:nth-child(5) { width: 15%; } /* Duration */
-        #modStatusTable th:nth-child(6) { width: 10%; text-align: right; } /* Action */
+        #modStatusTable th:nth-child(1) { width: 30%; } 
+        #modStatusTable th:nth-child(2) { width: 15%; } 
+        #modStatusTable th:nth-child(3) { width: 15%; } 
+        #modStatusTable th:nth-child(4) { width: 15%; } 
+        #modStatusTable th:nth-child(5) { width: 15%; } 
+        #modStatusTable th:nth-child(6) { width: 10%; text-align: right; } 
         #modStatusTable td:nth-child(6) { text-align: right; }
     </style>
 </head>
@@ -139,14 +138,10 @@
                     <select id="editRole"><option>User</option><option>Moderator</option><option>Admin</option></select>
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
-                    <select id="editStatus">
-                        <option>Online</option>
-                        <option>Offline</option>
-                        <option>Break</option>
-                        <option>Lunch</option>
-                        <option>Meeting</option>
-                        <option>Idle</option>
+                    <label>Account Status</label>
+                    <select id="editAccountStatus">
+                        <option value="Active">Active</option>
+                        <option value="Banned">Banned</option>
                     </select>
                 </div>
                 <div class="modal-actions">
@@ -158,6 +153,10 @@
     </div>
 
     <script>
+        // --- ICONS FOR ACTIONS ---
+        const ICON_EDIT = `<svg class="action-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+        const ICON_DELETE = `<svg class="action-icon action-icon-delete" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+
         // --- AUTH GUARD ---
         if (!localStorage.getItem('currentUser')) {
             window.location.href = 'login.html';
@@ -171,15 +170,13 @@
             
             document.getElementById(id).style.display = 'block';
             
-            // Render specific view logic
             if(id === 'view-status') renderModStatus();
         }
 
         let users = [];
 
         async function init() {
-            // NOTE: Changing key to force reload because of JSON structure changes
-            const stored = localStorage.getItem('mockUsers_v4'); 
+            const stored = localStorage.getItem('mockUsers_v5'); // New Key for Account Status Update
             if (stored) {
                 users = JSON.parse(stored);
             } else {
@@ -201,11 +198,11 @@
                     <td style="font-family:monospace; color:#8b949e; font-size:0.85rem;">${u.id}</td>
                     <td><strong>${u.name}</strong><br><span style="font-size:0.8em; color:#8b949e">@${u.username}</span></td>
                     <td>${u.role}</td>
-                    <td><span class="badge ${getBadgeClass(u.status)}">${u.status}</span></td>
+                    <td><span class="badge ${getBadgeClass(u.account_status)}">${u.account_status}</span></td>
                     <td style="font-size:0.85rem;">${u.createdAt || 'N/A'}</td>
                     <td>
-                        <button onclick="openEdit('${u.id}')" class="action-btn">✏️</button>
-                        <button onclick="delUser('${u.id}')" class="action-btn">🗑️</button>
+                        <button onclick="openEdit('${u.id}')" class="action-btn" title="Edit">${ICON_EDIT}</button>
+                        <button onclick="delUser('${u.id}')" class="action-btn" title="Delete">${ICON_DELETE}</button>
                     </td>
                 </tr>
             `).join('');
@@ -219,8 +216,6 @@
         // --- RENDER MODERATOR STATUS TABLE ---
         function renderModStatus() {
             const tbody = document.getElementById('modStatusBody');
-            
-            // 1. STRICT FILTER: Only Moderators (not Admins, not Users)
             const moderators = users.filter(u => u.role === 'Moderator');
 
             if (moderators.length === 0) {
@@ -229,24 +224,21 @@
             }
 
             tbody.innerHTML = moderators.map(u => {
-                // Mock Metrics (since not in JSON)
                 const tasks = Math.floor(Math.random() * 500) + 50;
                 const aht = (Math.random() * 60 + 10).toFixed(0);
                 
-                // 2. STATUS DOT LOGIC based on "status" in JSON
-                let dotColor = 'dot-gray'; // Default Offline
-                const s = u.status;
+                // Real-time Status Logic (Online, Break, etc)
+                let dotColor = 'dot-gray';
+                const s = u.status; 
                 if(s === 'Online') dotColor = 'dot-green';
                 if(s === 'Break' || s === 'Lunch') dotColor = 'dot-orange';
                 if(s === 'Meeting') dotColor = 'dot-blue';
                 if(s === 'Training') dotColor = 'dot-purple';
                 if(s === 'Idle') dotColor = 'dot-red';
 
-                // 3. DURATION LOGIC based on "last_status_update" in JSON
                 let durationStr = "--";
                 if (u.last_status_update) {
                     const diffMs = new Date() - new Date(u.last_status_update);
-                    // Handle case where date might be invalid or future
                     if (!isNaN(diffMs) && diffMs >= 0) {
                         const diffMins = Math.floor(diffMs / 60000);
                         const hrs = Math.floor(diffMins / 60);
@@ -301,7 +293,8 @@
                 email: document.getElementById('addEmail').value,
                 username: document.getElementById('addUsername').value,
                 role: document.getElementById('addRole').value,
-                status: 'Offline', 
+                status: 'Offline', // Default real-time status
+                account_status: 'Active', // Default account status
                 last_status_update: new Date().toISOString(),
                 password: 'password123',
                 createdAt: now
@@ -316,7 +309,8 @@
             document.getElementById('editName').value = u.name;
             document.getElementById('editEmail').value = u.email || "";
             document.getElementById('editRole').value = u.role;
-            document.getElementById('editStatus').value = u.status;
+            // Load the Account Status (Active/Banned)
+            document.getElementById('editAccountStatus').value = u.account_status || 'Active';
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -325,14 +319,11 @@
             const id = document.getElementById('editId').value;
             const idx = users.findIndex(u => u.id.toString() === id.toString());
             if (idx > -1) {
-                const newStatus = document.getElementById('editStatus').value;
-                if (users[idx].status !== newStatus) {
-                    users[idx].last_status_update = new Date().toISOString();
-                }
                 users[idx].name = document.getElementById('editName').value;
                 users[idx].email = document.getElementById('editEmail').value;
                 users[idx].role = document.getElementById('editRole').value;
-                users[idx].status = newStatus;
+                // Save Account Status
+                users[idx].account_status = document.getElementById('editAccountStatus').value;
                 
                 save(); render(); 
                 if(document.getElementById('view-status').style.display === 'block') renderModStatus();
@@ -347,7 +338,7 @@
             }
         }
 
-        function save() { localStorage.setItem('mockUsers_v4', JSON.stringify(users)); }
+        function save() { localStorage.setItem('mockUsers_v5', JSON.stringify(users)); }
         
         init();
 
