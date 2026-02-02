@@ -427,6 +427,7 @@ body.dark-mode .status-Active { color: #58a6ff; }
 }
 
 /* Text Context Area */
+/* FIX: Added white-space: pre-wrap to prevent jumping/collapsing during selection */
 .text-context-box {
     border: 1px solid var(--border-color);
     border-radius: 6px;
@@ -435,6 +436,9 @@ body.dark-mode .status-Active { color: #58a6ff; }
     font-size: 0.95rem;
     color: var(--text-main);
     line-height: 1.6;
+    min-height: 60px;
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 /* ACTION BAR (Bottom) */
@@ -574,6 +578,9 @@ body.dark-mode .status-Active { color: #58a6ff; }
     border-radius: 4px;
     display: none; /* Hidden until decided */
 }
+.score-perfect { background: rgba(35,134,54,0.15); color: #238636; border: 1px solid rgba(35,134,54,0.4); }
+.score-good { background: rgba(210,153,34,0.15); color: #9a6700; border: 1px solid rgba(210,153,34,0.4); }
+.score-bad { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid rgba(248,81,73,0.4); }
 
 /* =========================================
    14. IMAGE VIEWER & TEXT CONTEXT STYLES
@@ -588,15 +595,18 @@ body.dark-mode .status-Active { color: #58a6ff; }
     user-select: none; /* Prevent selection */
 }
 
-/* FIX: Restricted Highlight Styles */
+/* FIX: Restricted Highlight Styles 
+   - display: inline; prevents the "bar" effect
+   - No margins/paddings to break the flow
+*/
 .restricted-text {
     background-color: rgba(210, 153, 34, 0.4); 
     border-bottom: 2px solid #d29922; 
-    color: #7a5209; 
+    color: inherit; 
     font-weight: bold; 
-    padding: 0; /* Tightened to baseline */
-    display: inline; /* Prevents misalignment box issues */
-    line-height: 1;
+    padding: 0; 
+    display: inline; 
+    line-height: inherit;
     border-radius: 0; 
 }
 
