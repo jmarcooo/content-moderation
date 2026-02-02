@@ -14,9 +14,20 @@ const Config = {
 
     // Violation Reasons for Review Page
     violations: {
-        "Insults": ["Personal Attacks", "Bullying", "Hate Speech"],
-        "Spam": ["Advertising", "Scams", "Repeated Content"],
-        "Violence": ["Graphic Imagery", "Threats"],
-        "Adult Content": ["Nudity", "Sexual Acts"]
+        "":
+        "Insults": ["Personal Attacks", "Uncivilized Language", "Implicit and Uncivilized Language", "Bullying"],
+        "Advertising": ["General Advertising", "Betting Advertising", "Content Details", "Marketing Advertising"],
+        "Religous and Racial Insults": ["Discrimination and Insult"],
+        "Prohibited": ["Drugs", "Prohibited Goods", "Firearms Ammunition", "Tobacco", "Alcohol"],
+        "Pornography": ["Perverted Porn Sexual", "Sexual Description", "Pornographic Depiction", "Sexual Harassment"],
+        "Violence": ["War Events", "Violence and Bloody", "Shooting Incidents", "Horror Scenes"],
+        "Terrorism": ["Terrorist Figures", "Terrorist Orgainizations", "Terrorist Incidents"],
+        "Involving Minors" ["Sexual Content Involving Minors", "Underage Drinking", "Underage Smoking", "Underage Drug", "Underage Self-Harm ", "Child Gambling or Betting activities", "Child Inappropriate Language or Gestures"],
+        "Involved in Politics " ["Domestic Leaders", "Foreign Leaders", "National Institution ", "Negative Speech", "Policies and Regulations ", "Coordinated Inauthentic Behavior (CIB)"],
+        "Unauthorized Solicitation" ["Coerced Interaction/ Begging", "Fraudulent Reward Promotions", "Exploitative Follow-for-Follow Schemes", "Direct Requests for Funds", "Asking for Third-Party Donations", "Emotional/Distress Solicitation", "Implied Solicitation"],
+        "Disturbing Content" ["Body Horror/Distortion Imagery", "Unsanitary Practices", "Graphic Medical/Dermatological Imagery", "Bodily Fluids/Waste"],
+        "Suicide and Self-Harm" ["Suicidal Tendencies", "Suicide Depiction ", "Self-Harm Tendencies", "Promotion of Suicide/Self-Harm ", "Aftermath or Consequence", "Suicide and Self Harm (Emoji)", "Implicit suicidal and self harm expressions/slangs"],
+        "Low Quality Content" ["Low Quality and Meaningless"],
+        "Company Negative" ["Malicious smear", "Negative Reviews ", "Malicious Users ", "Experience Related"]
     }
 };
