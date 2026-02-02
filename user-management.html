@@ -6,7 +6,16 @@
     <title>User Management</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Specific tweaks for status monitor to fix alignment */
+        /* Table Column Sizing for Moderator Status View */
+        #modStatusTable th:nth-child(1) { width: 30%; } /* Email */
+        #modStatusTable th:nth-child(2) { width: 15%; } /* Tasks */
+        #modStatusTable th:nth-child(3) { width: 15%; } /* AHT */
+        #modStatusTable th:nth-child(4) { width: 15%; } /* Status */
+        #modStatusTable th:nth-child(5) { width: 15%; } /* Duration */
+        #modStatusTable th:nth-child(6) { width: 10%; text-align: right; } /* Action */
+        #modStatusTable td:nth-child(6) { text-align: right; }
+
+        /* Status Dots */
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
         .dot-green { background-color: #238636; }
         .dot-orange { background-color: #d29922; }
@@ -17,14 +26,6 @@
 
         .btn-sm { padding: 4px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); background: var(--bg-body); border-radius: 4px; cursor: pointer; white-space: nowrap; }
         .btn-sm:hover { background: var(--hover-bg); border-color: var(--accent-blue); color: var(--accent-blue); }
-        
-        #modStatusTable th:nth-child(1) { width: 30%; } 
-        #modStatusTable th:nth-child(2) { width: 15%; } 
-        #modStatusTable th:nth-child(3) { width: 15%; } 
-        #modStatusTable th:nth-child(4) { width: 15%; } 
-        #modStatusTable th:nth-child(5) { width: 15%; } 
-        #modStatusTable th:nth-child(6) { width: 10%; text-align: right; } 
-        #modStatusTable td:nth-child(6) { text-align: right; }
     </style>
 </head>
 <body>
@@ -43,7 +44,7 @@
                     <svg class="notif-icon" viewBox="0 0 24 24" style="fill:#0969da;">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                     </svg>
-                    <h3>Status Monitoring</h3>
+                    <h3>User Status</h3>
                     <p>Real-time status monitoring of moderators.</p>
                 </div>
 
@@ -84,7 +85,7 @@
         <div id="view-status" style="display: none;">
             <div onclick="switchSection('view-dashboard')" class="back-link">← Back to Dashboard</div>
             <div class="header">
-                <h1>Status Monitoring</h1>
+                <h1>Moderator Status Monitor</h1>
             </div>
 
             <div class="table-container">
@@ -153,16 +154,17 @@
     </div>
 
     <script>
-        // --- ICONS FOR ACTIONS ---
-        const ICON_EDIT = `<svg class="action-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
-        const ICON_DELETE = `<svg class="action-icon action-icon-delete" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+        // --- 1. ICONS DEFINITION (WITH EXPLICIT SIZE) ---
+        // Added width/height/fill to ensure they appear even if CSS misses them
+        const ICON_EDIT = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+        const ICON_DELETE = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
 
         // --- AUTH GUARD ---
         if (!localStorage.getItem('currentUser')) {
             window.location.href = 'login.html';
         }
 
-        // --- NAVIGATION LOGIC ---
+        // --- NAVIGATION ---
         function switchSection(id) {
             document.getElementById('view-dashboard').style.display = 'none';
             document.getElementById('view-accounts').style.display = 'none';
@@ -170,13 +172,15 @@
             
             document.getElementById(id).style.display = 'block';
             
+            // If switching to status view, render that specific table
             if(id === 'view-status') renderModStatus();
         }
 
         let users = [];
 
         async function init() {
-            const stored = localStorage.getItem('mockUsers_v5'); // New Key for Account Status Update
+            // Updated key to force refresh with new JSON structure
+            const stored = localStorage.getItem('mockUsers_v6'); 
             if (stored) {
                 users = JSON.parse(stored);
             } else {
@@ -189,16 +193,17 @@
             render();
         }
 
-        // --- RENDER ACCOUNTS TABLE ---
+        // --- RENDER ACCOUNTS TABLE (Uses account_status) ---
         function render() {
             const tbody = document.getElementById('userTableBody');
             if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found.</td></tr>'; return; }
+            
             tbody.innerHTML = users.map(u => `
                 <tr>
                     <td style="font-family:monospace; color:#8b949e; font-size:0.85rem;">${u.id}</td>
                     <td><strong>${u.name}</strong><br><span style="font-size:0.8em; color:#8b949e">@${u.username}</span></td>
                     <td>${u.role}</td>
-                    <td><span class="badge ${getBadgeClass(u.account_status)}">${u.account_status}</span></td>
+                    <td><span class="badge ${getBadgeClass(u.account_status)}">${u.account_status || 'Active'}</span></td>
                     <td style="font-size:0.85rem;">${u.createdAt || 'N/A'}</td>
                     <td>
                         <button onclick="openEdit('${u.id}')" class="action-btn" title="Edit">${ICON_EDIT}</button>
@@ -213,9 +218,11 @@
             return 'status-Active'; 
         }
 
-        // --- RENDER MODERATOR STATUS TABLE ---
+        // --- RENDER MODERATOR STATUS TABLE (Uses real-time status) ---
         function renderModStatus() {
             const tbody = document.getElementById('modStatusBody');
+            
+            // Filter: Only Moderators
             const moderators = users.filter(u => u.role === 'Moderator');
 
             if (moderators.length === 0) {
@@ -224,18 +231,20 @@
             }
 
             tbody.innerHTML = moderators.map(u => {
+                // Mock metrics
                 const tasks = Math.floor(Math.random() * 500) + 50;
                 const aht = (Math.random() * 60 + 10).toFixed(0);
                 
-                // Real-time Status Logic (Online, Break, etc)
+                // Color logic for real-time status
                 let dotColor = 'dot-gray';
-                const s = u.status; 
+                const s = u.status || 'Offline'; 
                 if(s === 'Online') dotColor = 'dot-green';
                 if(s === 'Break' || s === 'Lunch') dotColor = 'dot-orange';
                 if(s === 'Meeting') dotColor = 'dot-blue';
                 if(s === 'Training') dotColor = 'dot-purple';
                 if(s === 'Idle') dotColor = 'dot-red';
 
+                // Duration Calculation
                 let durationStr = "--";
                 if (u.last_status_update) {
                     const diffMs = new Date() - new Date(u.last_status_update);
@@ -257,12 +266,12 @@
                     <td>
                         <div style="display:flex; align-items:center;">
                             <span class="status-dot ${dotColor}"></span>
-                            ${u.status}
+                            ${s}
                         </div>
                     </td>
                     <td style="font-family:monospace; color:var(--text-main);">${durationStr}</td>
                     <td>
-                        <button class="btn-sm" onclick="alert('Changing status for ${u.username}...')">Change Status ▼</button>
+                        <button class="btn-sm" onclick="alert('Simulated: Changing status for ${u.username}...')">Change Status ▼</button>
                     </td>
                 </tr>
             `}).join('');
@@ -293,8 +302,8 @@
                 email: document.getElementById('addEmail').value,
                 username: document.getElementById('addUsername').value,
                 role: document.getElementById('addRole').value,
-                status: 'Offline', // Default real-time status
-                account_status: 'Active', // Default account status
+                status: 'Offline', 
+                account_status: 'Active', 
                 last_status_update: new Date().toISOString(),
                 password: 'password123',
                 createdAt: now
@@ -309,7 +318,7 @@
             document.getElementById('editName').value = u.name;
             document.getElementById('editEmail').value = u.email || "";
             document.getElementById('editRole').value = u.role;
-            // Load the Account Status (Active/Banned)
+            // Load account_status
             document.getElementById('editAccountStatus').value = u.account_status || 'Active';
             document.getElementById('editModal').style.display = 'flex';
         }
@@ -322,7 +331,7 @@
                 users[idx].name = document.getElementById('editName').value;
                 users[idx].email = document.getElementById('editEmail').value;
                 users[idx].role = document.getElementById('editRole').value;
-                // Save Account Status
+                // Save account_status
                 users[idx].account_status = document.getElementById('editAccountStatus').value;
                 
                 save(); render(); 
@@ -338,7 +347,7 @@
             }
         }
 
-        function save() { localStorage.setItem('mockUsers_v5', JSON.stringify(users)); }
+        function save() { localStorage.setItem('mockUsers_v6', JSON.stringify(users)); }
         
         init();
 
