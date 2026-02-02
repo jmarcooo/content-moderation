@@ -79,7 +79,27 @@ body {
 }
 
 /* Navigation Links */
-.nav-links { list-style: none; flex-grow: 1; }
+.nav-links { 
+    list-style: none; 
+    /* flex-grow: 1;  <-- REMOVE THIS LINE */
+    margin-bottom: 0;
+}
+
+.nav-links li { margin-bottom: 4px; }
+
+/* The user profile no longer needs auto margin if the logout list handles it, 
+   but we keep it just in case to ensure it sits at the very bottom */
+.user-profile { 
+    border-top: none; /* Removed border since Logout list has one */
+    padding-top: 15px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 10px; 
+    font-size: 0.9rem; 
+    /* margin-top: auto; <-- You can keep or remove this, sidebar.js handles the push */
+}
+
 .nav-links li { margin-bottom: 4px; }
 
 .nav-links a { 
