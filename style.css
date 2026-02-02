@@ -1,8 +1,7 @@
 /* =========================================
-   1. COLOR VARIABLES (DEFAULT = LIGHT MODE)
+   1. COLOR VARIABLES
    ========================================= */
 :root {
-    /* Light Mode (Default) */
     --bg-body: #f6f8fa;
     --bg-sidebar: #ffffff;
     --bg-card: #ffffff;
@@ -17,7 +16,6 @@
     --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* Dark Mode Overrides */
 body.dark-mode {
     --bg-body: #0d1117;
     --bg-sidebar: #161b22;
