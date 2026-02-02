@@ -49,22 +49,19 @@
     <script src="sidebar.js"></script>
 
     <script>
-        // --- 2. AUTH GUARD (Refactored) ---
-        // Uses the centralized Auth object to check login status
+        // --- AUTH GUARD ---
         Auth.requireLogin();
 
-        // --- 3. CONFIGURATION (Refactored) ---
-        // Instead of hardcoding the array here, we map over the Config
-        // and add a random mock count to simulate real-time data.
+        // --- CONFIGURATION ---
         let queueData = Config.queues.map(q => ({
             ...q,
-            count: Math.floor(Math.random() * 500) // Mock dynamic pending count
+            count: Math.floor(Math.random() * 500)
         }));
 
-        // --- 4. VIEW STATE & SORT LOGIC ---
+        // --- VIEW STATE & SORT LOGIC ---
         let currentView = localStorage.getItem('modQueueView') || 'card';
         let sortCol = 'count'; 
-        let sortAsc = false;   // Default: Highest first (Descending)
+        let sortAsc = false;
 
         function switchView(viewType) {
             currentView = viewType;
@@ -78,7 +75,6 @@
             document.getElementById('btn-list').classList.toggle('active', currentView === 'list');
         }
 
-        // Helper: Convert time string to seconds for sorting
         function parseTime(timeStr) {
             if (!timeStr) return 0;
             let m = 0, s = 0;
@@ -89,11 +85,10 @@
             return (m * 60) + s;
         }
 
-        // --- 5. SORTING ENGINE ---
+        // --- SORTING ENGINE ---
         function executeSort() {
             queueData.sort((a, b) => {
                 let valA, valB;
-
                 if (sortCol === 'latency' || sortCol === 'aht') {
                     valA = parseTime(a[sortCol]);
                     valB = parseTime(b[sortCol]);
@@ -112,7 +107,6 @@
             renderQueues();
         }
 
-        // Handler for List Header Clicks
         function handleHeaderSort(column) {
             if (sortCol === column) {
                 sortAsc = !sortAsc;
@@ -124,15 +118,13 @@
             executeSort();
         }
 
-        // Handler for Dropdown Change
         function handleDropdownSort(value) {
-            const [col, dir] = value.split('-'); // e.g., "count-desc"
+            const [col, dir] = value.split('-');
             sortCol = col;
             sortAsc = (dir === 'asc');
             executeSort();
         }
 
-        // Sync dropdown to match current sort state
         function syncDropdown() {
             const dir = sortAsc ? 'asc' : 'desc';
             const val = `${sortCol}-${dir}`;
@@ -142,7 +134,6 @@
             }
         }
 
-        // Icons for List Headers
         function getSortIcon(column) {
             if (sortCol !== column) return '<span class="sort-icon">⇅</span>';
             return sortAsc ? '▲' : '▼';
@@ -151,18 +142,16 @@
             return sortCol === column ? 'active-sort' : '';
         }
 
-        // --- 6. RENDER FUNCTION ---
+        // --- RENDER FUNCTION ---
         function renderQueues() {
             const container = document.getElementById('queue-container');
             let total = 0;
             let html = '';
 
-            // Update Container Class
             if (currentView === 'card') {
                 container.className = 'queue-grid';
             } else {
                 container.className = 'queue-container list-mode';
-                // LIST HEADER
                 html += `
                 <div class="list-header-row">
                     <div class="col-tenant ${getSortClass('category')}" onclick="handleHeaderSort('category')">
@@ -185,22 +174,16 @@
                 `;
             }
 
-            // Loop through data
             html += queueData.map(queue => {
                 total += queue.count;
 
-                // Priority Logic
-                let priorityClass = 'priority-low';
-                let listPriorityClass = 'list-priority-low';
+                // REMOVED PRIORITY LOGIC to match Audit style
+                // Previously: let priorityClass = 'priority-low'; ...
                 
-                if (queue.count > 100) { priorityClass = 'priority-med'; listPriorityClass = 'list-priority-med'; }
-                if (queue.count > 500) { priorityClass = 'priority-high'; listPriorityClass = 'list-priority-high'; }
-
-                // --- RENDER BASED ON VIEW ---
                 if (currentView === 'card') {
-                    // CARD LAYOUT
+                    // CARD LAYOUT (Removed ${priorityClass} from div)
                     return `
-                    <div class="queue-card ${priorityClass}" onclick="openQueue('${queue.name}')">
+                    <div class="queue-card" onclick="openQueue('${queue.name}')">
                         <div>
                             <div class="queue-type">${queue.category}</div>
                             <div class="queue-title">${queue.name}</div>
@@ -224,7 +207,7 @@
                 } else {
                     // LIST LAYOUT
                     return `
-                    <div class="queue-list-item ${listPriorityClass}" onclick="openQueue('${queue.name}')">
+                    <div class="queue-list-item" onclick="openQueue('${queue.name}')">
                         <div class="col-tenant"><span class="badge-tenant">${queue.category}</span></div>
                         <div class="col-name">${queue.name}</div>
                         <div class="col-pending">${queue.count.toLocaleString()} <span class="sub-text">Tasks</span></div>
@@ -240,13 +223,10 @@
             updateViewButtons();
         }
 
-        // --- 7. NAVIGATION ---
+        // --- NAVIGATION ---
         function openQueue(queueName) {
-            // Find the queue object in our data to get the correct Tenant (Category)
             const queue = queueData.find(q => q.name === queueName);
-            const tenant = queue ? queue.category : 'BP'; // Default to BP if not found
-
-            // Pass both Queue Name AND Tenant to the next page
+            const tenant = queue ? queue.category : 'BP'; 
             window.location.href = `review.html?queue=${encodeURIComponent(queueName)}&tenant=${encodeURIComponent(tenant)}`;
         }
 
