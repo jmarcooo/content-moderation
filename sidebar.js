@@ -49,7 +49,7 @@ const sidebarContent = `
         <div class="profile-info">
             <div class="profile-name">Admin</div>
             
-            <div class="profile-status" onclick="toggleStatusMenu()">
+            <div class="profile-status" id="status-trigger">
                 <span id="current-dot" class="dot dot-online"></span>
                 <span id="current-text">${T.online}</span>
                 <span class="status-caret">▼</span>
@@ -62,11 +62,11 @@ const sidebarContent = `
         </div>
         
         <ul id="status-menu" class="status-menu">
-            <li onclick="setStatus('online', 'Online')"><span class="dot dot-online"></span> Online</li>
-            <li onclick="setStatus('break', 'Break')"><span class="dot dot-break"></span> Break</li>
-            <li onclick="setStatus('lunch', 'Lunch')"><span class="dot dot-lunch"></span> Lunch</li>
-            <li onclick="setStatus('meeting', 'Meeting')"><span class="dot dot-meeting"></span> Meeting</li>
-            <li onclick="setStatus('offline', 'Offline')"><span class="dot dot-offline"></span> Offline</li>
+            <li data-status="online" data-label="Online"><span class="dot dot-online"></span> Online</li>
+            <li data-status="break" data-label="Break"><span class="dot dot-break"></span> Break</li>
+            <li data-status="lunch" data-label="Lunch"><span class="dot dot-lunch"></span> Lunch</li>
+            <li data-status="meeting" data-label="Meeting"><span class="dot dot-meeting"></span> Meeting</li>
+            <li data-status="offline" data-label="Offline"><span class="dot dot-offline"></span> Offline</li>
         </ul>
     </div>
 </nav>
@@ -75,8 +75,11 @@ const sidebarContent = `
 // Inject Sidebar
 document.body.insertAdjacentHTML('afterbegin', sidebarContent);
 
-// Active Link Logic
+// ===========================================
+// 2. SIDEBAR LOGIC (Event Listeners)
+// ===========================================
 document.addEventListener("DOMContentLoaded", () => {
+    // --- Active Link Logic ---
     const path = window.location.pathname;
     if (path.includes('home.html')) document.getElementById('link-home').classList.add('active');
     if (path.includes('user-management.html')) document.getElementById('link-users').classList.add('active');
@@ -85,6 +88,50 @@ document.addEventListener("DOMContentLoaded", () => {
     if (path.includes('appeal-center.html')) document.getElementById('link-appeal').classList.add('active');
     if (path.includes('notifications.html')) document.getElementById('link-notifs').classList.add('active');
     if (path.includes('settings.html')) document.getElementById('link-settings').classList.add('active');
+
+    // --- Status Dropdown Logic ---
+    const statusTrigger = document.getElementById('status-trigger');
+    const statusMenu = document.getElementById('status-menu');
+    const statusItems = statusMenu.querySelectorAll('li');
+    const currentLabel = document.getElementById('current-text');
+    const currentDot = document.getElementById('current-dot');
+
+    // Toggle menu click
+    statusTrigger.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent document click from closing it immediately
+        statusMenu.classList.toggle('active');
+    });
+
+    // Handle item selection
+    statusItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stop propagation
+            const type = item.getAttribute('data-status');
+            const label = item.getAttribute('data-label');
+
+            // Update UI
+            currentLabel.innerText = label;
+            currentDot.className = `dot dot-${type}`;
+
+            // Close menu
+            statusMenu.classList.remove('active');
+
+            // Save to storage
+            localStorage.setItem('userStatus', JSON.stringify({ type, label }));
+        });
+    });
+
+    // Close menu on click outside
+    document.addEventListener('click', () => {
+        statusMenu.classList.remove('active');
+    });
+
+    // Init Status from Storage
+    const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
+    if (savedStatus) {
+        currentLabel.innerText = savedStatus.label;
+        currentDot.className = `dot dot-${savedStatus.type}`;
+    }
 });
 
 // Theme Logic (Window functions used by Settings page)
@@ -94,30 +141,8 @@ if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 window.toggleTheme = function() {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('appTheme', isDark ? 'dark' : 'light');
-    // Dispatch event so toggle switch in settings can listen if needed
     window.dispatchEvent(new Event('themeChanged'));
 };
-
-// Status Logic
-window.toggleStatusMenu = function() { 
-    document.getElementById('status-menu').classList.toggle('active'); 
-}
-window.setStatus = function(type, label) {
-    document.getElementById('current-text').innerText = label;
-    document.getElementById('current-dot').className = `dot dot-${type}`;
-    document.getElementById('status-menu').classList.remove('active');
-    localStorage.setItem('userStatus', JSON.stringify({ type, label }));
-}
-// Init Status
-const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
-if (savedStatus) setStatus(savedStatus.type, savedStatus.label);
-
-// Close menu on click outside
-document.addEventListener('click', function(event) {
-    const profile = document.querySelector('.user-profile');
-    const menu = document.getElementById('status-menu');
-    if (profile && !profile.contains(event.target)) menu.classList.remove('active');
-});
 
 // Simple Auth Placeholder if auth.js isn't loaded
 if (typeof Auth === 'undefined') {
