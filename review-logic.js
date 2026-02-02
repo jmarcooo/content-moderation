@@ -177,7 +177,7 @@ const ReviewApp = {
         });
     },
 
-    // FIX: Optimized robust selection logic
+    // FIX: Robust selection logic using extractContents
     handleTextSelection(slot) {
         const box = document.getElementById(`text-${slot}`);
         if (!box || !box.classList.contains('moderatable')) return;
@@ -190,24 +190,28 @@ const ReviewApp = {
         // 2. Guard Clause: Ensure selection is inside the box
         if (!box.contains(selection.anchorNode) || !box.contains(selection.focusNode)) return;
 
-        // 3. Guard Clause: Ensure meaningful text
-        const text = selection.toString();
-        if (!text || text.trim().length === 0) return;
-
         const range = selection.getRangeAt(0);
+        const text = selection.toString();
+        
+        // 3. Guard Clause: Ensure meaningful text
+        if (!text || text.trim().length === 0) return;
         
         try {
+            // A. Create the highlight span
             const span = document.createElement('span');
             span.className = 'restricted-text';
-            span.textContent = text; 
+            
+            // B. Extract the actual DOM content (preserves text perfectly)
+            const fragment = range.extractContents();
+            span.appendChild(fragment);
 
-            // 4. Force Delete and Replace
-            range.deleteContents();
+            // C. Insert the highlighted span back into the range
             range.insertNode(span);
             
+            // D. Clear selection to avoid visual confusion
             selection.removeAllRanges();
             
-            // 5. Activate "Restricted" Button
+            // E. Activate "Restricted" Button (preserve=true prevents clearing the highlight we just made)
             this.setStatus('text', 'restrict', '', true);
         } catch (e) { 
             console.error("Highlighting failed", e); 
