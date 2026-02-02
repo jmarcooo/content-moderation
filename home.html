@@ -13,17 +13,17 @@
 
         <div class="dashboard-grid">
             <div class="card">
-                <h3>Total Users</h3>
+                <h3 id="stat-users-title">Total Users</h3>
                 <div class="number">1,204</div>
                 <div class="trend up">▲ 12% from last week</div>
             </div>
             <div class="card">
-                <h3>Flagged Comments</h3>
+                <h3 id="stat-flagged-title">Flagged Comments</h3>
                 <div class="number">42</div>
                 <div class="trend down">▼ 5% from yesterday</div>
             </div>
             <div class="card">
-                <h3>Pending Reviews</h3>
+                <h3 id="stat-pending-title">Pending Reviews</h3>
                 <div class="number">5</div>
                 <div class="trend" style="color: #d29922;">⚠ Requires attention</div>
             </div>
@@ -54,7 +54,16 @@
             window.location.href = 'login.html';
         }
 
-        if(currentUser) document.getElementById('welcome-msg').innerText = `Welcome back, ${currentUser.name}`;
+        if(currentUser) {
+            // We use a small timeout or check specifically to ensure we don't overwrite the translation immediately 
+            // if you want the name to remain dynamic.
+            // However, typically the translation script runs on DOMContentLoaded.
+            // To be safe, we only append the name.
+            const welcomeEl = document.getElementById('welcome-msg');
+            // If the translation script has already run, it might say "总览".
+            // We append the name carefully.
+            welcomeEl.innerText += ` - ${currentUser.name}`;
+        }
     </script>
 </body>
 </html>
