@@ -11,6 +11,7 @@ const TRANSLATIONS = {
         mod: "🚫 Moderation Queue",
         audit: "🔍 Quality Audit",
         appeal: "⚖️ Appeal Center",
+        notifs: "🔔 Notifications", // NEW
         settings: "⚙️ Settings",
         logout: "🚪 Logout",
         online: "Online",
@@ -26,6 +27,7 @@ const TRANSLATIONS = {
         header_mod: "Moderation Queues",
         header_audit: "Audit Queues",
         header_appeal: "Appeal Center",
+        header_notifs: "Notification Center", // NEW
         header_settings: "Settings",
         // Buttons
         btnAddUser: "+ Add User",
@@ -41,6 +43,7 @@ const TRANSLATIONS = {
         mod: "🚫 审核队列",
         audit: "🔍 质量质检",
         appeal: "⚖️ 申诉中心",
+        notifs: "🔔 通知中心", // NEW
         settings: "⚙️ 设置",
         logout: "🚪 退出登录",
         online: "在线",
@@ -56,6 +59,7 @@ const TRANSLATIONS = {
         header_mod: "审核队列",
         header_audit: "质检队列",
         header_appeal: "申诉中心",
+        header_notifs: "通知中心", // NEW
         header_settings: "设置",
         // Buttons
         btnAddUser: "+ 添加用户",
@@ -82,6 +86,13 @@ const sidebarContent = `
         
         <li><a href="audit.html" id="link-audit">${T.audit}</a></li>
         <li><a href="appeal-center.html" id="link-appeal">${T.appeal}</a></li>
+        
+        <li>
+            <a href="notifications.html" id="link-notifs">
+                <span>${T.notifs}</span>
+                <span class="sidebar-badge" id="sidebar-badge-count">3</span>
+            </a>
+        </li>
         
         <li><a href="settings.html">${T.settings}</a></li>
         <li><a href="login.html" style="margin-top:20px; color:#f85149;">${T.logout}</a></li>
@@ -127,23 +138,20 @@ document.body.insertAdjacentHTML('afterbegin', sidebarContent);
 // 3. AUTO-TRANSLATE PAGE CONTENT
 // ===========================================
 document.addEventListener("DOMContentLoaded", () => {
-    // This simple map connects HTML IDs to our Translation Dictionary
     const idMap = {
-        'welcome-msg': 'welcome', // Home
+        'welcome-msg': 'welcome', 
         'stat-users-title': 'stat_users',
         'stat-flagged-title': 'stat_flagged',
         'stat-pending-title': 'stat_pending',
-        
-        'header-users': 'header_users', // User Mgmt
+        'header-users': 'header_users',
         'btn-add-user': 'btnAddUser',
-
-        'header-mod': 'header_mod', // Moderation
-        'header-audit': 'header_audit', // Audit
-        'header-appeal': 'header_appeal', // Appeal
-        'header-settings': 'header_settings' // Settings
+        'header-mod': 'header_mod', 
+        'header-audit': 'header_audit', 
+        'header-appeal': 'header_appeal', 
+        'header-notifs': 'header_notifs', // NEW
+        'header-settings': 'header_settings'
     };
 
-    // Loop through map and replace text if element exists
     for (const [id, key] of Object.entries(idMap)) {
         const el = document.getElementById(id);
         if (el && T[key]) {
@@ -151,15 +159,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    // Also highlight active link (Existing logic)
+    // Highlight Active Link
     const path = window.location.pathname;
     if (path.includes('home.html')) document.getElementById('link-home').classList.add('active');
     if (path.includes('user-management.html')) document.getElementById('link-users').classList.add('active');
     if (path.includes('moderation.html')) document.getElementById('link-mod').classList.add('active');
     if (path.includes('audit.html')) document.getElementById('link-audit').classList.add('active');
     if (path.includes('appeal-center.html')) document.getElementById('link-appeal').classList.add('active');
+    if (path.includes('notifications.html')) document.getElementById('link-notifs').classList.add('active');
 });
-
 
 // ===========================================
 // 4. THEME & STATUS LOGIC (Preserved)
@@ -189,7 +197,6 @@ window.toggleStatusMenu = function() {
     document.getElementById('status-menu').classList.toggle('active');
 }
 
-// Auto-Close Menu
 document.addEventListener('click', function(event) {
     const dropdown = document.querySelector('.status-dropdown');
     const menu = document.getElementById('status-menu');
@@ -210,18 +217,16 @@ window.setStatus = function(type, label) {
 const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
 if (savedStatus) setStatus(savedStatus.type, savedStatus.label);
 
-// Auto-Idle Logic
 let idleTimer;
 const IDLE_LIMIT = 5 * 60 * 1000; 
 
 function resetIdleTimer() {
     clearTimeout(idleTimer);
     const currentLabel = document.getElementById('current-text').innerText;
-    if (currentLabel === 'Idle' || currentLabel === '空闲') { // Updated to check translated text
+    if (currentLabel === 'Idle' || currentLabel === '空闲') {
         setStatus('online', T.online);
         return; 
     }
-    // Only set idle if currently "Online" (English or Chinese)
     if (currentLabel === 'Online' || currentLabel === '在线') {
         idleTimer = setTimeout(() => {
             setStatus('idle', T.idle);
