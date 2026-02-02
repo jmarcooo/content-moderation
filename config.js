@@ -12,7 +12,7 @@ const Config = {
         { id: 'comm_prof',category: 'Community', name: 'Profile Review',   aht: '20s', latency: '4m 30s' }
     ],
 
-    // Violation Reasons (Transcribed from your screenshot)
+    // Violation Reasons (Fixed from your screenshot)
     violations: {
         "Insults": ["Personal Attacks", "Uncivilized Language", "Implicit and Uncivilized Language", "Bullying"],
         "Advertising": ["General Advertising", "Betting Advertising", "Content Details", "Marketing Advertising"],
