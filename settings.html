@@ -9,10 +9,34 @@
     <script src="sidebar.js"></script>
     <main class="main-content">
         <div class="header"><h1>Settings</h1></div>
+        
         <div class="info-card">
             <h3>Profile Settings</h3>
             <p style="color:var(--text-muted)">Manage your account preferences here.</p>
         </div>
+
+        <div class="info-card" style="margin-top: 20px;">
+            <h3>Language / 语言</h3>
+            <p style="color:var(--text-muted)">Select your interface language.</p>
+            
+            <select id="langSelect" class="form-group" style="max-width: 200px; margin-top: 10px;" onchange="changeLanguage(this.value)">
+                <option value="en">English</option>
+                <option value="zh">中文 (Chinese)</option>
+            </select>
+        </div>
+
     </main>
+
+    <script>
+        // Set the dropdown to the current saved language
+        const currentLang = localStorage.getItem('appLang') || 'en';
+        document.getElementById('langSelect').value = currentLang;
+
+        // Function to save and reload
+        function changeLanguage(lang) {
+            localStorage.setItem('appLang', lang);
+            location.reload(); // Reloads page to apply new language
+        }
+    </script>
 </body>
 </html>
