@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notification Center</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script src="sidebar.js"></script>
+    <main class="main-content">
+        <div class="header">
+            <h1 id="header-notifs">Notification Center</h1>
+            <button class="btn-cancel" onclick="clearNotifications()">Clear All</button>
+        </div>
+
+        <ul class="activity-list">
+            <li class="activity-item">
+                <div>
+                    <strong>System Alert</strong>: High volume in "Dynamic Video" queue.
+                </div>
+                <span>10 mins ago</span>
+            </li>
+            <li class="activity-item">
+                <div>
+                    <strong>Appeal Received</strong>: User @gamer_123 appealed a ban.
+                </div>
+                <span>45 mins ago</span>
+            </li>
+            <li class="activity-item">
+                <div>
+                    <strong>System Update</strong>: Maintenance scheduled for Sunday.
+                </div>
+                <span>2 hours ago</span>
+            </li>
+        </ul>
+    </main>
+
+    <script>
+        function clearNotifications() {
+            // Hide badge in sidebar visually for this session
+            const badge = document.getElementById('sidebar-badge-count');
+            if(badge) badge.style.display = 'none';
+            alert('Notifications cleared!');
+        }
+    </script>
+</body>
+</html>
