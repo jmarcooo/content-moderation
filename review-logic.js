@@ -166,9 +166,9 @@ const ReviewApp = {
 
         const badge = document.getElementById(`status-${target}`);
         badge.style.display = 'block';
-        if(status === 'approve') { badge.innerText="✅ APPROVED"; badge.className="score-perfect"; }
-        else if(status === 'restrict') { badge.innerText="⚠️ RESTRICTED"; badge.className="score-good"; }
-        else { badge.innerText=`⛔ REJECTED: ${reason}`; badge.className="score-bad"; }
+        if(status === 'approve') { badge.innerText="✅ APPROVED"; badge.className="decision-badge score-perfect"; }
+        else if(status === 'restrict') { badge.innerText="⚠️ RESTRICTED"; badge.className="decision-badge score-good"; }
+        else { badge.innerText=`⛔ REJECTED: ${reason}`; badge.className="decision-badge score-bad"; }
     },
 
     clearAllHighlights() {
@@ -195,7 +195,8 @@ const ReviewApp = {
         try {
             const span = document.createElement('span');
             span.className = 'restricted-text';
-            // Physically move the DOM nodes into the span
+            
+            // Critical Fix: Physically move text nodes into the span
             span.appendChild(range.extractContents());
             range.insertNode(span);
             
@@ -208,7 +209,7 @@ const ReviewApp = {
 
     renderViolations() {
         if (typeof Config === 'undefined' || !Config.violations) {
-            console.error("Config missing. Check syntax.");
+            console.error("❌ Config.violations is missing. Check config.js syntax.");
             return;
         }
         const list = document.getElementById('violationList');
