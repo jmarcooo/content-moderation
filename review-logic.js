@@ -166,9 +166,9 @@ const ReviewApp = {
 
         const badge = document.getElementById(`status-${target}`);
         badge.style.display = 'block';
-        if(status === 'approve') { badge.innerText="✅ APPROVED"; badge.className="decision-badge score-perfect"; }
-        else if(status === 'restrict') { badge.innerText="⚠️ RESTRICTED"; badge.className="decision-badge score-good"; }
-        else { badge.innerText=`⛔ REJECTED: ${reason}`; badge.className="decision-badge score-bad"; }
+        if(status === 'approve') { badge.innerText="✅ APPROVED"; badge.className="score-perfect"; }
+        else if(status === 'restrict') { badge.innerText="⚠️ RESTRICTED"; badge.className="score-good"; }
+        else { badge.innerText=`⛔ REJECTED: ${reason}`; badge.className="score-bad"; }
     },
 
     clearAllHighlights() {
@@ -177,7 +177,7 @@ const ReviewApp = {
         });
     },
 
-    // FIX: Completely rewritten selection handler
+    // FIX: Optimized robust selection logic using extractContents
     handleTextSelection(slot) {
         const box = document.getElementById(`text-${slot}`);
         if (!box || !box.classList.contains('moderatable')) return;
@@ -185,27 +185,20 @@ const ReviewApp = {
         const selection = window.getSelection();
         if (selection.rangeCount === 0 || selection.isCollapsed) return;
 
-        // Ensure we are selecting inside the correct box
         if (!box.contains(selection.anchorNode) || !box.contains(selection.focusNode)) return;
 
         const text = selection.toString();
-        // Prevent highlighting empty spaces or "ghost" selections
         if (!text || text.trim().length === 0) return;
 
         const range = selection.getRangeAt(0);
         
         try {
-            // Create the wrapper
             const span = document.createElement('span');
             span.className = 'restricted-text';
-            span.textContent = text; 
-
-            // Manually replace content. This is safer than extractContents() which can leave
-            // empty artifacts if the browser miscalculates text nodes.
-            range.deleteContents();
+            // Physically move the DOM nodes into the span
+            span.appendChild(range.extractContents());
             range.insertNode(span);
             
-            // Cleanup
             selection.removeAllRanges();
             this.setStatus('text', 'restrict', '', true);
         } catch (e) { 
@@ -214,7 +207,10 @@ const ReviewApp = {
     },
 
     renderViolations() {
-        if (typeof Config === 'undefined' || !Config.violations) return;
+        if (typeof Config === 'undefined' || !Config.violations) {
+            console.error("Config missing. Check syntax.");
+            return;
+        }
         const list = document.getElementById('violationList');
         let h = '';
         for(let [c, s] of Object.entries(Config.violations)) {
