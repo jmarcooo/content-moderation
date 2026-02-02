@@ -5,7 +5,7 @@ const APP_LANG = localStorage.getItem('appLang') || 'en';
 
 const TRANSLATIONS = {
     en: { brand: "AdminPanel", overview: "Overview", users: "User Management", mod: "Moderation Queue", audit: "Quality Audit", appeal: "Appeal Center", notifs: "Notifications", settings: "Settings", logout: "Logout", online: "Online", offline: "Offline" },
-    zh: { brand: "管理后台", overview: "总览", users: "用户管理", mod: "审核队列", audit: "质量质检", appeal: "申诉中心", notifs: "通知中心", settings: "设置", logout: "退出登录", online: "在线", offline: "离线" }
+    zh: { brand: "管理后台", overview: "总览",用户管理: "User Management", mod: "审核队列", audit: "质量质检", appeal: "申诉中心", notifs: "通知中心", settings: "设置", logout: "退出登录", online: "在线", offline: "离线" }
 };
 const T = TRANSLATIONS[APP_LANG];
 
@@ -76,7 +76,64 @@ const sidebarContent = `
 document.body.insertAdjacentHTML('afterbegin', sidebarContent);
 
 // ===========================================
-// 2. SIDEBAR LOGIC (Event Listeners)
+// 2. SIDEBAR LOGIC (Initialize immediately after injection)
+// ===========================================
+(function initSidebarLogic() {
+    // --- Status Dropdown Logic ---
+    const statusTrigger = document.getElementById('status-trigger');
+    const statusMenu = document.getElementById('status-menu');
+    const currentLabel = document.getElementById('current-text');
+    const currentDot = document.getElementById('current-dot');
+
+    if (!statusTrigger || !statusMenu) {
+        console.error("Status dropdown elements not found during initialization.");
+        return;
+    }
+
+    // Toggle menu click
+    statusTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        statusMenu.classList.toggle('active');
+    });
+
+    // Handle item selection (using Event Delegation)
+    statusMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = e.target.closest('li');
+        if (!item) return;
+
+        const type = item.getAttribute('data-status');
+        const label = item.getAttribute('data-label');
+
+        // Update UI
+        currentLabel.innerText = label;
+        currentDot.className = `dot dot-${type}`;
+
+        // Close menu
+        statusMenu.classList.remove('active');
+
+        // Save to storage
+        localStorage.setItem('userStatus', JSON.stringify({ type, label }));
+    });
+
+    // Close menu on click outside
+    document.addEventListener('click', (e) => {
+         if (statusMenu.classList.contains('active') && !statusTrigger.contains(e.target)) {
+             statusMenu.classList.remove('active');
+         }
+    });
+
+    // Init Status from Storage
+    const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
+    if (savedStatus && currentLabel && currentDot) {
+        currentLabel.innerText = savedStatus.label;
+        currentDot.className = `dot dot-${savedStatus.type}`;
+    }
+})();
+
+
+// ===========================================
+// 3. GLOBAL PAGE LOGIC
 // ===========================================
 document.addEventListener("DOMContentLoaded", () => {
     // --- Active Link Logic ---
@@ -88,50 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (path.includes('appeal-center.html')) document.getElementById('link-appeal').classList.add('active');
     if (path.includes('notifications.html')) document.getElementById('link-notifs').classList.add('active');
     if (path.includes('settings.html')) document.getElementById('link-settings').classList.add('active');
-
-    // --- Status Dropdown Logic ---
-    const statusTrigger = document.getElementById('status-trigger');
-    const statusMenu = document.getElementById('status-menu');
-    const statusItems = statusMenu.querySelectorAll('li');
-    const currentLabel = document.getElementById('current-text');
-    const currentDot = document.getElementById('current-dot');
-
-    // Toggle menu click
-    statusTrigger.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent document click from closing it immediately
-        statusMenu.classList.toggle('active');
-    });
-
-    // Handle item selection
-    statusItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.stopPropagation(); // Stop propagation
-            const type = item.getAttribute('data-status');
-            const label = item.getAttribute('data-label');
-
-            // Update UI
-            currentLabel.innerText = label;
-            currentDot.className = `dot dot-${type}`;
-
-            // Close menu
-            statusMenu.classList.remove('active');
-
-            // Save to storage
-            localStorage.setItem('userStatus', JSON.stringify({ type, label }));
-        });
-    });
-
-    // Close menu on click outside
-    document.addEventListener('click', () => {
-        statusMenu.classList.remove('active');
-    });
-
-    // Init Status from Storage
-    const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
-    if (savedStatus) {
-        currentLabel.innerText = savedStatus.label;
-        currentDot.className = `dot dot-${savedStatus.type}`;
-    }
 });
 
 // Theme Logic (Window functions used by Settings page)
