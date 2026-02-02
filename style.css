@@ -806,3 +806,46 @@ body.dark-mode .status-Active { color: #58a6ff; }
     cursor: pointer;
 }
 .back-link:hover { color: var(--accent-blue); }
+
+/* =========================================
+   HEADER USER SECTION (Avatar & Welcome)
+   ========================================= */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Space between text, bell, and avatar */
+}
+
+.welcome-text {
+    font-size: 1rem;
+    color: var(--accent-blue); /* Matches the blue text in your image */
+    font-weight: 500;
+}
+
+.header-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #545d68; /* Dark grey background */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+/* Red Dot Style for Notification (replaces the number badge) */
+.notification-dot {
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background-color: #f85149; /* Red */
+    border-radius: 50%;
+    border: 2px solid var(--bg-body); /* Creates a small gap around the dot */
+    display: none; /* Hidden by default */
+}
