@@ -8,7 +8,7 @@
     <style>
         .header {
             display: flex;
-            justify-content: space-between; /* Pushes title left, controls right */
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border-color);
@@ -20,11 +20,9 @@
 
     <main class="main-content">
         <div class="header">
-            <h1 id="page-title">Overview</h1>
+            <h1 id="welcome-title">Welcome!</h1>
 
             <div class="header-actions">
-                <span id="welcome-msg" class="welcome-text">Welcome back!</span>
-
                 <div class="notification-wrapper" onclick="handleNotificationClick()" title="Notifications">
                     <svg class="bell-icon" viewBox="0 0 16 16">
                         <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
@@ -80,26 +78,24 @@
         }
 
         if(currentUser) {
-            // 1. Set Welcome Message
-            const welcomeEl = document.getElementById('welcome-msg');
-            // Assuming "Marco" or "Jon" is the name
-            welcomeEl.innerText = `Welcome back, ${currentUser.name}!`;
+            // 2. UPDATED: Set the Main Title to "Welcome {Name}!"
+            const titleEl = document.getElementById('welcome-title');
+            titleEl.innerText = `Welcome ${currentUser.name}!`;
 
-            // 2. Set Avatar Initial
+            // Set Avatar Initial
             const avatarEl = document.getElementById('header-avatar');
-            // Takes the first letter of the name (e.g., "M" for Marco)
             avatarEl.innerText = currentUser.name.charAt(0).toUpperCase();
         }
 
         // --- NOTIFICATION DOT LOGIC ---
-        let notificationCount = 3; // Change to 0 to hide dot
+        let notificationCount = 3; 
 
         function updateBadge() {
             const dot = document.getElementById('notif-dot');
             if (notificationCount > 0) {
-                dot.style.display = 'block'; // Show red dot
+                dot.style.display = 'block';
             } else {
-                dot.style.display = 'none'; // Hide red dot
+                dot.style.display = 'none';
             }
         }
 
@@ -107,8 +103,6 @@
             if(notificationCount > 0) {
                 notificationCount = 0;
                 updateBadge();
-                // Optional: Redirect to notifications page
-                // window.location.href = 'notifications.html';
             }
         }
 
