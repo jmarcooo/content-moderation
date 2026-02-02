@@ -114,24 +114,19 @@ body {
     margin-top: 10px;
     display: flex; 
     gap: 12px;
-    /* Ensure items stretch to fill the height */
-    align-items: stretch;
+    align-items: center; /* Center items vertically */
 }
 
+/* 1. FIX: Fixed width and height for perfect circle */
 .avatar { 
-    /* Remove fixed width/height. Let it adapt. */
-    /* width: 38px; height: 38px; */
-
-    /* Force a 1:1 aspect ratio based on its stretched height, keeping it a circle */
-    aspect-ratio: 1 / 1;
-    
+    width: 48px; 
+    height: 48px;
+    flex-shrink: 0; /* Prevent squashing */
     background-color: #238636; /* GitHub Green */
-    border-radius: 50%; 
+    border-radius: 50%; /* Ensures roundness */
     display: flex; align-items: center; justify-content: center; 
-    font-weight: bold; color: white; font-size: 1rem;
-    flex-shrink: 0;
-    /* Minimum size to prevent it from being too small if text is short */
-    min-height: 38px; 
+    font-weight: bold; color: white; 
+    font-size: 1.2rem;
 }
 
 .profile-info {
@@ -142,7 +137,6 @@ body {
 
 .profile-name {
     font-weight: 600; color: var(--text-header);
-    /* Increased margin for better spacing */
     margin-bottom: 6px;
 }
 
@@ -151,9 +145,7 @@ body {
     display: flex; align-items: center; gap: 6px;
     color: var(--text-muted); cursor: pointer;
     font-size: 0.8rem;
-    /* Increased margin for better spacing */
     margin-bottom: 6px;
-    /* Prevent text selection on clicks */
     user-select: none;
 }
 .profile-status:hover { color: var(--text-main); }
@@ -164,7 +156,6 @@ body {
     display: flex; align-items: center; gap: 6px;
     color: var(--danger-red); text-decoration: none;
     font-size: 0.8rem; font-weight: 500;
-    /* Removed top margin, spacing is handled by profile-status now */
 }
 .logout-link:hover { text-decoration: underline; }
 .logout-icon { width: 12px; height: 12px; fill: currentColor; }
@@ -236,6 +227,7 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
 /* Back Link */
 .back-link { cursor: pointer; color: var(--text-muted); margin-bottom: 15px; display: inline-block; }
 .back-link:hover { color: var(--accent-blue); }
+
 /* =========================================
    5. CARDS (Dashboard & Grid View)
    ========================================= */
