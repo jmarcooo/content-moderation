@@ -5,76 +5,92 @@
     <title>Notification Center</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* --- Layout Specifics for Notification Center --- */
-        .notif-layout {
+        /* --- Layout: Notification Center Container --- */
+        .notif-wrapper {
             display: flex;
-            gap: 40px;
+            gap: 0; /* No gap, borders will define separation if needed, or use margin */
+            height: calc(100vh - 140px); /* Fill remaining height */
             margin-top: 20px;
-            height: calc(100vh - 120px);
         }
 
-        /* Inner Sidebar (Menu) */
-        .notif-menu {
-            width: 220px;
+        /* --- Left Side: Internal Navigation --- */
+        .notif-sidebar {
+            width: 240px;
             flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            border-right: 1px solid var(--border-color); /* Separator line */
             padding-top: 20px;
+            padding-right: 20px;
         }
 
-        .notif-menu-item {
+        .notif-nav-item {
             padding: 12px 20px;
+            margin-bottom: 8px;
             color: var(--text-muted);
             cursor: pointer;
-            font-weight: 500;
             font-size: 0.95rem;
-            border-radius: 4px; /* Rounded right corners */
+            font-weight: 500;
+            border-radius: 6px;
             position: relative;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
-        .notif-menu-item:hover {
+        .notif-nav-item:hover {
             color: var(--text-main);
             background-color: var(--hover-bg);
         }
 
-        /* Active State (Matches Screenshot: Green Glow + Left Border) */
-        .notif-menu-item.active {
-            color: #fff;
-            background: linear-gradient(90deg, rgba(35, 134, 54, 0.2) 0%, rgba(35, 134, 54, 0) 100%);
-            border-left: 3px solid #238636;
-            border-radius: 0 4px 4px 0;
-        }
-        /* Ensure text is readable in Light Mode if active */
-        body:not(.dark-mode) .notif-menu-item.active {
-            color: #238636;
+        /* Active State: Glowing Green Line + Gradient */
+        .notif-nav-item.active {
+            color: #fff; /* White text for contrast on dark/green */
+            background: linear-gradient(90deg, rgba(35, 134, 54, 0.15) 0%, transparent 100%);
+            border-left: 4px solid #238636;
+            border-radius: 0 6px 6px 0; /* Round only right side */
             font-weight: 700;
         }
-
-        /* Content Area */
-        .notif-content-area {
-            flex-grow: 1;
-            max-width: 800px;
+        /* Fix for light mode text visibility if active */
+        body:not(.dark-mode) .notif-nav-item.active {
+            color: #238636; 
         }
 
-        /* The Form Card (Matches Screenshot) */
-        .send-card {
+        /* --- Right Side: Content Area --- */
+        .notif-content {
+            flex-grow: 1;
+            padding-left: 40px; /* Space from sidebar */
+            padding-top: 10px;
+        }
+
+        /* --- THE SINGLE CARD (The Form Container) --- */
+        .glass-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 40px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+            max-width: 700px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); /* Deep shadow */
+            position: relative;
+            overflow: hidden;
         }
-        
-        /* Input Styling to match "Dark/Cyber" look */
-        .cyber-input-group {
-            margin-bottom: 24px;
+
+        /* Optional: Subtle glow behind the card for that "cyber" feel */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, rgba(35,134,54,0.3), transparent 60%);
+            z-index: -1;
+            border-radius: 16px;
+            opacity: 0.5;
+            filter: blur(10px);
         }
-        
+
+        /* --- Input Fields Styling --- */
+        .cyber-group {
+            margin-bottom: 25px;
+        }
+
         .cyber-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
             color: var(--text-header);
             font-size: 0.95rem;
@@ -82,60 +98,62 @@
 
         .cyber-input {
             width: 100%;
-            padding: 14px;
-            background-color: var(--bg-body); /* Slightly darker/lighter than card */
+            padding: 14px 16px;
+            background-color: var(--bg-body); /* Slightly distinct from card bg */
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--text-main);
             font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            outline: none;
         }
 
         .cyber-input:focus {
             border-color: #238636;
-            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.2);
-            outline: none;
+            box-shadow: 0 0 0 4px rgba(35, 134, 54, 0.15); /* Green glow ring */
         }
 
-        /* Send Blast Button */
-        .btn-blast {
+        /* --- Send Button --- */
+        .btn-neon {
             width: 100%;
-            background: linear-gradient(90deg, #238636 0%, #2ea043 100%);
-            color: white;
-            border: none;
             padding: 16px;
+            border-radius: 50px; /* Pill shape */
+            background: linear-gradient(90deg, #238636 0%, #2ea043 100%);
+            border: none;
+            color: white;
             font-size: 1rem;
-            font-weight: bold;
-            border-radius: 30px; /* Pill shape */
+            font-weight: 800;
+            text-transform: uppercase;
             cursor: pointer;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(35, 134, 54, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: transform 0.1s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             margin-top: 10px;
         }
 
-        .btn-blast:hover {
+        .btn-neon:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(46, 160, 67, 0.4);
+            box-shadow: 0 6px 20px rgba(35, 134, 54, 0.6);
         }
 
-        .btn-blast svg {
-            width: 18px; 
-            height: 18px; 
+        .btn-neon svg {
             fill: white;
+            width: 20px;
+            height: 20px;
         }
 
-        /* List View Styles (Kept simple) */
-        .notif-list-item {
-            padding: 15px;
+        /* --- List View Styling (Simple) --- */
+        .notif-row {
+            padding: 16px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
-        .notif-list-item:last-child { border-bottom: none; }
+        .notif-row:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -143,72 +161,69 @@
     <main class="main-content">
         
         <div class="header">
-            <h1 id="header-notifs">Notification Center</h1>
+            <h1 id="header-title">Notification Center</h1>
         </div>
 
-        <div class="notif-layout">
-            <div class="notif-menu">
-                <div class="notif-menu-item" id="tab-list" onclick="switchTab('list')">All Notifications</div>
-                <div class="notif-menu-item active" id="tab-send" onclick="switchTab('send')">Send Notification</div>
+        <div class="notif-wrapper">
+            
+            <div class="notif-sidebar">
+                <div class="notif-nav-item" id="nav-list" onclick="switchView('list')">
+                    All Notifications
+                </div>
+                <div class="notif-nav-item active" id="nav-send" onclick="switchView('send')">
+                    Send Notification
+                </div>
             </div>
 
-            <div class="notif-content-area">
+            <div class="notif-content">
                 
-                <div id="view-send" class="send-card">
-                    <form onsubmit="event.preventDefault(); sendBlast();">
-                        <div class="cyber-input-group">
+                <div id="view-send" class="glass-card">
+                    <form onsubmit="event.preventDefault(); handleSend();">
+                        
+                        <div class="cyber-group">
                             <label class="cyber-label">Target Audience</label>
                             <select class="cyber-input">
                                 <option>All Users</option>
                                 <option>Moderators Only</option>
                                 <option>Admins Only</option>
-                                <option>New Users (< 7 days)</option>
+                                <option>VIP Players</option>
                             </select>
                         </div>
 
-                        <div class="cyber-input-group">
+                        <div class="cyber-group">
                             <label class="cyber-label">Message Title</label>
                             <input type="text" class="cyber-input" placeholder="e.g. System Maintenance" required>
                         </div>
 
-                        <div class="cyber-input-group">
+                        <div class="cyber-group">
                             <label class="cyber-label">Message Body</label>
-                            <textarea class="cyber-input" style="height: 140px; resize: vertical;" placeholder="Type your message here..." required></textarea>
+                            <textarea class="cyber-input" style="height: 120px; resize: vertical;" placeholder="Type your message here..." required></textarea>
                         </div>
 
-                        <button type="submit" class="btn-blast">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                            </svg>
-                            SEND BLAST
+                        <button type="submit" class="btn-neon" id="btn-submit">
+                            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            Send Blast
                         </button>
                     </form>
                 </div>
 
-                <div id="view-list" class="send-card" style="display: none; padding: 0;">
+                <div id="view-list" class="glass-card" style="display: none; padding: 0;">
                     <div style="padding: 20px; border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
-                        <h3 style="margin:0;">Recent Activity</h3>
-                        <button class="btn-cancel" onclick="clearNotifications()" style="font-size:0.8rem;">Clear All</button>
+                        <h3 style="margin:0; font-size:1.1rem; color:var(--text-header);">History</h3>
+                        <button class="btn-cancel" onclick="clearNotifs()" style="font-size:0.8rem;">Clear All</button>
                     </div>
-                    <div class="notif-list">
-                        <div class="notif-list-item">
+                    <div id="notif-history-list">
+                        <div class="notif-row">
                             <div>
-                                <div style="font-weight:bold; margin-bottom:4px;">System Alert</div>
-                                <div style="font-size:0.9rem; color:var(--text-muted);">High volume detected in "Dynamic Video" queue.</div>
+                                <div style="font-weight:bold; color:var(--text-header);">System Alert</div>
+                                <div style="font-size:0.9rem; color:var(--text-muted);">High volume in "Dynamic Video" queue.</div>
                             </div>
                             <div style="font-size:0.8rem; color:var(--text-muted);">10m ago</div>
                         </div>
-                        <div class="notif-list-item">
+                        <div class="notif-row">
                             <div>
-                                <div style="font-weight:bold; margin-bottom:4px;">Appeal Received</div>
-                                <div style="font-size:0.9rem; color:var(--text-muted);">User @gamer_123 has submitted an appeal ticket.</div>
-                            </div>
-                            <div style="font-size:0.8rem; color:var(--text-muted);">45m ago</div>
-                        </div>
-                        <div class="notif-list-item">
-                            <div>
-                                <div style="font-weight:bold; margin-bottom:4px;">System Update</div>
-                                <div style="font-size:0.9rem; color:var(--text-muted);">Scheduled maintenance for Sunday, Feb 5th at 2:00 AM.</div>
+                                <div style="font-weight:bold; color:var(--text-header);">Maintenance</div>
+                                <div style="font-size:0.9rem; color:var(--text-muted);">Scheduled maintenance for Feb 5th.</div>
                             </div>
                             <div style="font-size:0.8rem; color:var(--text-muted);">2h ago</div>
                         </div>
@@ -221,40 +236,45 @@
     </main>
 
     <script>
-        function switchTab(tabId) {
-            // 1. Reset Tabs
-            document.querySelectorAll('.notif-menu-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
+        function switchView(view) {
+            // Update Menu
+            document.querySelectorAll('.notif-nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + view).classList.add('active');
 
-            // 2. Reset Views
+            // Update Cards
             document.getElementById('view-send').style.display = 'none';
             document.getElementById('view-list').style.display = 'none';
-
-            // 3. Show Target
-            document.getElementById('view-' + tabId).style.display = 'block';
+            
+            document.getElementById('view-' + view).style.display = 'block';
         }
 
-        function sendBlast() {
-            // Visual feedback
-            const btn = document.querySelector('.btn-blast');
-            const originalText = btn.innerHTML;
+        function handleSend() {
+            const btn = document.getElementById('btn-submit');
+            const originalHTML = btn.innerHTML;
             
-            btn.innerHTML = 'SENT!';
-            btn.style.background = '#238636'; // Solid green
-            
+            // Simulation of "Sending" state
+            btn.innerHTML = 'Sending...';
+            btn.style.opacity = '0.8';
+
             setTimeout(() => {
-                alert('Notification successfully sent to all targets.');
-                btn.innerHTML = originalText;
-                btn.style.background = ''; // Revert to gradient
-                document.querySelector('form').reset();
-            }, 500);
+                btn.innerHTML = '✅ SENT!';
+                btn.style.background = '#238636'; // Solid green confirmation
+                
+                setTimeout(() => {
+                    alert('Notification Blast Sent Successfully!');
+                    // Reset Form
+                    document.querySelector('form').reset();
+                    // Reset Button
+                    btn.innerHTML = originalHTML;
+                    btn.style.background = ''; 
+                    btn.style.opacity = '1';
+                }, 800);
+            }, 1000);
         }
 
-        function clearNotifications() {
-            const list = document.querySelector('.notif-list');
-            list.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted);">No notifications found.</div>';
-            
-            // Clear sidebar badge if it exists
+        function clearNotifs() {
+            document.getElementById('notif-history-list').innerHTML = '<div style="padding:30px; text-align:center; color:var(--text-muted);">No notifications found.</div>';
+            // Also hide sidebar badge if exists
             const badge = document.getElementById('sidebar-badge-count');
             if(badge) badge.style.display = 'none';
         }
