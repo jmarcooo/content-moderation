@@ -11,6 +11,7 @@
             gap: 0; 
             height: calc(100vh - 140px); 
             margin-top: 20px;
+            width: 100%; /* Ensure full width */
         }
 
         /* --- Left Side: Internal Navigation --- */
@@ -48,118 +49,202 @@
         /* --- Right Side: Content Area --- */
         .notif-content {
             flex-grow: 1;
-            padding-left: 40px; 
+            padding-left: 30px; 
             padding-top: 10px;
             height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- THE SINGLE CARD --- */
+        /* --- THE MAIN CARD --- */
         .glass-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 0;
-            max-width: 710px; 
+            border-radius: 12px;
+            width: 100%; /* Force full width to show both panes */
             height: 100%; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: -2px; left: -2px; right: -2px; bottom: -2px;
-            background: linear-gradient(45deg, rgba(35,134,54,0.3), transparent 60%);
-            z-index: -1;
-            border-radius: 16px;
-            opacity: 0.5;
-            filter: blur(10px);
+        /* --- SPLIT VIEW LAYOUT --- */
+        .notif-split-container {
+            display: flex;
+            flex-grow: 1;
+            height: 100%;
+            overflow: hidden;
         }
 
-        /* --- View Specifics --- */
-        .card-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-color);
+        /* Left Pane: List */
+        .notif-list-pane {
+            width: 380px; /* Fixed width for list */
+            min-width: 380px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-card);
+            z-index: 2;
+        }
+
+        /* Right Pane: Detail */
+        .notif-detail-pane {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 40px;
+            background-color: var(--bg-body); /* Slight contrast */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- List View Headers --- */
+        .list-header-top {
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-header);
+            background: var(--bg-card);
         }
-        
-        /* New Controls Bar */
-        .controls-bar {
-            padding: 10px 24px;
-            background-color: var(--hover-bg);
+
+        .select-all-row {
+            padding: 12px 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-size: 0.85rem;
+            gap: 12px;
+            background-color: var(--hover-bg); /* Gray background like screenshot */
+            font-size: 0.9rem;
+            color: var(--text-muted);
         }
 
-        .card-body-scroll {
-            padding: 0;
+        .list-scroll-area {
             overflow-y: auto;
             flex-grow: 1;
+            background: var(--bg-card);
         }
 
-        /* --- Buttons --- */
-        .btn-text { background: none; border: none; color: var(--accent-blue); cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-        .btn-text:hover { text-decoration: underline; }
-        
-        .btn-danger { color: #f85149; display: none; /* hidden by default */ }
-        .btn-danger.visible { display: inline-block; }
-
-        /* --- Input Fields Styling --- */
-        .cyber-group { margin-bottom: 25px; }
-        .cyber-label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-header); font-size: 0.95rem; }
-        .cyber-input { width: 100%; padding: 14px 16px; background-color: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-size: 1rem; transition: all 0.3s ease; outline: none; }
-        .cyber-input:focus { border-color: #238636; box-shadow: 0 0 0 4px rgba(35, 134, 54, 0.15); }
-
-        /* --- Send Button --- */
-        .btn-neon { width: 100%; padding: 16px; border-radius: 50px; background: linear-gradient(90deg, #238636 0%, #2ea043 100%); border: none; color: white; font-size: 1rem; font-weight: 800; text-transform: uppercase; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(35, 134, 54, 0.4); display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.2s, box-shadow 0.2s; margin-top: 10px; }
-        .btn-neon:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(35, 134, 54, 0.6); }
-        .btn-neon svg { fill: white; width: 20px; height: 20px; }
-
-        /* --- List View Styling --- */
+        /* --- List Row Styling --- */
         .notif-row {
-            padding: 16px 24px;
+            padding: 18px 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: flex-start;
-            gap: 15px;
+            gap: 12px;
+            cursor: pointer;
             transition: background 0.1s;
         }
-        .notif-row:last-child { border-bottom: none; }
         .notif-row:hover { background-color: var(--hover-bg); }
-        
-        .checkbox-wrapper { display: flex; align-items: center; padding-top: 3px; }
-        .custom-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: #238636; }
+        .notif-row.active-view { background-color: rgba(35, 134, 54, 0.05); border-left: 3px solid #238636; }
 
-        .notif-details { flex-grow: 1; }
-        
-        .notif-header-line { display: flex; align-items: center; margin-bottom: 4px; }
-        
-        /* Unread Styles */
-        .unread-indicator {
-            display: inline-block;
-            width: 8px; height: 8px;
-            background-color: #238636;
-            border-radius: 50%;
-            margin-right: 8px;
-            box-shadow: 0 0 6px #238636;
-            opacity: 0; /* Hidden for read items */
+        .notif-details { flex-grow: 1; overflow: hidden; }
+        .notif-header-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .notif-title { font-size: 0.95rem; font-weight: 500; color: var(--text-header); }
+        .notif-time-sm { font-size: 0.8rem; color: var(--text-muted); }
+        .notif-snippet { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px;}
+
+        /* --- Detail View Styling (Form Style) --- */
+        .detail-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
         }
-        .notif-row.unread .unread-indicator { opacity: 1; }
-        .notif-row.unread .notif-title { font-weight: 700; color: var(--text-header); }
-        .notif-row.unread { background-color: rgba(35, 134, 54, 0.03); } /* Subtle tint */
 
-        .notif-title { font-size: 0.95rem; color: var(--text-header); transition: font-weight 0.2s; }
-        .notif-body { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
-        .notif-time { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; margin-left: 10px; }
+        .detail-title-lg {
+            font-size: 2.2rem;
+            font-weight: 400; /* Thin/Modern look */
+            color: var(--text-header);
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .detail-timestamp {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Form Fields mimicking the screenshot */
+        .field-group {
+            margin-bottom: 25px;
+        }
+        .field-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-header);
+        }
+        .field-box {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px; /* Sharp corners like screenshot */
+            background-color: var(--bg-card); 
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+        .field-box.readonly {
+            background-color: transparent; 
+            border: 1px solid #d0d7de; /* Distinct border */
+        }
+        .field-box.body-content {
+            min-height: 450px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .detail-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding-top: 20px;
+        }
+
+        /* Buttons matching screenshot (White with border) */
+        .btn-form {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 10px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-header);
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+        .btn-form:hover {
+            border-color: var(--text-muted);
+            background-color: var(--hover-bg);
+        }
+        
+        .btn-link {
+            background: none;
+            border: none;
+            color: #0969da;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .btn-link:hover { text-decoration: underline; }
+
+        /* Custom Checkbox */
+        .custom-checkbox { width: 18px; height: 18px; cursor: pointer; margin-top: 2px; accent-color: var(--text-muted); border: 2px solid var(--border-color); }
+
+        /* Hide Scrollbar for cleaner UI */
+        .list-scroll-area::-webkit-scrollbar { width: 6px; }
+        .list-scroll-area::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 4px; }
 
     </style>
 </head>
@@ -181,53 +266,50 @@
             <div class="notif-content">
                 
                 <div id="view-list" class="glass-card" style="display: flex;">
-                    <div class="card-header">
-                        <h3 style="margin:0; font-size:1.1rem; color:var(--text-header);">History</h3>
-                        <button class="btn-text" onclick="NotifApp.markAllRead()">Mark all as read</button>
-                    </div>
                     
-                    <div class="controls-bar">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="selectAll" class="custom-checkbox" onchange="NotifApp.toggleSelectAll(this)">
-                            <label for="selectAll" style="cursor:pointer; font-weight:500;">Select All</label>
-                        </div>
-                        <button id="btnDelete" class="btn-text btn-danger" onclick="NotifApp.deleteSelected()">
-                            Delete Selected (<span id="selCount">0</span>)
-                        </button>
-                    </div>
-
-                    <div class="card-body-scroll">
-                        <div id="notif-list-container">
+                    <div class="notif-split-container">
+                        
+                        <div class="notif-list-pane">
+                            <div class="list-header-top">
+                                <span>History</span>
+                                <button class="btn-link" onclick="NotifApp.markAllRead()">Mark all as read</button>
                             </div>
+                            <div class="select-all-row">
+                                <input type="checkbox" id="selectAll" class="custom-checkbox" onchange="NotifApp.toggleSelectAll(this)">
+                                <label for="selectAll" style="cursor:pointer; user-select: none;">Select All</label>
+                                <button id="btnDeleteList" class="btn-link" style="color:#cf222e; margin-left:auto; display:none;" onclick="NotifApp.deleteSelected()">Delete</button>
+                            </div>
+                            <div class="list-scroll-area" id="notif-list-container">
+                                </div>
+                        </div>
+
+                        <div class="notif-detail-pane" id="detail-view">
+                            </div>
+
                     </div>
                 </div>
 
-                <div id="view-send" class="glass-card" style="display: none;">
-                     <div class="card-body-scroll" style="padding: 30px;">
-                        <form onsubmit="event.preventDefault(); NotifApp.sendBlast();">
-                            <div class="cyber-group">
-                                <label class="cyber-label">Target Audience</label>
-                                <select class="cyber-input">
-                                    <option>All Users</option>
-                                    <option>Moderators Only</option>
-                                    <option>Admins Only</option>
-                                    <option>VIP Players</option>
-                                </select>
-                            </div>
-                            <div class="cyber-group">
-                                <label class="cyber-label">Message Title</label>
-                                <input type="text" class="cyber-input" placeholder="e.g. System Maintenance" required>
-                            </div>
-                            <div class="cyber-group">
-                                <label class="cyber-label">Message Body</label>
-                                <textarea class="cyber-input" style="height: 120px; resize: vertical;" placeholder="Type your message here..." required></textarea>
-                            </div>
-                            <button type="submit" class="btn-neon" id="btn-submit">
-                                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                                Send Blast
-                            </button>
-                        </form>
-                    </div>
+                <div id="view-send" class="glass-card" style="display: none; padding: 40px;">
+                    <form onsubmit="event.preventDefault(); NotifApp.sendBlast();" style="max-width: 600px;">
+                        <h2 style="margin-bottom:20px;">Send Notification</h2>
+                        <div class="field-group">
+                            <label class="field-label">Target Audience</label>
+                            <select class="field-box" style="background:var(--bg-input);">
+                                <option>All Users</option>
+                                <option>Moderators Only</option>
+                                <option>Admins Only</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Message Title</label>
+                            <input type="text" class="field-box" placeholder="e.g. System Maintenance">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Message Body</label>
+                            <textarea class="field-box" style="height:150px; resize:vertical;" placeholder="Type message..."></textarea>
+                        </div>
+                        <button class="btn-form" style="background:#238636; color:white; border:none;">Send Blast</button>
+                    </form>
                 </div>
 
             </div>
@@ -245,120 +327,142 @@
             if(view === 'list') {
                 document.getElementById('view-list').style.display = 'flex';
             } else {
-                document.getElementById('view-send').style.display = 'flex';
+                document.getElementById('view-send').style.display = 'block';
             }
         }
 
         const NotifApp = {
             data: [
-                { id: 1, title: "System Alert", body: "High volume detected in \"Dynamic Video\" queue.", time: "10m ago", read: false },
-                { id: 2, title: "New Appeal", body: "User @gamer123 has submitted an appeal ticket for review.", time: "45m ago", read: false },
-                { id: 3, title: "Maintenance", body: "Scheduled maintenance for Feb 5th at 02:00 UTC.", time: "2h ago", read: true },
-                { id: 4, title: "Server Load", body: "Node-EU-3 is experiencing high latency (350ms).", time: "3h ago", read: true },
-                { id: 5, title: "Payment Failed", body: "Gateway B reported a 2% failure rate increase.", time: "5h ago", read: false },
-                { id: 6, title: "New Registration", body: "User @mod_candidate completed onboarding.", time: "1d ago", read: true },
-                { id: 7, title: "Policy Update", body: "New moderation guidelines updated for \"Hate Speech\".", time: "2d ago", read: true }
+                { id: 1, title: "System Alert", body: "High volume detected in \"Dynamic Video\" queue. Server scale-up triggered.", time: "10m ago", fullTime: "02/03/2026 15:23", read: false, sender: "Admin" },
+                { id: 2, title: "New Appeal", body: "User @gamer123 has submitted an appeal ticket for review regarding ban #4402.", time: "45m ago", fullTime: "02/03/2026 14:45", read: false, sender: "System" },
+                { id: 3, title: "Maintenance", body: "Scheduled maintenance for Feb 5th at 02:00 UTC. Expected downtime: 45 mins.", time: "2h ago", fullTime: "02/03/2026 13:00", read: true, sender: "DevOps" },
+                { id: 4, title: "Server Load", body: "Node-EU-3 is experiencing high latency (350ms). Traffic redirected.", time: "3h ago", fullTime: "02/03/2026 12:15", read: true, sender: "Monitor" },
+                { id: 5, title: "Payment Failed", body: "Gateway B reported a 2% failure rate increase. Tech team alerted.", time: "5h ago", fullTime: "02/03/2026 10:00", read: true, sender: "Billing" },
+                { id: 6, title: "New Registration", body: "User @mod_candidate completed onboarding.", time: "1d ago", fullTime: "02/02/2026 09:30", read: true, sender: "HR" },
+                { id: 7, title: "Policy Update", body: "New moderation guidelines updated for \"Hate Speech\".", time: "2d ago", fullTime: "02/01/2026 16:00", read: true, sender: "Policy" }
             ],
             selected: new Set(),
+            currentViewId: null,
 
             init() {
-                this.render();
+                this.renderList();
+                // Immediately select first item to populate right pane
+                if(this.data.length > 0) this.handleRowClick(this.data[0].id);
             },
 
-            render() {
+            renderList() {
                 const container = document.getElementById('notif-list-container');
-                if(this.data.length === 0) {
-                    container.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted);">No notifications found.</div>';
-                    return;
-                }
-
                 container.innerHTML = this.data.map(item => `
-                    <div class="notif-row ${item.read ? '' : 'unread'}">
-                        <div class="checkbox-wrapper">
+                    <div class="notif-row ${this.currentViewId === item.id ? 'active-view' : ''}" onclick="NotifApp.handleRowClick(${item.id})">
+                        <div onclick="event.stopPropagation()">
                             <input type="checkbox" class="custom-checkbox" 
                                 ${this.selected.has(item.id) ? 'checked' : ''}
                                 onchange="NotifApp.toggleSelect(${item.id})">
                         </div>
-                        <div class="notif-details" onclick="NotifApp.toggleRead(${item.id})">
+                        <div class="notif-details">
                             <div class="notif-header-line">
-                                <span class="unread-indicator"></span>
-                                <span class="notif-title">${item.title}</span>
-                                <span class="notif-time" style="margin-left:auto;">${item.time}</span>
+                                <span class="notif-title" style="${!item.read ? 'font-weight:700' : ''}">${item.title}</span>
+                                <span class="notif-time-sm">${item.time}</span>
                             </div>
-                            <div class="notif-body">${item.body}</div>
+                            <div class="notif-snippet">${item.body}</div>
                         </div>
                     </div>
                 `).join('');
+                
+                // Show/Hide Delete button in header based on selection
+                const delBtn = document.getElementById('btnDeleteList');
+                delBtn.style.display = this.selected.size > 0 ? 'block' : 'none';
+                delBtn.innerText = `Delete (${this.selected.size})`;
+            },
 
-                this.updateControls();
+            renderDetail(id) {
+                const container = document.getElementById('detail-view');
+                const item = this.data.find(i => i.id === id);
+
+                if (!item) {
+                    container.innerHTML = `<div style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">Select a notification</div>`;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="detail-header-row">
+                        <h1 class="detail-title-lg">${item.title}</h1>
+                        <div class="detail-timestamp">
+                            <div>${item.fullTime}</div>
+                            <div>${item.time}</div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label">Sent by:</label>
+                        <input class="field-box readonly" value="${item.sender}" readonly>
+                    </div>
+
+                    <div class="field-group" style="flex-grow:1; display:flex; flex-direction:column;">
+                        <label class="field-label">Body:</label>
+                        <textarea class="field-box readonly body-content" readonly>${item.body}</textarea>
+                    </div>
+
+                    <div class="detail-footer">
+                        <button class="btn-form" onclick="NotifApp.deleteSingle(${item.id})">Delete</button>
+                        <button class="btn-form" onclick="NotifApp.markReadSingle(${item.id})">Mark as Read</button>
+                    </div>
+                `;
             },
 
             toggleSelect(id) {
                 if(this.selected.has(id)) this.selected.delete(id);
                 else this.selected.add(id);
-                this.render(); // Re-render to keep checkbox state UI sync (though simple DOM update works too, full render is easier)
+                this.renderList();
             },
 
             toggleSelectAll(checkbox) {
-                if(checkbox.checked) {
-                    this.data.forEach(i => this.selected.add(i.id));
-                } else {
-                    this.selected.clear();
-                }
-                this.render();
+                if(checkbox.checked) this.data.forEach(i => this.selected.add(i.id));
+                else this.selected.clear();
+                this.renderList();
+            },
+
+            handleRowClick(id) {
+                this.currentViewId = id;
+                this.renderList(); // Update active highlight
+                this.renderDetail(id);
             },
 
             deleteSelected() {
-                if(this.selected.size === 0) return;
-                if(!confirm(`Delete ${this.selected.size} notifications?`)) return;
-                
-                this.data = this.data.filter(i => !this.selected.has(i.id));
-                this.selected.clear();
-                document.getElementById('selectAll').checked = false;
-                this.render();
+                if(confirm(`Delete ${this.selected.size} items?`)) {
+                    this.data = this.data.filter(i => !this.selected.has(i.id));
+                    this.selected.clear();
+                    document.getElementById('selectAll').checked = false;
+                    
+                    if(this.data.length > 0) this.handleRowClick(this.data[0].id);
+                    else { this.currentViewId = null; this.renderList(); document.getElementById('detail-view').innerHTML = ''; }
+                }
+            },
+
+            deleteSingle(id) {
+                if(confirm('Delete this notification?')) {
+                    this.data = this.data.filter(i => i.id !== id);
+                    if(this.data.length > 0) this.handleRowClick(this.data[0].id);
+                    else { this.currentViewId = null; this.renderList(); document.getElementById('detail-view').innerHTML = ''; }
+                }
+            },
+
+            markReadSingle(id) {
+                const item = this.data.find(i => i.id === id);
+                if(item) {
+                    item.read = true;
+                    this.renderList();
+                    // alert('Marked as read');
+                }
             },
 
             markAllRead() {
                 this.data.forEach(i => i.read = true);
-                this.render();
-            },
-            
-            toggleRead(id) {
-                // Optional: Clicking a row marks it as read
-                const item = this.data.find(i => i.id === id);
-                if(item && !item.read) {
-                    item.read = true;
-                    this.render();
-                }
-            },
-
-            updateControls() {
-                const btn = document.getElementById('btnDelete');
-                const countSpan = document.getElementById('selCount');
-                if(this.selected.size > 0) {
-                    btn.classList.add('visible');
-                    countSpan.innerText = this.selected.size;
-                } else {
-                    btn.classList.remove('visible');
-                }
+                this.renderList();
             },
 
             sendBlast() {
-                const btn = document.getElementById('btn-submit');
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = 'Sending...';
-                btn.style.opacity = '0.8';
-                setTimeout(() => {
-                    btn.innerHTML = '✅ SENT!';
-                    btn.style.background = '#238636'; 
-                    setTimeout(() => {
-                        alert('Notification Blast Sent Successfully!');
-                        document.querySelector('form').reset();
-                        btn.innerHTML = originalHTML;
-                        btn.style.background = ''; 
-                        btn.style.opacity = '1';
-                    }, 800);
-                }, 1000);
+                alert('Notification Blast Sent!');
             }
         };
 
