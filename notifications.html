@@ -4,106 +4,259 @@
     <meta charset="UTF-8">
     <title>Notification Center</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- Layout Specifics for Notification Center --- */
+        .notif-layout {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+            height: calc(100vh - 120px);
+        }
+
+        /* Inner Sidebar (Menu) */
+        .notif-menu {
+            width: 220px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 20px;
+        }
+
+        .notif-menu-item {
+            padding: 12px 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: 4px; /* Rounded right corners */
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .notif-menu-item:hover {
+            color: var(--text-main);
+            background-color: var(--hover-bg);
+        }
+
+        /* Active State (Matches Screenshot: Green Glow + Left Border) */
+        .notif-menu-item.active {
+            color: #fff;
+            background: linear-gradient(90deg, rgba(35, 134, 54, 0.2) 0%, rgba(35, 134, 54, 0) 100%);
+            border-left: 3px solid #238636;
+            border-radius: 0 4px 4px 0;
+        }
+        /* Ensure text is readable in Light Mode if active */
+        body:not(.dark-mode) .notif-menu-item.active {
+            color: #238636;
+            font-weight: 700;
+        }
+
+        /* Content Area */
+        .notif-content-area {
+            flex-grow: 1;
+            max-width: 800px;
+        }
+
+        /* The Form Card (Matches Screenshot) */
+        .send-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+        }
+        
+        /* Input Styling to match "Dark/Cyber" look */
+        .cyber-input-group {
+            margin-bottom: 24px;
+        }
+        
+        .cyber-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-header);
+            font-size: 0.95rem;
+        }
+
+        .cyber-input {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--bg-body); /* Slightly darker/lighter than card */
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .cyber-input:focus {
+            border-color: #238636;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.2);
+            outline: none;
+        }
+
+        /* Send Blast Button */
+        .btn-blast {
+            width: 100%;
+            background: linear-gradient(90deg, #238636 0%, #2ea043 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 30px; /* Pill shape */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.1s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-blast:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 160, 67, 0.4);
+        }
+
+        .btn-blast svg {
+            width: 18px; 
+            height: 18px; 
+            fill: white;
+        }
+
+        /* List View Styles (Kept simple) */
+        .notif-list-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notif-list-item:last-child { border-bottom: none; }
+    </style>
 </head>
 <body>
     <script src="sidebar.js"></script>
     <main class="main-content">
         
-        <div id="view-dashboard">
-            <div class="header">
-                <h1 id="header-notifs">Notification Center</h1>
-            </div>
-
-            <div class="notif-dashboard-grid">
-                <div class="notif-card" onclick="switchSection('view-list')">
-                    <svg class="notif-icon" viewBox="0 0 24 24">
-                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5v-3h3.56c.69 1.19 1.97 2 3.45 2s2.75-.81 3.45-2H19v3zm0-5h-4.99c0 1.1-.9 2-2 2s-2-.9-2-2H5V5h14v9z"/>
-                    </svg>
-                    <h3>View Notifications</h3>
-                    <p>View all notifications received.</p>
-                </div>
-
-                <div class="notif-card" onclick="switchSection('view-send')">
-                    <svg class="notif-icon" viewBox="0 0 24 24">
-                         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                    </svg>
-                    <h3>Send Notification</h3>
-                    <p>Create a notification to be sent to all target users.</p>
-                </div>
-            </div>
+        <div class="header">
+            <h1 id="header-notifs">Notification Center</h1>
         </div>
 
-        <div id="view-list" style="display: none;">
-            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to Dashboard</div>
-            <div class="header">
-                <h2>All Notifications</h2>
-                <button class="btn-cancel" onclick="clearNotifications()">Clear All</button>
+        <div class="notif-layout">
+            <div class="notif-menu">
+                <div class="notif-menu-item" id="tab-list" onclick="switchTab('list')">All Notifications</div>
+                <div class="notif-menu-item active" id="tab-send" onclick="switchTab('send')">Send Notification</div>
             </div>
 
-            <ul class="activity-list">
-                <li class="activity-item">
-                    <div><strong>System Alert</strong>: High volume in "Dynamic Video" queue.</div>
-                    <span>10 mins ago</span>
-                </li>
-                <li class="activity-item">
-                    <div><strong>Appeal Received</strong>: User @gamer_123 appealed a ban.</div>
-                    <span>45 mins ago</span>
-                </li>
-                <li class="activity-item">
-                    <div><strong>System Update</strong>: Maintenance scheduled for Sunday.</div>
-                    <span>2 hours ago</span>
-                </li>
-            </ul>
-        </div>
+            <div class="notif-content-area">
+                
+                <div id="view-send" class="send-card">
+                    <form onsubmit="event.preventDefault(); sendBlast();">
+                        <div class="cyber-input-group">
+                            <label class="cyber-label">Target Audience</label>
+                            <select class="cyber-input">
+                                <option>All Users</option>
+                                <option>Moderators Only</option>
+                                <option>Admins Only</option>
+                                <option>New Users (< 7 days)</option>
+                            </select>
+                        </div>
 
-        <div id="view-send" style="display: none;">
-            <div onclick="switchSection('view-dashboard')" class="back-link">← Back to Dashboard</div>
-            <div class="header">
-                <h2>Send Notification</h2>
-            </div>
-            
-            <div class="info-card" style="max-width: 600px;">
-                <form onsubmit="event.preventDefault(); alert('Notification Sent!'); switchSection('view-dashboard');">
-                    <div class="form-group">
-                        <label>Target Audience</label>
-                        <select>
-                            <option>All Users</option>
-                            <option>Moderators Only</option>
-                            <option>Admins Only</option>
-                        </select>
+                        <div class="cyber-input-group">
+                            <label class="cyber-label">Message Title</label>
+                            <input type="text" class="cyber-input" placeholder="e.g. System Maintenance" required>
+                        </div>
+
+                        <div class="cyber-input-group">
+                            <label class="cyber-label">Message Body</label>
+                            <textarea class="cyber-input" style="height: 140px; resize: vertical;" placeholder="Type your message here..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-blast">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                            SEND BLAST
+                        </button>
+                    </form>
+                </div>
+
+                <div id="view-list" class="send-card" style="display: none; padding: 0;">
+                    <div style="padding: 20px; border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0;">Recent Activity</h3>
+                        <button class="btn-cancel" onclick="clearNotifications()" style="font-size:0.8rem;">Clear All</button>
                     </div>
-                    <div class="form-group">
-                        <label>Message Title</label>
-                        <input type="text" placeholder="e.g. System Maintenance" required>
+                    <div class="notif-list">
+                        <div class="notif-list-item">
+                            <div>
+                                <div style="font-weight:bold; margin-bottom:4px;">System Alert</div>
+                                <div style="font-size:0.9rem; color:var(--text-muted);">High volume detected in "Dynamic Video" queue.</div>
+                            </div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">10m ago</div>
+                        </div>
+                        <div class="notif-list-item">
+                            <div>
+                                <div style="font-weight:bold; margin-bottom:4px;">Appeal Received</div>
+                                <div style="font-size:0.9rem; color:var(--text-muted);">User @gamer_123 has submitted an appeal ticket.</div>
+                            </div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">45m ago</div>
+                        </div>
+                        <div class="notif-list-item">
+                            <div>
+                                <div style="font-weight:bold; margin-bottom:4px;">System Update</div>
+                                <div style="font-size:0.9rem; color:var(--text-muted);">Scheduled maintenance for Sunday, Feb 5th at 2:00 AM.</div>
+                            </div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">2h ago</div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Message Body</label>
-                        <input type="text" style="height: 80px;" placeholder="Type your message here..." required>
-                    </div>
-                    <div style="text-align: right;">
-                        <button type="submit" class="btn-primary">Send Blast</button>
-                    </div>
-                </form>
+                </div>
+
             </div>
         </div>
 
     </main>
 
     <script>
-        function switchSection(id) {
-            // Hide all sections
-            document.getElementById('view-dashboard').style.display = 'none';
-            document.getElementById('view-list').style.display = 'none';
+        function switchTab(tabId) {
+            // 1. Reset Tabs
+            document.querySelectorAll('.notif-menu-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            // 2. Reset Views
             document.getElementById('view-send').style.display = 'none';
+            document.getElementById('view-list').style.display = 'none';
+
+            // 3. Show Target
+            document.getElementById('view-' + tabId).style.display = 'block';
+        }
+
+        function sendBlast() {
+            // Visual feedback
+            const btn = document.querySelector('.btn-blast');
+            const originalText = btn.innerHTML;
             
-            // Show requested section
-            document.getElementById(id).style.display = 'block';
+            btn.innerHTML = 'SENT!';
+            btn.style.background = '#238636'; // Solid green
+            
+            setTimeout(() => {
+                alert('Notification successfully sent to all targets.');
+                btn.innerHTML = originalText;
+                btn.style.background = ''; // Revert to gradient
+                document.querySelector('form').reset();
+            }, 500);
         }
 
         function clearNotifications() {
+            const list = document.querySelector('.notif-list');
+            list.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted);">No notifications found.</div>';
+            
+            // Clear sidebar badge if it exists
             const badge = document.getElementById('sidebar-badge-count');
             if(badge) badge.style.display = 'none';
-            alert('Notifications cleared!');
         }
     </script>
 </body>
