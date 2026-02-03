@@ -31,7 +31,7 @@ const sidebarContent = `
         <li><a href="moderation.html" id="link-mod">${ICONS.mod}<span>${T.mod}</span></a></li>
         <li><a href="audit.html" id="link-audit">${ICONS.audit}<span>${T.audit}</span></a></li>
         <li><a href="appeal-center.html" id="link-appeal">${ICONS.appeal}<span>${T.appeal}</span></a></li>
-        <li><a href="notifications.html" id="link-notifs">${ICONS.notifs}<span>${T.notifs}</span><span class="sidebar-badge" id="sidebar-badge-count">3</span></a></li>
+        <li><a href="notifications.html" id="link-notifs">${ICONS.notifs}<span>${T.notifs}</span></a></li>
     </ul>
 
     <div class="sidebar-spacer"></div>
