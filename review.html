@@ -2,458 +2,130 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Notification Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Task</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* --- Layout: Notification Center Container --- */
-        .notif-wrapper {
-            display: flex;
-            gap: 0; 
-            height: calc(100vh - 140px); 
-            margin-top: 20px;
-        }
-
-        /* --- Left Side: Internal Navigation --- */
-        .notif-sidebar {
-            width: 240px;
-            flex-shrink: 0;
-            border-right: 1px solid var(--border-color); 
-            padding-top: 20px;
-            padding-right: 20px;
-        }
-
-        .notif-nav-item {
-            padding: 12px 20px;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 500;
-            border-radius: 6px;
-            position: relative;
-            transition: all 0.2s ease;
-        }
-
-        .notif-nav-item:hover { color: var(--text-main); background-color: var(--hover-bg); }
-
-        .notif-nav-item.active {
-            color: #fff; 
-            background: linear-gradient(90deg, rgba(35, 134, 54, 0.15) 0%, transparent 100%);
-            border-left: 4px solid #238636;
-            border-radius: 0 6px 6px 0; 
-            font-weight: 700;
-        }
-        body:not(.dark-mode) .notif-nav-item.active { color: #238636; }
-
-        /* --- Right Side: Content Area --- */
-        .notif-content {
-            flex-grow: 1;
-            padding-left: 40px; 
-            padding-top: 10px;
-            height: 100%;
-        }
-
-        /* --- THE MAIN CARD --- */
-        .glass-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            max-width: 1100px; 
-            height: 100%; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- SPLIT VIEW LAYOUT --- */
-        .notif-split-container {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        /* Left Pane: List */
-        .notif-list-pane {
-            width: 380px;
-            flex-shrink: 0;
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-card);
-        }
-
-        /* Right Pane: Detail */
-        .notif-detail-pane {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 40px;
-            background-color: var(--bg-card);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- List View Headers --- */
-        .list-header-top {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            font-weight: 700;
-            color: var(--text-header);
-        }
-
-        .select-all-row {
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background-color: var(--bg-body);
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .list-scroll-area {
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        /* --- List Row Styling --- */
-        .notif-row {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-        .notif-row:hover { background-color: var(--hover-bg); }
-        .notif-row.active-view { background-color: rgba(35, 134, 54, 0.05); }
-
-        .notif-details { flex-grow: 1; overflow: hidden; }
-        .notif-header-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .notif-title { font-size: 0.9rem; font-weight: 500; color: var(--text-header); }
-        .notif-time-sm { font-size: 0.75rem; color: var(--text-muted); }
-        .notif-snippet { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* --- Detail View Styling (Form Style) --- */
-        .detail-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 30px;
-        }
-
-        .detail-title-lg {
-            font-size: 2rem;
-            font-weight: 500; /* Thin/Modern look */
-            color: var(--text-header);
-            margin: 0;
-        }
-
-        .detail-timestamp {
-            text-align: right;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        /* Form Fields mimicking the screenshot */
-        .field-group {
-            margin-bottom: 25px;
-        }
-        .field-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-header);
-        }
-        .field-box {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background-color: var(--bg-input); /* Usually white or transparent */
-            color: var(--text-main);
-            font-size: 1rem;
-        }
-        .field-box.readonly {
-            background-color: transparent; /* Clean look */
-        }
-        .field-box.body-content {
-            min-height: 400px;
-            white-space: pre-wrap;
-            line-height: 1.6;
-        }
-
-        .detail-footer {
-            margin-top: auto;
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            padding-top: 20px;
-            border-top: 1px solid transparent; /* Keeps spacing */
-        }
-
-        /* Buttons */
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            padding: 8px 24px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--text-main);
-            transition: all 0.2s;
-        }
-        .btn-outline:hover {
-            border-color: var(--text-muted);
-            background-color: var(--hover-bg);
-        }
-        
-        .btn-link {
-            background: none;
-            border: none;
-            color: #0969da;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-        .btn-link:hover { text-decoration: underline; }
-
-        /* Custom Checkbox */
-        .custom-checkbox { width: 16px; height: 16px; cursor: pointer; margin-top: 3px; accent-color: #238636; }
-
+        .timer-badge { font-family: monospace; font-size: 1rem; letter-spacing: 1px; font-weight: bold; }
+        .restricted-text { background-color: rgba(210, 153, 34, 0.25); border-bottom: 2px solid #d29922; color: #b07b17; font-weight: bold; padding: 0 2px; border-radius: 2px; }
+        /* Hide modules by default until loaded */
+        #module-content, #module-text { display: none; }
     </style>
 </head>
 <body>
+
     <script src="sidebar.js"></script>
-    <main class="main-content">
+
+    <main class="main-content" style="padding-bottom: 50px;">
         
-        <div class="header">
-            <h1 id="header-title">Notification Center</h1>
+        <div class="header" style="margin-bottom: 10px; border-bottom: none; padding-bottom: 0;">
+            <div>
+                <a href="moderation.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem;">← Back to Queues</a>
+                <h1 id="queue-title" style="margin-top: 5px;">Loading...</h1>
+            </div>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="badge status-Active">Time: <span id="timer" class="timer-badge">00:00:00</span></span>
+                <span class="badge" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-main);">
+                    Done: <span id="session-counter" style="font-weight:bold;">0</span>
+                </span>
+            </div>
         </div>
 
-        <div class="notif-wrapper">
+        <div id="loader" style="display: flex; justify-content: center; align-items: center; height: 60vh; font-size: 1.2rem; color: var(--text-muted);">
+            <div>⚡ Fetching next task...</div>
+        </div>
+
+        <div id="workbench" class="workbench-container" style="display: none;">
             
-            <div class="notif-sidebar">
-                <div class="notif-nav-item active" id="nav-list" onclick="switchView('list')">All Notifications</div>
-                <div class="notif-nav-item" id="nav-send" onclick="switchView('send')">Send Notification</div>
+            <div class="left-sidebar">
+                <div class="info-card">
+                    <div class="info-header">Content Info</div>
+                    <div class="info-row"><span class="label">Content ID:</span> <span class="value" id="content-id">--</span></div>
+                    <div class="info-row"><span class="label">Type:</span> <span class="value" id="content-type">--</span></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-header">User Info</div>
+                    <div class="info-row"><span class="label">User ID:</span> <span class="value" id="user-id">--</span></div>
+                    <div class="info-row"><span class="label">Level:</span> <span class="value" id="user-level">--</span></div>
+                    <div class="info-row"><span class="label">Violations:</span> <span class="value" id="viol-hist" style="color:#f85149">0</span></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-header">Moderation Info</div>
+                    <div class="info-row"><span class="label">Task ID:</span> <span class="value" id="sidebar-task-id" style="font-family:monospace;">--</span></div>
+                    <div class="info-row"><span class="label">Reviewer:</span> <span class="value" id="reviewer-name">Admin</span></div>
+                </div>
             </div>
 
-            <div class="notif-content">
+            <div class="content-canvas">
                 
-                <div id="view-list" class="glass-card" style="display: flex;">
+                <div id="module-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-header">CONTENT</div>
+                        <span id="status-content" class="decision-badge"></span>
+                    </div>
+                    <div class="image-grid" id="image-container"></div>
                     
-                    <div class="notif-split-container">
-                        
-                        <div class="notif-list-pane">
-                            <div class="list-header-top">
-                                <span>History</span>
-                                <button class="btn-link" onclick="NotifApp.markAllRead()">Mark all as read</button>
-                            </div>
-                            <div class="select-all-row">
-                                <input type="checkbox" id="selectAll" class="custom-checkbox" onchange="NotifApp.toggleSelectAll(this)">
-                                <label for="selectAll" style="cursor:pointer;">Select All</label>
-                                <button id="btnDeleteList" class="btn-link" style="color:#f85149; margin-left:auto; display:none;" onclick="NotifApp.deleteSelected()">Delete</button>
-                            </div>
-                            <div class="list-scroll-area" id="notif-list-container">
-                                </div>
-                        </div>
-
-                        <div class="notif-detail-pane" id="detail-view">
-                            <div style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
-                                Select a notification to view details
-                            </div>
-                        </div>
-
+                    <div class="action-module">
+                        <button class="btn-sm btn-approve-sm" onclick="ReviewApp.setStatus('content', 'approve')">Approve</button>
+                        <button class="btn-sm btn-reject-sm" onclick="ReviewApp.openDrawer('content')">Reject</button>
                     </div>
                 </div>
 
-                <div id="view-send" class="glass-card" style="display: none; padding: 40px;">
-                    <form onsubmit="event.preventDefault(); NotifApp.sendBlast();" style="max-width: 600px;">
-                        <h2 style="margin-bottom:20px;">Send Notification</h2>
-                        <div class="field-group">
-                            <label class="field-label">Target Audience</label>
-                            <select class="field-box" style="background:#fff;">
-                                <option>All Users</option>
-                                <option>Moderators Only</option>
-                                <option>Admins Only</option>
-                            </select>
-                        </div>
-                        <div class="field-group">
-                            <label class="field-label">Message Title</label>
-                            <input type="text" class="field-box" placeholder="e.g. System Maintenance">
-                        </div>
-                        <div class="field-group">
-                            <label class="field-label">Message Body</label>
-                            <textarea class="field-box" style="height:150px; resize:vertical;" placeholder="Type message..."></textarea>
-                        </div>
-                        <button class="btn-outline" style="background:#238636; color:white; border:none;">Send Blast</button>
-                    </form>
+                <div id="module-text" style="margin-top: 30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-header">TEXT</div>
+                        <span id="status-text" class="decision-badge"></span>
+                    </div>
+
+                    <div id="text-wrapper-top" style="margin-bottom: 15px;">
+                        <div class="label" id="label-top" style="margin-bottom:4px; font-weight:bold;">Context</div>
+                        <div id="text-top" class="text-context-box" onmouseup="ReviewApp.handleTextSelection('top')"></div>
+                    </div>
+
+                    <div id="text-wrapper-bottom">
+                        <div class="label" id="label-bottom" style="margin-bottom:4px; font-weight:bold;">Content</div>
+                        <div id="text-bottom" class="text-context-box" onmouseup="ReviewApp.handleTextSelection('bottom')"></div>
+                    </div>
+
+                    <div class="action-module">
+                        <button class="btn-sm btn-approve-sm" onclick="ReviewApp.setStatus('text', 'approve')">Approve</button>
+                        <button class="btn-sm btn-restrict-sm" onmousedown="event.preventDefault()" onclick="ReviewApp.setStatus('text', 'restrict')">Restrict</button>
+                        <button class="btn-sm btn-reject-sm" onclick="ReviewApp.openDrawer('text')">Reject</button>
+                    </div>
                 </div>
 
+                <div style="margin-top: auto; padding-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
+                    <button class="btn-cancel" onclick="ReviewApp.submitAndExit()">Submit & Exit</button>
+                    <button class="btn-primary" onclick="ReviewApp.nextTask()">Submit & Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="violationDrawer" class="violation-drawer">
+            <div class="drawer-header"><span>Select Reason</span><span style="cursor:pointer;" onclick="ReviewApp.closeDrawer()">✕</span></div>
+            <div class="drawer-content" id="violationList"></div>
+        </div>
+
+        <div id="imageViewer" class="viewer-overlay">
+            <span class="close-viewer" onclick="ImageViewer.close()">×</span>
+            <div class="viewer-content">
+                <img id="viewer-img-target" src="" class="viewer-image" alt="Zoom View">
+            </div>
+            <div class="viewer-controls">
+                <button class="viewer-btn" onclick="ImageViewer.transform('zoomIn')" title="Zoom In">➕</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('zoomOut')" title="Zoom Out">➖</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('rotateL')" title="Rotate Left">↺</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('rotateR')" title="Rotate Right">↻</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('flip')" title="Flip Horizontal">⇄</button>
             </div>
         </div>
 
     </main>
 
-    <script>
-        function switchView(view) {
-            document.querySelectorAll('.notif-nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-' + view).classList.add('active');
-            document.getElementById('view-send').style.display = 'none';
-            document.getElementById('view-list').style.display = 'none';
-            
-            if(view === 'list') {
-                document.getElementById('view-list').style.display = 'flex';
-            } else {
-                document.getElementById('view-send').style.display = 'block';
-            }
-        }
-
-        const NotifApp = {
-            data: [
-                { id: 1, title: "System Alert", body: "High volume detected in \"Dynamic Video\" queue. Please allocate more resources.", time: "10m ago", fullTime: "02/03/2026 15:23", read: false, sender: "Admin" },
-                { id: 2, title: "New Appeal", body: "User @gamer123 has submitted an appeal ticket for review.", time: "45m ago", fullTime: "02/03/2026 14:45", read: false, sender: "System" },
-                { id: 3, title: "Maintenance", body: "Scheduled maintenance for Feb 5th. System will be down for 2 hours.", time: "2h ago", fullTime: "02/03/2026 13:00", read: true, sender: "IT Dept" },
-                { id: 4, title: "Server Load", body: "Node-EU-3 is experiencing high latency (350ms).", time: "3h ago", fullTime: "02/03/2026 12:15", read: true, sender: "Monitor" },
-                { id: 5, title: "Payment Failed", body: "Gateway B reported a 2% failure rate increase.", time: "5h ago", fullTime: "02/03/2026 10:00", read: true, sender: "Billing" },
-                { id: 6, title: "New Registration", body: "User @mod_candidate completed onboarding.", time: "1d ago", fullTime: "02/02/2026 09:30", read: true, sender: "Auth" },
-                { id: 7, title: "Policy Update", body: "New moderation guidelines updated for \"Hate Speech\".", time: "2d ago", fullTime: "02/01/2026 16:00", read: true, sender: "Policy" }
-            ],
-            selected: new Set(),
-            currentViewId: null,
-
-            init() {
-                this.renderList();
-                // Select first item by default like the image implies
-                if(this.data.length > 0) this.handleRowClick(this.data[0].id);
-            },
-
-            renderList() {
-                const container = document.getElementById('notif-list-container');
-                container.innerHTML = this.data.map(item => `
-                    <div class="notif-row ${this.currentViewId === item.id ? 'active-view' : ''}" onclick="NotifApp.handleRowClick(${item.id})">
-                        <div onclick="event.stopPropagation()">
-                            <input type="checkbox" class="custom-checkbox" 
-                                ${this.selected.has(item.id) ? 'checked' : ''}
-                                onchange="NotifApp.toggleSelect(${item.id})">
-                        </div>
-                        <div class="notif-details">
-                            <div class="notif-header-line">
-                                <span class="notif-title" style="${!item.read ? 'font-weight:700' : ''}">${item.title}</span>
-                                <span class="notif-time-sm">${item.time}</span>
-                            </div>
-                            <div class="notif-snippet">${item.body}</div>
-                        </div>
-                    </div>
-                `).join('');
-                
-                // Show/Hide Delete button in header based on selection
-                const delBtn = document.getElementById('btnDeleteList');
-                delBtn.style.display = this.selected.size > 0 ? 'block' : 'none';
-                delBtn.innerText = `Delete (${this.selected.size})`;
-            },
-
-            renderDetail(id) {
-                const container = document.getElementById('detail-view');
-                const item = this.data.find(i => i.id === id);
-
-                if (!item) {
-                    container.innerHTML = `<div style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">Select a notification</div>`;
-                    return;
-                }
-
-                container.innerHTML = `
-                    <div class="detail-header-row">
-                        <h1 class="detail-title-lg">${item.title}</h1>
-                        <div class="detail-timestamp">
-                            <div>${item.fullTime}</div>
-                            <div>${item.time}</div>
-                        </div>
-                    </div>
-
-                    <div class="field-group">
-                        <label class="field-label">Sent by:</label>
-                        <div class="field-box readonly">${item.sender}</div>
-                    </div>
-
-                    <div class="field-group" style="flex-grow:1; display:flex; flex-direction:column;">
-                        <label class="field-label">Body:</label>
-                        <div class="field-box readonly body-content">${item.body}</div>
-                    </div>
-
-                    <div class="detail-footer">
-                        <button class="btn-outline" onclick="NotifApp.deleteSingle(${item.id})">Delete</button>
-                        <button class="btn-outline" onclick="NotifApp.markReadSingle(${item.id})">Mark as Read</button>
-                    </div>
-                `;
-            },
-
-            toggleSelect(id) {
-                if(this.selected.has(id)) this.selected.delete(id);
-                else this.selected.add(id);
-                this.renderList();
-            },
-
-            toggleSelectAll(checkbox) {
-                if(checkbox.checked) this.data.forEach(i => this.selected.add(i.id));
-                else this.selected.clear();
-                this.renderList();
-            },
-
-            handleRowClick(id) {
-                this.currentViewId = id;
-                this.renderList(); // Update active highlight
-                this.renderDetail(id);
-            },
-
-            deleteSelected() {
-                if(confirm(`Delete ${this.selected.size} items?`)) {
-                    this.data = this.data.filter(i => !this.selected.has(i.id));
-                    this.selected.clear();
-                    document.getElementById('selectAll').checked = false;
-                    this.renderList();
-                    if(this.data.length > 0) this.handleRowClick(this.data[0].id);
-                    else document.getElementById('detail-view').innerHTML = '';
-                }
-            },
-
-            deleteSingle(id) {
-                if(confirm('Delete this notification?')) {
-                    this.data = this.data.filter(i => i.id !== id);
-                    this.renderList();
-                    // Select next available or clear
-                    if(this.data.length > 0) this.handleRowClick(this.data[0].id);
-                    else document.getElementById('detail-view').innerHTML = '';
-                }
-            },
-
-            markReadSingle(id) {
-                const item = this.data.find(i => i.id === id);
-                if(item) {
-                    item.read = true;
-                    this.renderList();
-                    alert('Marked as read');
-                }
-            },
-
-            markAllRead() {
-                this.data.forEach(i => i.read = true);
-                this.renderList();
-            },
-
-            sendBlast() {
-                alert('Notification Blast Sent!');
-            }
-        };
-
-        NotifApp.init();
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="review-logic.js"></script>
     </script>
 </body>
 </html>
