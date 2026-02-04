@@ -20,7 +20,6 @@
             border-bottom: 1px solid var(--border-color);
         }
         
-        /* Remove border from the last item */
         .settings-section:last-child {
             border-bottom: none;
             padding-bottom: 0;
@@ -38,7 +37,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 15px; /* Added spacing for multiple rows */
         }
+        .settings-row:last-child { margin-bottom: 0; }
 
         .setting-label {
             font-weight: 600;
@@ -51,6 +52,28 @@
             color: var(--text-muted);
             font-size: 0.85rem;
         }
+
+        /* Keybind Input Style */
+        .key-input {
+            width: 120px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-input);
+            color: var(--text-main);
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .key-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+            outline: none;
+            background: var(--hover-bg);
+        }
+        .key-input::placeholder { font-weight: normal; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -87,43 +110,58 @@
                 </div>
             </div>
 
-        </div>
+            <div class="settings-section">
+                <div class="section-title">Keyboard Shortcuts</div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="setting-label">Approve Content</div>
+                        <div class="setting-desc">Key to approve the main content (Image/Video).</div>
+                    </div>
+                    <input type="text" class="key-input" id="bind-approve-content" placeholder="Press key..." readonly>
+                </div>
 
+                <div class="settings-row">
+                    <div>
+                        <div class="setting-label">Reject Content</div>
+                        <div class="setting-desc">Key to reject the main content.</div>
+                    </div>
+                    <input type="text" class="key-input" id="bind-reject-content" placeholder="Press key..." readonly>
+                </div>
+
+                <div class="settings-row">
+                    <div>
+                        <div class="setting-label">Approve Text</div>
+                        <div class="setting-desc">Key to approve the text/caption.</div>
+                    </div>
+                    <input type="text" class="key-input" id="bind-approve-text" placeholder="Press key..." readonly>
+                </div>
+
+                <div class="settings-row">
+                    <div>
+                        <div class="setting-label">Submit & Next</div>
+                        <div class="setting-desc">Submit decision and load next task.</div>
+                    </div>
+                    <input type="text" class="key-input" id="bind-next" placeholder="Press key..." readonly>
+                </div>
+
+                <div style="margin-top: 15px; display:flex; justify-content:flex-end;">
+                     <button class="btn-primary" onclick="saveKeybinds()">Save Shortcuts</button>
+                </div>
+            </div>
+
+        </div>
     </main>
 
     <script>
-        // --- 1. TRANSLATION DICTIONARY ---
+        // --- 1. TRANSLATION & THEME LOGIC (Existing) ---
         const APP_LANG_SET = localStorage.getItem('appLang') || 'en';
-        
         const TEXT = {
-            en: {
-                header: "Settings",
-                appearTitle: "Appearance",
-                darkMode: "Dark Mode",
-                darkDesc: "Adjust the appearance to reduce eye strain.",
-                btnDark: "Switch to Dark Mode",
-                btnLight: "Switch to Light Mode",
-                langTitle: "Language / 语言",
-                langLabel: "Interface Language",
-                langDesc: "Select your preferred language."
-            },
-            zh: {
-                header: "设置",
-                appearTitle: "外观",
-                darkMode: "深色模式",
-                darkDesc: "调整外观以减少眼睛疲劳。",
-                btnDark: "切换到深色模式",
-                btnLight: "切换到浅色模式",
-                langTitle: "语言 / Language",
-                langLabel: "界面语言",
-                langDesc: "选择您的首选语言。"
-            }
+            en: { header: "Settings", appearTitle: "Appearance", darkMode: "Dark Mode", darkDesc: "Adjust the appearance to reduce eye strain.", btnDark: "Switch to Dark Mode", btnLight: "Switch to Light Mode", langTitle: "Language / 语言", langLabel: "Interface Language", langDesc: "Select your preferred language." },
+            zh: { header: "设置", appearTitle: "外观", darkMode: "深色模式", darkDesc: "调整外观以减少眼睛疲劳。", btnDark: "切换到深色模式", btnLight: "切换到浅色模式", langTitle: "语言 / Language", langLabel: "界面语言", langDesc: "选择您的首选语言。" }
         };
-
-        // FIXED: Renamed 'T' to 'T_SET' to avoid conflict with sidebar.js
         const T_SET = TEXT[APP_LANG_SET];
 
-        // --- 2. APPLY TRANSLATIONS ---
         document.getElementById('txt-header').innerText = T_SET.header;
         document.getElementById('txt-appear-title').innerText = T_SET.appearTitle;
         document.getElementById('txt-dark-mode').innerText = T_SET.darkMode;
@@ -132,13 +170,11 @@
         document.getElementById('txt-lang-label').innerText = T_SET.langLabel;
         document.getElementById('txt-lang-desc').innerText = T_SET.langDesc;
 
-        // --- 3. THEME LOGIC ---
         function updateThemeButtonText() {
             const isDark = document.body.classList.contains('dark-mode');
             const btn = document.getElementById('btn-theme-toggle');
             btn.innerText = isDark ? T_SET.btnLight : T_SET.btnDark;
         }
-
         updateThemeButtonText();
         window.addEventListener('themeChanged', updateThemeButtonText);
         
@@ -148,12 +184,56 @@
             setTimeout(updateThemeButtonText, 50);
         };
 
-        // --- 4. LANGUAGE LOGIC ---
         document.getElementById('langSelect').value = APP_LANG_SET;
-
         function changeLanguage(lang) {
             localStorage.setItem('appLang', lang);
             location.reload(); 
+        }
+
+        // --- 2. KEYBIND LOGIC (New) ---
+        
+        // Load existing binds or defaults
+        const defaultBinds = {
+            'approve-content': '1',
+            'reject-content': '2',
+            'approve-text': '3',
+            'next': 'Enter'
+        };
+        let currentBinds = JSON.parse(localStorage.getItem('appKeybinds')) || defaultBinds;
+
+        // Init inputs
+        const bindInputs = {
+            'approve-content': document.getElementById('bind-approve-content'),
+            'reject-content': document.getElementById('bind-reject-content'),
+            'approve-text': document.getElementById('bind-approve-text'),
+            'next': document.getElementById('bind-next')
+        };
+
+        // Populate fields
+        for (const [action, key] of Object.entries(currentBinds)) {
+            if(bindInputs[action]) bindInputs[action].value = key;
+        }
+
+        // Add recording listeners
+        Object.values(bindInputs).forEach(input => {
+            input.addEventListener('keydown', (e) => {
+                e.preventDefault();
+                let key = e.key;
+                if(key === ' ') key = 'Space';
+                input.value = key;
+                input.classList.add('active-bind'); // Visual feedback class if you want to add it
+            });
+        });
+
+        function saveKeybinds() {
+            const newBinds = {
+                'approve-content': bindInputs['approve-content'].value,
+                'reject-content': bindInputs['reject-content'].value,
+                'approve-text': bindInputs['approve-text'].value,
+                'next': bindInputs['next'].value
+            };
+            localStorage.setItem('appKeybinds', JSON.stringify(newBinds));
+            alert('Shortcuts Saved!');
         }
     </script>
 </body>
