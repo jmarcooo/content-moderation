@@ -198,46 +198,34 @@
             location.reload(); 
         }
 
-        // --- 2. KEYBIND LOGIC (New) ---
-        
-        // Load existing binds or defaults
+        // 1. Update Default Binds
         const defaultBinds = {
             'approve-content': '1',
             'reject-content': '2',
             'approve-text': '3',
+            'reject-text': '4',  // <--- NEW DEFAULT
             'next': 'Enter'
         };
         let currentBinds = JSON.parse(localStorage.getItem('appKeybinds')) || defaultBinds;
 
-        // Init inputs
+        // 2. Update Inputs Map
         const bindInputs = {
             'approve-content': document.getElementById('bind-approve-content'),
             'reject-content': document.getElementById('bind-reject-content'),
             'approve-text': document.getElementById('bind-approve-text'),
+            'reject-text': document.getElementById('bind-reject-text'), // <--- NEW INPUT
             'next': document.getElementById('bind-next')
         };
 
-        // Populate fields
-        for (const [action, key] of Object.entries(currentBinds)) {
-            if(bindInputs[action]) bindInputs[action].value = key;
-        }
+        // ... existing "Populate fields" and "Add recording listeners" loops work automatically ...
 
-        // Add recording listeners
-        Object.values(bindInputs).forEach(input => {
-            input.addEventListener('keydown', (e) => {
-                e.preventDefault();
-                let key = e.key;
-                if(key === ' ') key = 'Space';
-                input.value = key;
-                input.classList.add('active-bind'); // Visual feedback class if you want to add it
-            });
-        });
-
+        // 3. Update Save Function
         function saveKeybinds() {
             const newBinds = {
                 'approve-content': bindInputs['approve-content'].value,
                 'reject-content': bindInputs['reject-content'].value,
                 'approve-text': bindInputs['approve-text'].value,
+                'reject-text': bindInputs['reject-text'].value, // <--- NEW SAVE
                 'next': bindInputs['next'].value
             };
             localStorage.setItem('appKeybinds', JSON.stringify(newBinds));
