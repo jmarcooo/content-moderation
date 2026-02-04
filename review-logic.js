@@ -31,7 +31,7 @@ window.ImageViewer = {
     }
 };
 
-// Attach ReviewApp to window to ensure HTML access (Fixes the "Close" bug)
+// Attach ReviewApp to window to ensure HTML access
 window.ReviewApp = {
     timerInterval: null,
     secondsElapsed: 0,
@@ -88,6 +88,26 @@ window.ReviewApp = {
         };
 
         document.addEventListener('keydown', (e) => {
+            // --- NEW: HANDLE ESCAPE KEY ---
+            if (e.key === 'Escape') {
+                // 1. Check if Image Viewer is open
+                const viewer = document.getElementById('imageViewer');
+                if(viewer && viewer.style.display === 'flex') {
+                    e.preventDefault();
+                    window.ImageViewer.close();
+                    return; // Stop here, don't trigger anything else
+                }
+                
+                // 2. Check if Rejection Drawer is open
+                const drawer = document.getElementById('violationDrawer');
+                if(drawer && drawer.classList.contains('open')) {
+                    e.preventDefault();
+                    this.closeDrawer();
+                    return; // Stop here
+                }
+            }
+
+            // Ignore typing in inputs
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
             const pressed = getPressedString(e);
@@ -171,10 +191,10 @@ window.ReviewApp = {
             if (task.images.length > 0) {
                 modContent.style.display = 'block'; 
                 if (q.includes('avatar')) {
-                    imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="ImageViewer.open(this.src)">`;
+                    imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="window.ImageViewer.open(this.src)">`;
                 } else {
                     imgContainer.innerHTML = task.images.map(src => 
-                        `<div class="content-image-card"><img src="${src}" onclick="ImageViewer.open(this.src)"></div>`
+                        `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
                     ).join('');
                 }
             } else {
@@ -245,7 +265,7 @@ window.ReviewApp = {
 
     setStatus(target, status, reason='', preserve=false) {
         const container = document.getElementById(`module-${target}`);
-        if(!container) return; // Guard clause
+        if(!container) return; 
         
         container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
         
