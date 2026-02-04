@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Admin Portal</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            background-color: var(--bg-body); /* Uses Theme Color */
+            background-color: var(--bg-body); 
         }
         
         .login-card { 
             width: 100%; 
             max-width: 350px; 
-            background: var(--bg-card);      /* Uses Theme Color */
+            background: var(--bg-card);      
             padding: 2rem; 
             border-radius: 6px; 
             border: 1px solid var(--border-color); 
@@ -24,7 +25,7 @@
             text-align: center; 
         }
         
-        .sidebar { display: none; } /* Hide sidebar on login */
+        .sidebar { display: none; } 
     </style>
 </head>
 <body>
@@ -43,32 +44,43 @@
     </div>
 
     <script>
+        // Your Codespaces URL
+        const API_URL = 'https://cautious-capybara-v6jqqj6xvv47hx49p.github.dev';
+
         // 1. CLEAR OLD SESSION
         localStorage.removeItem('currentUser'); 
 
-        // 2. CHECK THEME (Login page needs to know if it should be dark)
+        // 2. CHECK THEME
         const savedTheme = localStorage.getItem('appTheme') || 'light';
         if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
-        // 3. LOGIN LOGIC
+        // 3. LOGIN LOGIC (SERVER-SIDE)
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
 
             try {
-                const res = await fetch('users.json');
-                const users = await res.json();
-                const valid = users.find(user => user.username === u && user.password === p);
+                // Send credentials to backend
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
 
-                if (valid) {
-                    localStorage.setItem('currentUser', JSON.stringify(valid));
+                const result = await response.json();
+
+                if (result.success) {
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
                     window.location.href = 'home.html';
                 } else {
+                    document.getElementById('error-msg').innerText = "❌ " + (result.message || "Invalid credentials");
                     document.getElementById('error-msg').style.display = 'block';
                 }
             } catch (err) {
-                alert('Error loading database. Ensure you are viewing via GitHub Pages.');
+                console.error(err);
+                document.getElementById('error-msg').innerText = "❌ Server Error. Is backend running?";
+                document.getElementById('error-msg').style.display = 'block';
             }
         });
     </script>
