@@ -1,12 +1,19 @@
-const ImageViewer = {
+// Attach ImageViewer to window to ensure HTML access
+window.ImageViewer = {
     scale: 1, rotate: 0, flip: 1,
     open(src) {
         const viewer = document.getElementById('imageViewer');
-        document.getElementById('viewer-img-target').src = src;
-        this.reset();
-        viewer.style.display = 'flex';
+        const target = document.getElementById('viewer-img-target');
+        if(viewer && target) {
+            target.src = src;
+            this.reset();
+            viewer.style.display = 'flex';
+        }
     },
-    close() { document.getElementById('imageViewer').style.display = 'none'; },
+    close() { 
+        const viewer = document.getElementById('imageViewer');
+        if(viewer) viewer.style.display = 'none'; 
+    },
     reset() { this.scale = 1; this.rotate = 0; this.flip = 1; this.update(); },
     transform(action) {
         if (action === 'zoomIn') this.scale += 0.2;
@@ -17,35 +24,44 @@ const ImageViewer = {
         this.update();
     },
     update() {
-        document.getElementById('viewer-img-target').style.transform = 
-            `scale(${this.scale}) rotate(${this.rotate}deg) scaleX(${this.flip})`;
+        const target = document.getElementById('viewer-img-target');
+        if(target) {
+            target.style.transform = `scale(${this.scale}) rotate(${this.rotate}deg) scaleX(${this.flip})`;
+        }
     }
 };
 
-const ReviewApp = {
+// Attach ReviewApp to window to ensure HTML access (Fixes the "Close" bug)
+window.ReviewApp = {
     timerInterval: null,
     secondsElapsed: 0,
     tasksCompleted: 0,
     currentTargetForDrawer: '',
     queueName: '',
     
-init() {
+    init() {
         if(typeof Auth !== 'undefined') {
             const user = Auth.requireLogin();
-            if(user) document.getElementById('reviewer-name').innerText = user.name;
+            if(user) {
+                const el = document.getElementById('reviewer-name');
+                if(el) el.innerText = user.name;
+            }
         }
         const urlParams = new URLSearchParams(window.location.search);
         this.queueName = urlParams.get('queue') || 'Review';
         const tenant = urlParams.get('tenant') || 'BP';
-        document.getElementById('queue-title').innerText = `${tenant} ${this.queueName}`;
+        
+        const titleEl = document.getElementById('queue-title');
+        if(titleEl) titleEl.innerText = `${tenant} ${this.queueName}`;
+
         this.renderViolations();
         this.loadNextTask();
         
-        // NEW: Initialize Keybinds
+        // Initialize Keybinds
         this.bindKeys();
     },
 
-bindKeys() {
+    bindKeys() {
         const defaults = { 
             'approve-content': '1', 
             'reject-content': '2', 
@@ -57,7 +73,6 @@ bindKeys() {
         };
         const binds = JSON.parse(localStorage.getItem('appKeybinds')) || defaults;
 
-        // Helper to reconstruct key string from event
         const getPressedString = (e) => {
             if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return null;
             let keys = [];
@@ -96,19 +111,14 @@ bindKeys() {
             // --- BATCH ACTIONS ---
             else if (pressed === binds['approve-all']) {
                 e.preventDefault();
-                // Check if modules exist/are visible before acting
-                if(document.getElementById('module-content').style.display !== 'none') 
-                    this.setStatus('content', 'approve');
-                if(document.getElementById('module-text').style.display !== 'none') 
-                    this.setStatus('text', 'approve');
+                const mc = document.getElementById('module-content');
+                const mt = document.getElementById('module-text');
+                if(mc && mc.style.display !== 'none') this.setStatus('content', 'approve');
+                if(mt && mt.style.display !== 'none') this.setStatus('text', 'approve');
             } 
             else if (pressed === binds['reject-all']) {
                 e.preventDefault();
-                // "Reject All" sets status to Reject immediately (Batch Action)
-                if(document.getElementById('module-content').style.display !== 'none') 
-                    this.setStatus('content', 'reject', 'Batch Reject');
-                if(document.getElementById('module-text').style.display !== 'none') 
-                    this.setStatus('text', 'reject', 'Batch Reject');
+                this.openDrawer('both');
             } 
             
             // --- SUBMIT ---
@@ -118,7 +128,7 @@ bindKeys() {
             }
         });
     },
-    
+
     generateTask() {
         const id = Math.floor(Math.random() * 99999);
         const type = this.queueName.toLowerCase();
@@ -146,7 +156,7 @@ bindKeys() {
         this.stopTimer(); 
         document.getElementById('loader').style.display = 'flex';
         document.getElementById('workbench').style.display = 'none';
-        this.resetUI();
+        this.resetUI(); 
 
         setTimeout(() => {
             const task = this.generateTask();
@@ -211,17 +221,19 @@ bindKeys() {
 
     startTimer() {
         this.secondsElapsed = 0;
-        document.getElementById('timer').innerText = "00:00:00";
+        const timerEl = document.getElementById('timer');
+        if(timerEl) timerEl.innerText = "00:00:00";
         this.timerInterval = setInterval(() => {
             this.secondsElapsed++;
             const date = new Date(0);
             date.setSeconds(this.secondsElapsed);
-            document.getElementById('timer').innerText = date.toISOString().substr(11, 8);
+            if(timerEl) timerEl.innerText = date.toISOString().substr(11, 8);
         }, 1000);
     },
     stopTimer() { clearInterval(this.timerInterval); },
 
     resetUI() {
+        this.closeDrawer(); 
         ['content', 'text'].forEach(t => {
             const badge = document.getElementById(`status-${t}`);
             if(badge) badge.style.display = 'none';
@@ -233,6 +245,8 @@ bindKeys() {
 
     setStatus(target, status, reason='', preserve=false) {
         const container = document.getElementById(`module-${target}`);
+        if(!container) return; // Guard clause
+        
         container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
         
         if (!preserve && target === 'text') this.clearAllHighlights();
@@ -242,10 +256,12 @@ bindKeys() {
         if(status === 'reject') container.querySelector('.btn-reject-sm').classList.add('active');
 
         const badge = document.getElementById(`status-${target}`);
-        badge.style.display = 'block';
-        if(status === 'approve') { badge.innerText="✅ APPROVED"; badge.className="decision-badge score-perfect"; }
-        else if(status === 'restrict') { badge.innerText="⚠️ RESTRICTED"; badge.className="decision-badge score-good"; }
-        else { badge.innerText=`⛔ REJECTED: ${reason}`; badge.className="decision-badge score-bad"; }
+        if(badge) {
+            badge.style.display = 'block';
+            if(status === 'approve') { badge.innerText="✅ APPROVED"; badge.className="decision-badge score-perfect"; }
+            else if(status === 'restrict') { badge.innerText="⚠️ RESTRICTED"; badge.className="decision-badge score-good"; }
+            else { badge.innerText=`⛔ REJECTED: ${reason}`; badge.className="decision-badge score-bad"; }
+        }
     },
 
     clearAllHighlights() {
@@ -254,45 +270,28 @@ bindKeys() {
         });
     },
 
-    // FIX: Robust selection logic using extractContents
     handleTextSelection(slot) {
         const box = document.getElementById(`text-${slot}`);
         if (!box || !box.classList.contains('moderatable')) return;
 
         const selection = window.getSelection();
-        
-        // 1. Guard Clause: If no text selected, do nothing
         if (selection.rangeCount === 0 || selection.isCollapsed) return;
-
-        // 2. Guard Clause: Ensure selection is inside the box
         if (!box.contains(selection.anchorNode) || !box.contains(selection.focusNode)) return;
 
         const range = selection.getRangeAt(0);
         const text = selection.toString();
         
-        // 3. Guard Clause: Ensure meaningful text
         if (!text || text.trim().length === 0) return;
         
         try {
-            // A. Create the highlight span
             const span = document.createElement('span');
             span.className = 'restricted-text';
-            
-            // B. Extract the actual DOM content (preserves text perfectly)
             const fragment = range.extractContents();
             span.appendChild(fragment);
-
-            // C. Insert the highlighted span back into the range
             range.insertNode(span);
-            
-            // D. Clear selection to avoid visual confusion
             selection.removeAllRanges();
-            
-            // E. Activate "Restricted" Button (preserve=true prevents clearing the highlight we just made)
             this.setStatus('text', 'restrict', '', true);
-        } catch (e) { 
-            console.error("Highlighting failed", e); 
-        }
+        } catch (e) { console.error("Highlighting failed", e); }
     },
 
     renderViolations() {
@@ -306,7 +305,7 @@ bindKeys() {
             h += `<div class="violation-category">
                     <div class="category-trigger" onclick="this.nextElementSibling.classList.toggle('active')">${c} ▼</div>
                     <div class="violation-submenu">
-                        ${s.map(sub=>`<div class="violation-option" onclick="ReviewApp.confirmReject('${c}-${sub}')">${sub}</div>`).join('')}
+                        ${s.map(sub=>`<div class="violation-option" onclick="window.ReviewApp.confirmReject('${c}-${sub}')">${sub}</div>`).join('')}
                     </div>
                 </div>`;
         }
@@ -330,18 +329,37 @@ bindKeys() {
             else titleEl.innerText = "Select Reason";
         }
         
-        document.getElementById('violationDrawer').classList.add('open'); 
+        const drawer = document.getElementById('violationDrawer');
+        if(drawer) drawer.classList.add('open'); 
+    },
+
+    closeDrawer() { 
+        const drawer = document.getElementById('violationDrawer');
+        if(drawer) drawer.classList.remove('open'); 
     },
     
+    confirmReject(r) { 
+        // Handle "Both" case from Batch Action
+        if (this.currentTargetForDrawer === 'both') {
+            const mc = document.getElementById('module-content');
+            const mt = document.getElementById('module-text');
+            if(mc && mc.style.display !== 'none') this.setStatus('content', 'reject', r);
+            if(mt && mt.style.display !== 'none') this.setStatus('text', 'reject', r);
+        } else {
+            this.setStatus(this.currentTargetForDrawer, 'reject', r); 
+        }
+        this.closeDrawer(); 
+    },
+
     validateSubmission() {
         const isVisible = (elem) => !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
         const contentModule = document.getElementById('module-content');
-        if (isVisible(contentModule) && !contentModule.querySelector('.btn-sm.active')) {
+        if (contentModule && isVisible(contentModule) && !contentModule.querySelector('.btn-sm.active')) {
             alert("⚠️ Missing decision for CONTENT.");
             return false;
         }
         const textModule = document.getElementById('module-text');
-        if (isVisible(textModule)) {
+        if (textModule && isVisible(textModule)) {
             const activeBtn = textModule.querySelector('.btn-sm.active');
             if (!activeBtn) {
                 alert("⚠️ Missing decision for TEXT.");
@@ -357,16 +375,18 @@ bindKeys() {
 
     nextTask() {
         if (!this.validateSubmission()) return;
-        document.getElementById('session-counter').innerText = ++this.tasksCompleted;
+        const counter = document.getElementById('session-counter');
+        if(counter) counter.innerText = ++this.tasksCompleted;
         this.loadNextTask();
     },
 
     submitAndExit() { 
         if (!this.validateSubmission()) return;
+        this.closeDrawer(); 
         window.location.href = 'moderation.html'; 
     }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    ReviewApp.init();
+    window.ReviewApp.init();
 });
