@@ -45,32 +45,75 @@ init() {
         this.bindKeys();
     },
 
-   bindKeys() {
-        // Update defaults here to match settings
+bindKeys() {
         const defaults = { 
             'approve-content': '1', 
             'reject-content': '2', 
             'approve-text': '3', 
-            'reject-text': '4', // <--- NEW DEFAULT
+            'reject-text': '4',
+            'approve-all': 'Ctrl+1',
+            'reject-all': 'Ctrl+2',
             'next': 'Enter' 
         };
         const binds = JSON.parse(localStorage.getItem('appKeybinds')) || defaults;
 
+        // Helper to reconstruct key string from event
+        const getPressedString = (e) => {
+            if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return null;
+            let keys = [];
+            if (e.ctrlKey) keys.push('Ctrl');
+            if (e.altKey) keys.push('Alt');
+            if (e.shiftKey) keys.push('Shift');
+            if (e.metaKey) keys.push('Meta');
+            let char = e.key;
+            if (char === ' ') char = 'Space';
+            if (char.length === 1) char = char.toUpperCase();
+            keys.push(char);
+            return keys.join('+');
+        };
+
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-            let pressed = e.key;
-            if (pressed === ' ') pressed = 'Space';
+            const pressed = getPressedString(e);
+            if (!pressed) return;
 
+            // --- SINGLE ACTIONS ---
             if (pressed === binds['approve-content']) {
+                e.preventDefault();
                 this.setStatus('content', 'approve');
             } else if (pressed === binds['reject-content']) {
+                e.preventDefault();
                 this.openDrawer('content');
             } else if (pressed === binds['approve-text']) {
+                e.preventDefault();
                 this.setStatus('text', 'approve');
             } else if (pressed === binds['reject-text']) {
-                this.openDrawer('text'); // <--- NEW LOGIC: Opens drawer for text
-            } else if (pressed === binds['next']) {
+                e.preventDefault();
+                this.openDrawer('text');
+            } 
+            
+            // --- BATCH ACTIONS ---
+            else if (pressed === binds['approve-all']) {
+                e.preventDefault();
+                // Check if modules exist/are visible before acting
+                if(document.getElementById('module-content').style.display !== 'none') 
+                    this.setStatus('content', 'approve');
+                if(document.getElementById('module-text').style.display !== 'none') 
+                    this.setStatus('text', 'approve');
+            } 
+            else if (pressed === binds['reject-all']) {
+                e.preventDefault();
+                // "Reject All" sets status to Reject immediately (Batch Action)
+                if(document.getElementById('module-content').style.display !== 'none') 
+                    this.setStatus('content', 'reject', 'Batch Reject');
+                if(document.getElementById('module-text').style.display !== 'none') 
+                    this.setStatus('text', 'reject', 'Batch Reject');
+            } 
+            
+            // --- SUBMIT ---
+            else if (pressed === binds['next']) {
+                e.preventDefault();
                 this.nextTask();
             }
         });
