@@ -37,7 +37,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px; /* Added spacing for multiple rows */
+            margin-bottom: 15px;
         }
         .settings-row:last-child { margin-bottom: 0; }
 
@@ -55,7 +55,7 @@
 
         /* Keybind Input Style */
         .key-input {
-            width: 120px;
+            width: 140px;
             padding: 8px;
             text-align: center;
             border: 1px solid var(--border-color);
@@ -73,7 +73,11 @@
             outline: none;
             background: var(--hover-bg);
         }
-        .key-input::placeholder { font-weight: normal; font-size: 0.8rem; }
+        .key-input.active-bind {
+            border-color: #238636;
+            background-color: rgba(35, 134, 54, 0.1);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -136,7 +140,7 @@
                     </div>
                     <input type="text" class="key-input" id="bind-approve-text" placeholder="Press key..." readonly>
                 </div>
-                
+
                 <div class="settings-row">
                     <div>
                         <div class="setting-label">Reject Text</div>
@@ -145,7 +149,23 @@
                     <input type="text" class="key-input" id="bind-reject-text" placeholder="Press key..." readonly>
                 </div>
 
+                <div class="settings-row" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                    <div>
+                        <div class="setting-label">Approve All</div>
+                        <div class="setting-desc">Approve both content and text simultaneously.</div>
+                    </div>
+                    <input type="text" class="key-input" id="bind-approve-all" placeholder="Press key..." readonly>
+                </div>
+
                 <div class="settings-row">
+                    <div>
+                        <div class="setting-label">Reject All</div>
+                        <div class="setting-desc">Reject both content and text simultaneously.</div>
+                    </div>
+                    <input type="text" class="key-input" id="bind-reject-all" placeholder="Press key..." readonly>
+                </div>
+
+                <div class="settings-row" style="margin-top: 15px;">
                     <div>
                         <div class="setting-label">Submit & Next</div>
                         <div class="setting-desc">Submit decision and load next task.</div>
@@ -198,59 +218,83 @@
             location.reload(); 
         }
 
-        // --- 2. KEYBIND LOGIC ---
-    
+        // --- 2. KEYBIND LOGIC (Updated for Complex Keys) ---
+        
         // A. Define Defaults
         const defaultBinds = {
             'approve-content': '1',
             'reject-content': '2',
             'approve-text': '3',
-            'reject-text': '4', 
+            'reject-text': '4',
+            'approve-all': 'Ctrl+1', 
+            'reject-all': 'Ctrl+2',
             'next': 'Enter'
         };
-    
-        // B. Load Saved & Merge (Fixes issue where new keys don't show up)
+
+        // B. Load Saved & Merge
         const saved = JSON.parse(localStorage.getItem('appKeybinds')) || {};
-        // This combines defaults with your saved keys. 
-        // If a saved key is missing (like the new 'reject-text'), it uses the default.
         let currentBinds = { ...defaultBinds, ...saved };
-    
+
         // C. Map Inputs
         const bindInputs = {
             'approve-content': document.getElementById('bind-approve-content'),
             'reject-content': document.getElementById('bind-reject-content'),
             'approve-text': document.getElementById('bind-approve-text'),
             'reject-text': document.getElementById('bind-reject-text'),
+            'approve-all': document.getElementById('bind-approve-all'),
+            'reject-all': document.getElementById('bind-reject-all'),
             'next': document.getElementById('bind-next')
         };
-    
-        // D. POPULATE FIELDS (This puts the values into the inputs)
+
+        // D. Populate Fields
         for (const [action, key] of Object.entries(currentBinds)) {
             if (bindInputs[action]) {
                 bindInputs[action].value = key;
             }
         }
-    
-        // E. Add Recording Listeners
+
+        // E. Complex Key Listener (Detects Modifiers)
+        function getKeyString(e) {
+            // Don't register standalone modifier presses
+            if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return null;
+
+            let keys = [];
+            if (e.ctrlKey) keys.push('Ctrl');
+            if (e.altKey) keys.push('Alt');
+            if (e.shiftKey) keys.push('Shift');
+            if (e.metaKey) keys.push('Meta');
+            
+            let char = e.key;
+            if (char === ' ') char = 'Space';
+            if (char.length === 1) char = char.toUpperCase();
+            
+            keys.push(char);
+            return keys.join('+');
+        }
+
         Object.values(bindInputs).forEach(input => {
-            if(!input) return; // Guard clause
+            if(!input) return;
             input.addEventListener('keydown', (e) => {
                 e.preventDefault();
-                let key = e.key;
-                if(key === ' ') key = 'Space';
-                input.value = key;
+                // Prevent browser shortcuts (like Ctrl+P) from firing while recording
+                e.stopPropagation();
+                
+                const keyString = getKeyString(e);
+                if (keyString) {
+                    input.value = keyString;
+                    // Visual feedback
+                    input.classList.add('active-bind');
+                    setTimeout(() => input.classList.remove('active-bind'), 200);
+                }
             });
         });
-    
+
         // F. Save Function
         function saveKeybinds() {
-            const newBinds = {
-                'approve-content': bindInputs['approve-content'].value,
-                'reject-content': bindInputs['reject-content'].value,
-                'approve-text': bindInputs['approve-text'].value,
-                'reject-text': bindInputs['reject-text'].value,
-                'next': bindInputs['next'].value
-            };
+            const newBinds = {};
+            for (const [key, input] of Object.entries(bindInputs)) {
+                if(input) newBinds[key] = input.value;
+            }
             localStorage.setItem('appKeybinds', JSON.stringify(newBinds));
             alert('Shortcuts Saved!');
         }
