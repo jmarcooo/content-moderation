@@ -2,302 +2,129 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Task</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Layout specific for Settings Items */
-        .settings-container {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-        }
-
-        .settings-section {
-            padding-bottom: 24px;
-            margin-bottom: 24px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .settings-section:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-            margin-bottom: 0;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--text-header);
-            margin-bottom: 12px;
-        }
-
-        .settings-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .settings-row:last-child { margin-bottom: 0; }
-
-        .setting-label {
-            font-weight: 600;
-            color: var(--text-header);
-            font-size: 0.95rem;
-            margin-bottom: 4px;
-        }
-
-        .setting-desc {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        /* Keybind Input Style */
-        .key-input {
-            width: 140px;
-            padding: 8px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background: var(--bg-input);
-            color: var(--text-main);
-            font-family: monospace;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .key-input:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
-            outline: none;
-            background: var(--hover-bg);
-        }
-        .key-input.active-bind {
-            border-color: #238636;
-            background-color: rgba(35, 134, 54, 0.1);
-            transform: scale(1.05);
-        }
+        .timer-badge { font-family: monospace; font-size: 1rem; letter-spacing: 1px; font-weight: bold; }
+        .restricted-text { background-color: rgba(210, 153, 34, 0.25); border-bottom: 2px solid #d29922; color: #b07b17; font-weight: bold; padding: 0 2px; border-radius: 2px; }
+        /* Hide modules by default until loaded */
+        #module-content, #module-text { display: none; }
     </style>
 </head>
 <body>
+
     <script src="sidebar.js"></script>
-    <main class="main-content">
-        <div class="header">
-            <h1 id="txt-header">Settings</h1>
-        </div>
+
+    <main class="main-content" style="padding-bottom: 50px;">
         
-        <div class="settings-container">
+        <div class="header" style="margin-bottom: 10px; border-bottom: none; padding-bottom: 0;">
+            <div>
+                <a href="moderation.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem;">← Back to Queues</a>
+                <h1 id="queue-title" style="margin-top: 5px;">Loading...</h1>
+            </div>
             
-            <div class="settings-section">
-                <div class="section-title" id="txt-appear-title">Appearance</div>
-                <div class="settings-row">
-                    <div>
-                        <div class="setting-label" id="txt-dark-mode">Dark Mode</div>
-                        <div class="setting-desc" id="txt-dark-desc">Adjust the appearance to reduce eye strain.</div>
-                    </div>
-                    <button class="btn-cancel" id="btn-theme-toggle" onclick="toggleTheme()">Switch to Dark Mode</button>
-                </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="badge status-Active">Time: <span id="timer" class="timer-badge">00:00:00</span></span>
+                <span class="badge" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-main);">
+                    Done: <span id="session-counter" style="font-weight:bold;">0</span>
+                </span>
             </div>
-
-            <div class="settings-section">
-                <div class="section-title" id="txt-lang-title">Language / 语言</div>
-                <div class="settings-row">
-                    <div>
-                        <div class="setting-label" id="txt-lang-label">Interface Language</div>
-                        <div class="setting-desc" id="txt-lang-desc">Select your preferred language.</div>
-                    </div>
-                    <select id="langSelect" class="form-group" style="width: auto; margin-bottom: 0;" onchange="changeLanguage(this.value)">
-                        <option value="en">English</option>
-                        <option value="zh">中文 (Chinese)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="settings-section">
-                <div class="section-title">Keyboard Shortcuts</div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="setting-label">Approve Content</div>
-                        <div class="setting-desc">Key to approve the main content (Image/Video).</div>
-                    </div>
-                    <input type="text" class="key-input" id="bind-approve-content" placeholder="Press key..." readonly>
-                </div>
-
-                <div class="settings-row">
-                    <div>
-                        <div class="setting-label">Reject Content</div>
-                        <div class="setting-desc">Key to reject the main content.</div>
-                    </div>
-                    <input type="text" class="key-input" id="bind-reject-content" placeholder="Press key..." readonly>
-                </div>
-
-                <div class="settings-row">
-                    <div>
-                        <div class="setting-label">Approve Text</div>
-                        <div class="setting-desc">Key to approve the text/caption.</div>
-                    </div>
-                    <input type="text" class="key-input" id="bind-approve-text" placeholder="Press key..." readonly>
-                </div>
-
-                <div class="settings-row">
-                    <div>
-                        <div class="setting-label">Reject Text</div>
-                        <div class="setting-desc">Key to reject the text/caption.</div>
-                    </div>
-                    <input type="text" class="key-input" id="bind-reject-text" placeholder="Press key..." readonly>
-                </div>
-
-                <div class="settings-row" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
-                    <div>
-                        <div class="setting-label">Approve All</div>
-                        <div class="setting-desc">Approve both content and text simultaneously.</div>
-                    </div>
-                    <input type="text" class="key-input" id="bind-approve-all" placeholder="Press key..." readonly>
-                </div>
-
-                <div class="settings-row">
-                    <div>
-                        <div class="setting-label">Reject All</div>
-                        <div class="setting-desc">Reject both content and text simultaneously.</div>
-                    </div>
-                    <input type="text" class="key-input" id="bind-reject-all" placeholder="Press key..." readonly>
-                </div>
-
-                <div class="settings-row" style="margin-top: 15px;">
-                    <div>
-                        <div class="setting-label">Submit & Next</div>
-                        <div class="setting-desc">Submit decision and load next task.</div>
-                    </div>
-                    <input type="text" class="key-input" id="bind-next" placeholder="Press key..." readonly>
-                </div>
-
-                <div style="margin-top: 15px; display:flex; justify-content:flex-end;">
-                     <button class="btn-primary" onclick="saveKeybinds()">Save Shortcuts</button>
-                </div>
-            </div>
-
         </div>
+
+        <div id="loader" style="display: flex; justify-content: center; align-items: center; height: 60vh; font-size: 1.2rem; color: var(--text-muted);">
+            <div>⚡ Fetching next task...</div>
+        </div>
+
+        <div id="workbench" class="workbench-container" style="display: none;">
+            
+            <div class="left-sidebar">
+                <div class="info-card">
+                    <div class="info-header">Content Info</div>
+                    <div class="info-row"><span class="label">Content ID:</span> <span class="value" id="content-id">--</span></div>
+                    <div class="info-row"><span class="label">Type:</span> <span class="value" id="content-type">--</span></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-header">User Info</div>
+                    <div class="info-row"><span class="label">User ID:</span> <span class="value" id="user-id">--</span></div>
+                    <div class="info-row"><span class="label">Level:</span> <span class="value" id="user-level">--</span></div>
+                    <div class="info-row"><span class="label">Violations:</span> <span class="value" id="viol-hist" style="color:#f85149">0</span></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-header">Moderation Info</div>
+                    <div class="info-row"><span class="label">Task ID:</span> <span class="value" id="sidebar-task-id" style="font-family:monospace;">--</span></div>
+                    <div class="info-row"><span class="label">Reviewer:</span> <span class="value" id="reviewer-name">Admin</span></div>
+                </div>
+            </div>
+
+            <div class="content-canvas">
+                
+                <div id="module-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-header">CONTENT</div>
+                        <span id="status-content" class="decision-badge"></span>
+                    </div>
+                    <div class="image-grid" id="image-container"></div>
+                    
+                    <div class="action-module">
+                        <button class="btn-sm btn-approve-sm" onclick="ReviewApp.setStatus('content', 'approve')">Approve</button>
+                        <button class="btn-sm btn-reject-sm" onclick="ReviewApp.openDrawer('content')">Reject</button>
+                    </div>
+                </div>
+
+                <div id="module-text" style="margin-top: 30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-header">TEXT</div>
+                        <span id="status-text" class="decision-badge"></span>
+                    </div>
+
+                    <div id="text-wrapper-top" style="margin-bottom: 15px;">
+                        <div class="label" id="label-top" style="margin-bottom:4px; font-weight:bold;">Context</div>
+                        <div id="text-top" class="text-context-box" onmouseup="ReviewApp.handleTextSelection('top')"></div>
+                    </div>
+
+                    <div id="text-wrapper-bottom">
+                        <div class="label" id="label-bottom" style="margin-bottom:4px; font-weight:bold;">Content</div>
+                        <div id="text-bottom" class="text-context-box" onmouseup="ReviewApp.handleTextSelection('bottom')"></div>
+                    </div>
+
+                    <div class="action-module">
+                        <button class="btn-sm btn-approve-sm" onclick="ReviewApp.setStatus('text', 'approve')">Approve</button>
+                        <button class="btn-sm btn-restrict-sm" onmousedown="event.preventDefault()" onclick="ReviewApp.setStatus('text', 'restrict')">Restrict</button>
+                        <button class="btn-sm btn-reject-sm" onclick="ReviewApp.openDrawer('text')">Reject</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: auto; padding-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
+                    <button class="btn-cancel" onclick="ReviewApp.submitAndExit()">Submit & Exit</button>
+                    <button class="btn-primary" onclick="ReviewApp.nextTask()">Submit & Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="violationDrawer" class="violation-drawer">
+            <div class="drawer-header"><span id="drawer-title">Select Reason</span><span style="cursor:pointer;" onclick="ReviewApp.closeDrawer()">✕</span></div>
+            <div class="drawer-content" id="violationList"></div>
+        </div>
+
+        <div id="imageViewer" class="viewer-overlay">
+            <span class="close-viewer" onclick="ImageViewer.close()">×</span>
+            <div class="viewer-content">
+                <img id="viewer-img-target" src="" class="viewer-image" alt="Zoom View">
+            </div>
+            <div class="viewer-controls">
+                <button class="viewer-btn" onclick="ImageViewer.transform('zoomIn')" title="Zoom In">➕</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('zoomOut')" title="Zoom Out">➖</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('rotateL')" title="Rotate Left">↺</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('rotateR')" title="Rotate Right">↻</button>
+                <button class="viewer-btn" onclick="ImageViewer.transform('flip')" title="Flip Horizontal">⇄</button>
+            </div>
+        </div>
+
     </main>
 
-    <script>
-        // --- 1. TRANSLATION & THEME LOGIC (Existing) ---
-        const APP_LANG_SET = localStorage.getItem('appLang') || 'en';
-        const TEXT = {
-            en: { header: "Settings", appearTitle: "Appearance", darkMode: "Dark Mode", darkDesc: "Adjust the appearance to reduce eye strain.", btnDark: "Switch to Dark Mode", btnLight: "Switch to Light Mode", langTitle: "Language / 语言", langLabel: "Interface Language", langDesc: "Select your preferred language." },
-            zh: { header: "设置", appearTitle: "外观", darkMode: "深色模式", darkDesc: "调整外观以减少眼睛疲劳。", btnDark: "切换到深色模式", btnLight: "切换到浅色模式", langTitle: "语言 / Language", langLabel: "界面语言", langDesc: "选择您的首选语言。" }
-        };
-        const T_SET = TEXT[APP_LANG_SET];
-
-        document.getElementById('txt-header').innerText = T_SET.header;
-        document.getElementById('txt-appear-title').innerText = T_SET.appearTitle;
-        document.getElementById('txt-dark-mode').innerText = T_SET.darkMode;
-        document.getElementById('txt-dark-desc').innerText = T_SET.darkDesc;
-        document.getElementById('txt-lang-title').innerText = T_SET.langTitle;
-        document.getElementById('txt-lang-label').innerText = T_SET.langLabel;
-        document.getElementById('txt-lang-desc').innerText = T_SET.langDesc;
-
-        function updateThemeButtonText() {
-            const isDark = document.body.classList.contains('dark-mode');
-            const btn = document.getElementById('btn-theme-toggle');
-            btn.innerText = isDark ? T_SET.btnLight : T_SET.btnDark;
-        }
-        updateThemeButtonText();
-        window.addEventListener('themeChanged', updateThemeButtonText);
-        
-        const originalToggle = window.toggleTheme;
-        window.toggleTheme = function() {
-            if(originalToggle) originalToggle(); 
-            setTimeout(updateThemeButtonText, 50);
-        };
-
-        document.getElementById('langSelect').value = APP_LANG_SET;
-        function changeLanguage(lang) {
-            localStorage.setItem('appLang', lang);
-            location.reload(); 
-        }
-
-        // --- 2. KEYBIND LOGIC (Updated for Complex Keys) ---
-        
-        // A. Define Defaults
-        const defaultBinds = {
-            'approve-content': '1',
-            'reject-content': '2',
-            'approve-text': '3',
-            'reject-text': '4',
-            'approve-all': 'Ctrl+1', 
-            'reject-all': 'Ctrl+2',
-            'next': 'Enter'
-        };
-
-        // B. Load Saved & Merge
-        const saved = JSON.parse(localStorage.getItem('appKeybinds')) || {};
-        let currentBinds = { ...defaultBinds, ...saved };
-
-        // C. Map Inputs
-        const bindInputs = {
-            'approve-content': document.getElementById('bind-approve-content'),
-            'reject-content': document.getElementById('bind-reject-content'),
-            'approve-text': document.getElementById('bind-approve-text'),
-            'reject-text': document.getElementById('bind-reject-text'),
-            'approve-all': document.getElementById('bind-approve-all'),
-            'reject-all': document.getElementById('bind-reject-all'),
-            'next': document.getElementById('bind-next')
-        };
-
-        // D. Populate Fields
-        for (const [action, key] of Object.entries(currentBinds)) {
-            if (bindInputs[action]) {
-                bindInputs[action].value = key;
-            }
-        }
-
-        // E. Complex Key Listener (Detects Modifiers)
-        function getKeyString(e) {
-            // Don't register standalone modifier presses
-            if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return null;
-
-            let keys = [];
-            if (e.ctrlKey) keys.push('Ctrl');
-            if (e.altKey) keys.push('Alt');
-            if (e.shiftKey) keys.push('Shift');
-            if (e.metaKey) keys.push('Meta');
-            
-            let char = e.key;
-            if (char === ' ') char = 'Space';
-            if (char.length === 1) char = char.toUpperCase();
-            
-            keys.push(char);
-            return keys.join('+');
-        }
-
-        Object.values(bindInputs).forEach(input => {
-            if(!input) return;
-            input.addEventListener('keydown', (e) => {
-                e.preventDefault();
-                // Prevent browser shortcuts (like Ctrl+P) from firing while recording
-                e.stopPropagation();
-                
-                const keyString = getKeyString(e);
-                if (keyString) {
-                    input.value = keyString;
-                    // Visual feedback
-                    input.classList.add('active-bind');
-                    setTimeout(() => input.classList.remove('active-bind'), 200);
-                }
-            });
-        });
-
-        // F. Save Function
-        function saveKeybinds() {
-            const newBinds = {};
-            for (const [key, input] of Object.entries(bindInputs)) {
-                if(input) newBinds[key] = input.value;
-            }
-            localStorage.setItem('appKeybinds', JSON.stringify(newBinds));
-            alert('Shortcuts Saved!');
-        }
-    </script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="review-logic.js"></script>
 </body>
 </html>
