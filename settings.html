@@ -198,34 +198,57 @@
             location.reload(); 
         }
 
-        // 1. Update Default Binds
+        // --- 2. KEYBIND LOGIC ---
+    
+        // A. Define Defaults
         const defaultBinds = {
             'approve-content': '1',
             'reject-content': '2',
             'approve-text': '3',
-            'reject-text': '4',  // <--- NEW DEFAULT
+            'reject-text': '4', 
             'next': 'Enter'
         };
-        let currentBinds = JSON.parse(localStorage.getItem('appKeybinds')) || defaultBinds;
-
-        // 2. Update Inputs Map
+    
+        // B. Load Saved & Merge (Fixes issue where new keys don't show up)
+        const saved = JSON.parse(localStorage.getItem('appKeybinds')) || {};
+        // This combines defaults with your saved keys. 
+        // If a saved key is missing (like the new 'reject-text'), it uses the default.
+        let currentBinds = { ...defaultBinds, ...saved };
+    
+        // C. Map Inputs
         const bindInputs = {
             'approve-content': document.getElementById('bind-approve-content'),
             'reject-content': document.getElementById('bind-reject-content'),
             'approve-text': document.getElementById('bind-approve-text'),
-            'reject-text': document.getElementById('bind-reject-text'), // <--- NEW INPUT
+            'reject-text': document.getElementById('bind-reject-text'),
             'next': document.getElementById('bind-next')
         };
-
-        // ... existing "Populate fields" and "Add recording listeners" loops work automatically ...
-
-        // 3. Update Save Function
+    
+        // D. POPULATE FIELDS (This puts the values into the inputs)
+        for (const [action, key] of Object.entries(currentBinds)) {
+            if (bindInputs[action]) {
+                bindInputs[action].value = key;
+            }
+        }
+    
+        // E. Add Recording Listeners
+        Object.values(bindInputs).forEach(input => {
+            if(!input) return; // Guard clause
+            input.addEventListener('keydown', (e) => {
+                e.preventDefault();
+                let key = e.key;
+                if(key === ' ') key = 'Space';
+                input.value = key;
+            });
+        });
+    
+        // F. Save Function
         function saveKeybinds() {
             const newBinds = {
                 'approve-content': bindInputs['approve-content'].value,
                 'reject-content': bindInputs['reject-content'].value,
                 'approve-text': bindInputs['approve-text'].value,
-                'reject-text': bindInputs['reject-text'].value, // <--- NEW SAVE
+                'reject-text': bindInputs['reject-text'].value,
                 'next': bindInputs['next'].value
             };
             localStorage.setItem('appKeybinds', JSON.stringify(newBinds));
