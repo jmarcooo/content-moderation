@@ -29,7 +29,7 @@ const ReviewApp = {
     currentTargetForDrawer: '',
     queueName: '',
     
-    init() {
+init() {
         if(typeof Auth !== 'undefined') {
             const user = Auth.requireLogin();
             if(user) document.getElementById('reviewer-name').innerText = user.name;
@@ -40,8 +40,37 @@ const ReviewApp = {
         document.getElementById('queue-title').innerText = `${tenant} ${this.queueName}`;
         this.renderViolations();
         this.loadNextTask();
+        
+        // NEW: Initialize Keybinds
+        this.bindKeys();
     },
 
+    bindKeys() {
+        // Load settings or defaults
+        const defaults = { 'approve-content': '1', 'reject-content': '2', 'approve-text': '3', 'next': 'Enter' };
+        const binds = JSON.parse(localStorage.getItem('appKeybinds')) || defaults;
+
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in an input field (e.g. searching, though not present on this page yet)
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            // Normalize key
+            let pressed = e.key;
+            if (pressed === ' ') pressed = 'Space';
+
+            // Check against configured binds
+            if (pressed === binds['approve-content']) {
+                this.setStatus('content', 'approve');
+            } else if (pressed === binds['reject-content']) {
+                this.openDrawer('content'); // Rejection usually requires a reason
+            } else if (pressed === binds['approve-text']) {
+                this.setStatus('text', 'approve');
+            } else if (pressed === binds['next']) {
+                this.nextTask();
+            }
+        });
+    },
+    
     generateTask() {
         const id = Math.floor(Math.random() * 99999);
         const type = this.queueName.toLowerCase();
