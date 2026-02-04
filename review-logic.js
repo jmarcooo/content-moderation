@@ -315,14 +315,24 @@ bindKeys() {
 
     openDrawer(t) { 
         this.currentTargetForDrawer = t; 
+        
+        // Try to find the title element by ID, fallback to querySelector if missing
+        let titleEl = document.getElementById('drawer-title');
+        if (!titleEl) {
+            titleEl = document.querySelector('.drawer-header span:first-child');
+        }
+        
+        // Dynamic Title Update
+        if(titleEl) {
+            if (t === 'content') titleEl.innerText = "Select Rejection for Content";
+            else if (t === 'text') titleEl.innerText = "Select Rejection for Text";
+            else if (t === 'both') titleEl.innerText = "Select Rejection for Both";
+            else titleEl.innerText = "Select Reason";
+        }
+        
         document.getElementById('violationDrawer').classList.add('open'); 
     },
-    closeDrawer() { document.getElementById('violationDrawer').classList.remove('open'); },
-    confirmReject(r) { 
-        this.setStatus(this.currentTargetForDrawer, 'reject', r); 
-        this.closeDrawer(); 
-    },
-
+    
     validateSubmission() {
         const isVisible = (elem) => !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
         const contentModule = document.getElementById('module-content');
