@@ -45,26 +45,31 @@ init() {
         this.bindKeys();
     },
 
-    bindKeys() {
-        // Load settings or defaults
-        const defaults = { 'approve-content': '1', 'reject-content': '2', 'approve-text': '3', 'next': 'Enter' };
+   bindKeys() {
+        // Update defaults here to match settings
+        const defaults = { 
+            'approve-content': '1', 
+            'reject-content': '2', 
+            'approve-text': '3', 
+            'reject-text': '4', // <--- NEW DEFAULT
+            'next': 'Enter' 
+        };
         const binds = JSON.parse(localStorage.getItem('appKeybinds')) || defaults;
 
         document.addEventListener('keydown', (e) => {
-            // Ignore if typing in an input field (e.g. searching, though not present on this page yet)
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-            // Normalize key
             let pressed = e.key;
             if (pressed === ' ') pressed = 'Space';
 
-            // Check against configured binds
             if (pressed === binds['approve-content']) {
                 this.setStatus('content', 'approve');
             } else if (pressed === binds['reject-content']) {
-                this.openDrawer('content'); // Rejection usually requires a reason
+                this.openDrawer('content');
             } else if (pressed === binds['approve-text']) {
                 this.setStatus('text', 'approve');
+            } else if (pressed === binds['reject-text']) {
+                this.openDrawer('text'); // <--- NEW LOGIC: Opens drawer for text
             } else if (pressed === binds['next']) {
                 this.nextTask();
             }
