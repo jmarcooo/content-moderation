@@ -87,23 +87,30 @@ window.ReviewApp = {
             return keys.join('+');
         };
 
+        // Helper to check if a module is actually visible
+        const isVisible = (id) => {
+            const el = document.getElementById(id);
+            // Checks if element exists and is rendered (offsetParent is null if display:none)
+            return el && el.offsetParent !== null;
+        };
+
         document.addEventListener('keydown', (e) => {
-            // --- NEW: HANDLE ESCAPE KEY ---
+            // --- HANDLE ESCAPE KEY ---
             if (e.key === 'Escape') {
-                // 1. Check if Image Viewer is open
+                // 1. Close Image Viewer if open
                 const viewer = document.getElementById('imageViewer');
                 if(viewer && viewer.style.display === 'flex') {
                     e.preventDefault();
                     window.ImageViewer.close();
-                    return; // Stop here, don't trigger anything else
+                    return; 
                 }
                 
-                // 2. Check if Rejection Drawer is open
+                // 2. Close Rejection Drawer if open
                 const drawer = document.getElementById('violationDrawer');
                 if(drawer && drawer.classList.contains('open')) {
                     e.preventDefault();
                     this.closeDrawer();
-                    return; // Stop here
+                    return; 
                 }
             }
 
@@ -113,17 +120,24 @@ window.ReviewApp = {
             const pressed = getPressedString(e);
             if (!pressed) return;
 
-            // --- SINGLE ACTIONS ---
+            // --- SINGLE ACTIONS (With Visibility Checks) ---
             if (pressed === binds['approve-content']) {
+                if (!isVisible('module-content')) return; // FIX: Stop if no content
                 e.preventDefault();
                 this.setStatus('content', 'approve');
+
             } else if (pressed === binds['reject-content']) {
+                if (!isVisible('module-content')) return; // FIX: Stop if no content
                 e.preventDefault();
                 this.openDrawer('content');
+
             } else if (pressed === binds['approve-text']) {
+                if (!isVisible('module-text')) return; // FIX: Stop if no text
                 e.preventDefault();
                 this.setStatus('text', 'approve');
+
             } else if (pressed === binds['reject-text']) {
+                if (!isVisible('module-text')) return; // FIX: Stop if no text
                 e.preventDefault();
                 this.openDrawer('text');
             } 
@@ -131,10 +145,9 @@ window.ReviewApp = {
             // --- BATCH ACTIONS ---
             else if (pressed === binds['approve-all']) {
                 e.preventDefault();
-                const mc = document.getElementById('module-content');
-                const mt = document.getElementById('module-text');
-                if(mc && mc.style.display !== 'none') this.setStatus('content', 'approve');
-                if(mt && mt.style.display !== 'none') this.setStatus('text', 'approve');
+                // "Approve All" safely ignores hidden modules automatically
+                if(isVisible('module-content')) this.setStatus('content', 'approve');
+                if(isVisible('module-text')) this.setStatus('text', 'approve');
             } 
             else if (pressed === binds['reject-all']) {
                 e.preventDefault();
