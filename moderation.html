@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moderation Queues</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* New SVG Utility Classes */
+        .icon-svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            vertical-align: middle;
+            margin-right: 4px;
+            opacity: 0.7;
+        }
+    </style>
 </head>
 <body>
 
@@ -148,6 +159,10 @@
             let total = 0;
             let html = '';
 
+            // DEFINING SVG ICONS HERE
+            const ICON_CLOCK = `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
+            const ICON_BOLT  = `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></svg>`;
+
             if (currentView === 'card') {
                 container.className = 'queue-grid';
             } else {
@@ -176,12 +191,9 @@
 
             html += queueData.map(queue => {
                 total += queue.count;
-
-                // REMOVED PRIORITY LOGIC to match Audit style
-                // Previously: let priorityClass = 'priority-low'; ...
                 
                 if (currentView === 'card') {
-                    // CARD LAYOUT (Removed ${priorityClass} from div)
+                    // CARD LAYOUT
                     return `
                     <div class="queue-card" onclick="openQueue('${queue.name}')">
                         <div>
@@ -196,10 +208,10 @@
 
                         <div class="card-footer">
                             <div class="card-stat-item" title="Average Latency">
-                                ⏱ <span class="card-stat-val">${queue.latency}</span>
+                                ${ICON_CLOCK} <span class="card-stat-val">${queue.latency}</span>
                             </div>
                             <div class="card-stat-item" title="Average Handle Time">
-                                ⚡ <span class="card-stat-val">${queue.aht}</span>
+                                ${ICON_BOLT} <span class="card-stat-val">${queue.aht}</span>
                             </div>
                             <button class="btn-review" style="padding: 2px 8px; font-size: 0.75rem;">Review</button>
                         </div>
@@ -211,8 +223,8 @@
                         <div class="col-tenant"><span class="badge-tenant">${queue.category}</span></div>
                         <div class="col-name">${queue.name}</div>
                         <div class="col-pending">${queue.count.toLocaleString()} <span class="sub-text">Tasks</span></div>
-                        <div class="col-latency"><span class="icon-muted">⏱</span> ${queue.latency}</div>
-                        <div class="col-aht"><span class="icon-muted">⚡</span> ${queue.aht}</div>
+                        <div class="col-latency">${ICON_CLOCK} ${queue.latency}</div>
+                        <div class="col-aht">${ICON_BOLT} ${queue.aht}</div>
                         <div class="col-action"><button class="btn-review">Review</button></div>
                     </div>`;
                 }
