@@ -1060,3 +1060,30 @@ body.dark-mode .status-Active { color: #58a6ff; }
     border-radius: 10px;
     line-height: 1.2;
 }
+
+/* =========================================
+   SVG ICON UTILITIES
+   ========================================= */
+.icon-svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    vertical-align: text-bottom;
+}
+
+.icon-svg-lg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* Specific styling for Queue Card Icons */
+.card-stat-item .icon-svg {
+    color: var(--text-muted);
+    margin-right: 6px;
+}
+
+/* Specific styling for Image Viewer Buttons */
+.viewer-btn .icon-svg-lg {
+    fill: white; /* Viewer background is dark */
+}
