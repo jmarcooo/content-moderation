@@ -44,9 +44,6 @@
     </div>
 
     <script>
-        // Your Codespaces URL
-        const API_URL = 'http://localhost:3000';
-
         // 1. CLEAR OLD SESSION
         localStorage.removeItem('currentUser'); 
 
@@ -54,32 +51,36 @@
         const savedTheme = localStorage.getItem('appTheme') || 'light';
         if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
-        // 3. LOGIN LOGIC (SERVER-SIDE)
+        // 3. LOGIN LOGIC (STATIC / NO-SERVER)
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
+            const uInput = document.getElementById('username').value;
+            const pInput = document.getElementById('password').value;
 
             try {
-                // Send credentials to backend
-                const response = await fetch(`${API_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: u, password: p })
-                });
+                // Fetch static file instead of calling API
+                const response = await fetch('users.json');
+                if (!response.ok) throw new Error("Could not load users.json");
+                
+                const users = await response.json();
+                
+                // Validate credentials locally
+                const user = users.find(u => u.username === uInput && u.password === pInput);
 
-                const result = await response.json();
-
-                if (result.success) {
-                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                if (user) {
+                    // Create safe user object (remove password)
+                    const safeUser = { ...user };
+                    delete safeUser.password;
+                    
+                    localStorage.setItem('currentUser', JSON.stringify(safeUser));
                     window.location.href = 'home.html';
                 } else {
-                    document.getElementById('error-msg').innerText = "❌ " + (result.message || "Invalid credentials");
+                    document.getElementById('error-msg').innerText = "❌ Invalid credentials";
                     document.getElementById('error-msg').style.display = 'block';
                 }
             } catch (err) {
                 console.error(err);
-                document.getElementById('error-msg').innerText = "❌ Server Error. Is backend running?";
+                document.getElementById('error-msg').innerText = "❌ Error loading user data";
                 document.getElementById('error-msg').style.display = 'block';
             }
         });
