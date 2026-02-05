@@ -135,10 +135,6 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        // Your Codespaces URL
-        const API_URL = 'http://localhost:3000'; 
-
         // --- ICONS & TRANSLATIONS ---
         const ICON_EDIT = `<i class="fa-regular fa-pen-to-square"></i>`;
         const ICON_DELETE = `<i class="fa-regular fa-trash-can"></i>`;
@@ -162,39 +158,26 @@
             applyTranslations();
 
             try {
-                // FETCH FROM SERVER
-                const res = await fetch(`${API_URL}/users`);
+                // FETCH FROM STATIC FILE
+                const res = await fetch('users.json');
                 if (!res.ok) throw new Error('Network response was not ok');
                 users = await res.json();
                 render();
             } catch (err) { 
                 console.error("Error connecting to server:", err);
-                alert("Could not connect to backend server. Ensure it is running and 'Port 3000' is Public.");
+                alert("Could not load users.json. Ensure the file exists locally.");
                 render();
             }
         }
 
         // --- SAVING DATA ---
         async function save() {
-            // 1. Optimistic Update
+            // 1. Optimistic Update (UI Only)
             render();
             if(document.getElementById('view-status').style.display === 'block') renderModStatus();
 
-            // 2. Send to Server
-            try {
-                const response = await fetch(`${API_URL}/save-users`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(users)
-                });
-                
-                const result = await response.json();
-                if(!result.success) alert('Failed to save to server');
-                
-            } catch (error) {
-                console.error('Save failed', error);
-                alert('Server connection failed. Changes will be lost on refresh.');
-            }
+            // 2. Static Mode Notification
+            console.log('Static Mode: Changes are temporary and not saved to the file system.');
         }
 
         // --- UI & LOGIC ---
