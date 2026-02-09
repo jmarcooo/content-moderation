@@ -58,10 +58,9 @@ window.AuditApp = {
     },
 
     generateAuditTask() {
-        const id = Math.floor(Math.random() * 999999999999).toString(); // 12 digit format
+        const id = Math.floor(Math.random() * 999999999999).toString();
         const type = this.queueName.toLowerCase();
         
-        // Random moderation data
         const decisions = ['Approve', 'Reject'];
         const modDecision = decisions[Math.floor(Math.random() * decisions.length)];
         const modNames = ['kenneth.cortes', 'liezl.tejero', 'mark.villanueva', 'jon.odono'];
@@ -79,18 +78,30 @@ window.AuditApp = {
             
             modDecision,
             modName: modNames[Math.floor(Math.random() * modNames.length)],
-            modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString()
+            modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString(),
+            
+            userId: "User-" + Math.floor(Math.random() * 10000),
+            level: "Lvl " + Math.floor(Math.random() * 50),
+            violations: Math.floor(Math.random() * 5),
+            taskId: "Task-" + id
         };
 
-        // Mock Content
-        if (type.includes('avatar') || type.includes('profile')) {
-            task.images.push(`https://i.pravatar.cc/300?u=${id}`);
-            task.text = "Just a chill gamer living life.";
-        } else {
-            task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-            task.text = "Check out this content!";
+        // RULE 1: Video/Image Review (Content + Text)
+        if (type.includes('image') || type.includes('video')) {
+             task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
+             task.text = "Check out this content!";
         }
-        
+        // RULE 2: Avatar (Content Only)
+        else if (type.includes('avatar')) {
+             task.images.push(`https://i.pravatar.cc/300?u=${id}`);
+             task.text = ""; // Empty text
+        }
+        // RULE 3: Nickname/Profile (Text Only)
+        else if (type.includes('nick') || type.includes('profile')) {
+             task.images = []; // Empty images
+             task.text = "Super_Gamer_Profile";
+        }
+
         return task;
     },
 
@@ -102,57 +113,60 @@ window.AuditApp = {
         setTimeout(() => {
             const task = this.generateAuditTask();
             
-            // 1. Sidebar Info
+            // Populate Sidebar info...
             document.getElementById('info-tenant').innerText = task.tenant;
             document.getElementById('info-id').innerText = task.id;
             document.getElementById('info-publisher').innerText = task.publisher;
             document.getElementById('info-account').innerText = task.accountType;
             document.getElementById('info-time').innerText = task.publishTime;
-
-            // 2. Sidebar Moderation Info
+            document.getElementById('info-userid').innerText = task.userId;
+            document.getElementById('info-level').innerText = task.level;
+            document.getElementById('info-violations').innerText = task.violations;
+            document.getElementById('info-taskid').innerText = task.taskId;
             document.getElementById('mod-name').innerText = task.modName;
             document.getElementById('mod-time').innerText = task.modTime;
 
-            // 3. Render Content & Inline Status
+            // --- MODULE VISIBILITY ---
+            const imgSection = document.getElementById('image-container').parentElement;
+            const txtSection = document.getElementById('text-container').parentElement;
             const imgContainer = document.getElementById('image-container');
             const txtContainer = document.getElementById('text-container');
             
-            // Images
+            // 1. Content (Images)
             if (task.images.length > 0) {
+                imgSection.style.display = 'block';
                 imgContainer.innerHTML = task.images.map(src => 
-                    `<img src="${src}" style="height:150px; border-radius:4px; cursor:pointer;" onclick="window.ImageViewer.open(this.src)">`
+                    `<img src="${src}" style="height:160px; border-radius:6px; cursor:pointer; border:1px solid #eee;" onclick="window.ImageViewer.open(this.src)">`
                 ).join('');
+                this.updateInlineStatus('images', task.modDecision);
             } else {
-                imgContainer.innerHTML = '<span style="color:var(--text-muted)">No media content.</span>';
+                imgSection.style.display = 'none';
             }
 
-            // Text
-            txtContainer.innerText = task.text;
-
-            // Update Inline Status Labels
-            const els = ['mod-val-images', 'mod-val-text'];
-            const wrappers = ['status-display-images', 'status-display-text'];
-            
-            els.forEach((id, idx) => {
-                const el = document.getElementById(id);
-                const wrap = document.getElementById(wrappers[idx]);
-                
-                el.innerText = task.modDecision;
-                
-                // Reset classes
-                wrap.classList.remove('mod-approve', 'mod-reject');
-                
-                if (task.modDecision === 'Approve') {
-                    wrap.classList.add('mod-approve');
-                } else {
-                    wrap.classList.add('mod-reject');
-                }
-            });
+            // 2. Text
+            if (task.text && task.text.trim() !== "") {
+                txtSection.style.display = 'block';
+                txtContainer.innerText = task.text;
+                this.updateInlineStatus('text', task.modDecision);
+            } else {
+                txtSection.style.display = 'none';
+            }
 
             document.getElementById('loader').style.display = 'none';
             document.getElementById('workbench').style.display = 'flex';
             this.startTimer();
-        }, 500);
+        }, 400);
+    },
+
+    updateInlineStatus(type, decision) {
+        const el = document.getElementById(`mod-val-${type}`);
+        const wrap = document.getElementById(`status-display-${type}`);
+        if(el && wrap) {
+            el.innerText = decision;
+            wrap.classList.remove('mod-approve', 'mod-reject');
+            if (decision === 'Approve') wrap.classList.add('mod-approve');
+            else wrap.classList.add('mod-reject');
+        }
     },
 
     startTimer() {
@@ -195,11 +209,7 @@ window.AuditApp = {
     submitAudit(decision, errorType = '') {
         const counter = document.getElementById('session-counter');
         if(counter) counter.innerText = ++this.tasksAudited;
-
-        if (decision === 'disagree') {
-            this.closeDrawer();
-        }
-        
+        if (decision === 'disagree') this.closeDrawer();
         this.loadNextTask();
     },
 
