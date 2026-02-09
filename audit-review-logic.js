@@ -24,14 +24,7 @@ window.AuditApp = {
     secondsElapsed: 0,
     tasksAudited: 0,
     queueName: '',
-    
-    errorTypes: [
-        { label: "False Positive", desc: "Moderator punished benign content" },
-        { label: "False Negative", desc: "Moderator missed a violation" },
-        { label: "Wrong Violation Reason", desc: "Punished, but selected wrong tag" },
-        { label: "Wrong Scope", desc: "Restricted too much/little text" },
-        { label: "Policy Misinterpretation", desc: "Applied policy incorrectly" }
-    ],
+    currentTaskState: null, // Stores current task data for the drawer logic
 
     init() {
         if(typeof Auth !== 'undefined') Auth.requireLogin();
@@ -43,7 +36,6 @@ window.AuditApp = {
         const titleEl = document.getElementById('queue-title');
         if(titleEl) titleEl.innerText = `${tenant} - ${this.queueName}`;
 
-        this.renderErrorTypes();
         this.loadNextTask();
         this.bindKeys();
     },
@@ -122,9 +114,11 @@ window.AuditApp = {
         this.stopTimer();
         document.getElementById('loader').style.display = 'flex';
         document.getElementById('workbench').style.display = 'none';
+        this.closeDrawer();
         
         setTimeout(() => {
             const task = this.generateAuditTask();
+            this.currentTaskState = task; // Store for Drawer Logic
             
             // --- 3. POPULATE SIDEBAR ---
             document.getElementById('info-tenant').innerText = task.tenant;
@@ -151,7 +145,7 @@ window.AuditApp = {
             // Images
             if (task.images.length > 0) {
                 imgSection.style.display = 'block';
-                // UPDATED: Apply SQUARE placeholder style
+                // SQUARE placeholder style
                 const squareStyle = 'width: 180px; height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer; margin-right: 10px; margin-bottom: 10px;';
                 imgContainer.innerHTML = task.images.map(src => 
                     `<img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)">`
@@ -206,36 +200,126 @@ window.AuditApp = {
     },
     stopTimer() { clearInterval(this.timerInterval); },
 
-    renderErrorTypes() {
-        const list = document.getElementById('errorList');
-        if(list) {
-            list.innerHTML = this.errorTypes.map(e => `
-                <div class="violation-category">
-                    <div class="category-trigger" onclick="AuditApp.submitAudit('disagree', '${e.label}')">
-                        <div>
-                            <div style="font-weight:600;">${e.label}</div>
-                            <div style="font-size:0.8rem; color:var(--text-muted);">${e.desc}</div>
-                        </div>
-                        <span>→</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-    },
+    // --- DRAWER LOGIC ---
 
     openErrorDrawer() {
-        document.getElementById('errorDrawer').classList.add('open');
+        const drawer = document.getElementById('violationDrawer');
+        const content = document.getElementById('errorList');
+        const title = document.querySelector('.drawer-header span');
+        
+        if(!this.currentTaskState) return;
+
+        title.innerText = "Audit Correction";
+        drawer.classList.add('open');
+        
+        // Start at Step 1
+        this.renderStep1_ErrorType(content);
     },
 
     closeDrawer() {
-        document.getElementById('errorDrawer').classList.remove('open');
+        document.getElementById('violationDrawer').classList.remove('open');
     },
 
-    submitAudit(decision, errorType = '') {
+    // Step 1: List Errors based on Initial Decision
+    renderStep1_ErrorType(container) {
+        const initial = this.currentTaskState.modDecision; // 'Approve' or 'Reject'
+        
+        let validErrors = [];
+        
+        if(initial === 'Reject') {
+            // Moderator Rejected it, but auditor disagrees
+            validErrors = [
+                { id: 'false_pos', label: 'False Positive', sub: 'Content is safe, should be Approved' },
+                { id: 'wrong_reason', label: 'Wrong Violation Reason', sub: 'Content is bad, but reason is wrong' },
+                { id: 'wrong_scope', label: 'Wrong Scope', sub: 'Restriction scope incorrect' }
+            ];
+        } else {
+            // Moderator Approved it, but auditor disagrees
+            validErrors = [
+                { id: 'false_neg', label: 'False Negative', sub: 'Content violates policy, should be Rejected' },
+                { id: 'policy_miss', label: 'Policy Misinterpretation', sub: 'Applied policy incorrectly' }
+            ];
+        }
+
+        let html = `<div style="padding: 20px;">
+            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; text-transform:uppercase; font-weight:700;">1. Select Error Type</div>`;
+        
+        validErrors.forEach(err => {
+            html += `
+            <div class="violation-category" onclick="AuditApp.renderStep2_Decision('${err.id}', '${err.label}')" style="cursor:pointer; padding:15px; border:1px solid var(--border-color); margin-bottom:10px; border-radius:6px; background:var(--bg-body);">
+                <div style="font-weight:600; color:var(--text-header);">${err.label}</div>
+                <div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">${err.sub}</div>
+            </div>`;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+    },
+
+    // Step 2: Select Correct Decision (Audit Decision)
+    renderStep2_Decision(errorId, errorLabel) {
+        const container = document.getElementById('errorList');
+        const title = document.querySelector('.drawer-header span');
+        title.innerText = "Correct Decision";
+
+        let html = `<div style="padding: 20px;">
+            <div style="margin-bottom:20px; font-size:0.9rem; padding:10px; background:var(--hover-bg); border-radius:6px;">
+                <span style="color:var(--text-muted);">Selected Error:</span> 
+                <strong>${errorLabel}</strong>
+                <a href="#" onclick="AuditApp.openErrorDrawer()" style="color:#0969da; font-size:0.8rem; margin-left:10px; text-decoration:none;">(Change)</a>
+            </div>
+            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase; font-weight:700;">2. Select Correct Audit Decision</div>`;
+
+        // Logic: What are the valid outcomes?
+        // If error is False Positive -> The correct decision MUST be Approve.
+        if (errorId === 'false_pos') {
+            html += `
+            <button class="btn-primary" style="width:100%; padding:12px; font-size:1rem;" onclick="AuditApp.submitCorrection('Approve', '${errorLabel}')">
+                Set Decision to <strong>Approve</strong>
+            </button>`;
+        } 
+        // If error is False Negative or Wrong Reason -> The correct decision MUST be Reject (require reason).
+        else {
+            if (typeof Config !== 'undefined' && Config.violations) {
+                for(let [cat, subs] of Object.entries(Config.violations)) {
+                    html += `<div class="violation-category">
+                        <div class="category-trigger" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">
+                            ${cat} ▼
+                        </div>
+                        <div class="violation-submenu" style="display:none;">
+                            ${subs.map(s => `
+                                <div class="violation-option" onclick="AuditApp.submitCorrection('Reject', '${errorLabel}', '${cat} - ${s}')">
+                                    ${s}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                }
+            }
+        }
+        
+        html += `</div>`;
+        container.innerHTML = html;
+    },
+
+    submitCorrection(newDecision, errorType, violationReason = '') {
         const counter = document.getElementById('session-counter');
         if(counter) counter.innerText = ++this.tasksAudited;
-        if (decision === 'disagree') this.closeDrawer();
+        
+        console.log(`Audit Submitted: Error=${errorType}, Correct=${newDecision}, Reason=${violationReason}`);
+        
+        // Feedback before loading next
+        // alert(`Audit Recorded: Correct decision is ${newDecision} (${errorType})`); 
+        
+        this.closeDrawer();
         this.loadNextTask();
+    },
+
+    submitAudit(decision) {
+        if(decision === 'agree') {
+            const counter = document.getElementById('session-counter');
+            if(counter) counter.innerText = ++this.tasksAudited;
+            this.loadNextTask();
+        }
     },
 
     exit() {
