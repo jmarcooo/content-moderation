@@ -8,48 +8,116 @@
     <style>
         .timer-badge { font-family: monospace; font-size: 1rem; letter-spacing: 1px; font-weight: bold; }
         
-        /* Specific Styles for Audit Decision Box */
-        .mod-decision-card {
-            background-color: #f6f8fa;
+        /* Sidebar Info Row Styling */
+        .info-row { margin-bottom: 8px; display: flex; flex-direction: column; }
+        .info-row .label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-bottom: 2px; }
+        .info-row .value { font-size: 0.9rem; color: var(--text-main); font-weight: 500; word-break: break-word; }
+
+        /* Content Section Styling */
+        .content-section {
+            background: white;
             border: 1px solid var(--border-color);
-            border-left: 4px solid var(--accent-blue);
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
         }
-        .mod-decision-title { font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 5px; }
-        .mod-decision-val { font-size: 1.1rem; font-weight: 600; color: var(--text-header); }
-        .mod-decision-reason { font-size: 0.9rem; color: var(--text-main); margin-top: 4px; font-style: italic; }
+        .content-section-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-header);
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
 
-        .decision-approve { border-left-color: #238636; }
-        .decision-reject { border-left-color: #da3633; }
-        
-        .btn-agree { background-color: #238636; color: white; border: 1px solid #238636; }
-        .btn-agree:hover { background-color: #1a6328; }
-        
-        .btn-disagree { background-color: #da3633; color: white; border: 1px solid #da3633; }
-        .btn-disagree:hover { background-color: #b32b29; }
+        /* Initial Moderation Status Indicator */
+        .initial-mod-status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 8px 12px;
+            background-color: #f6f8fa;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .mod-approve { color: #238636; border-left: 4px solid #238636; }
+        .mod-reject { color: #da3633; border-left: 4px solid #da3633; }
 
-        /* SVG Styles */
-        .icon-svg-lg { width: 20px; height: 20px; fill: white; }
-        .close-icon-svg { width: 24px; height: 24px; fill: currentColor; }
+        /* Footer Action Bar Redesign */
+        .audit-footer {
+            position: fixed;
+            bottom: 0;
+            left: 260px; /* Sidebar width */
+            right: 0;
+            height: 80px;
+            background: white;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .audit-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-right: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-audit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 44px;
+            padding: 0 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            border: none;
+            color: white;
+        }
+        .btn-audit:active { transform: scale(0.98); }
+
+        .btn-audit-agree { background-color: #238636; margin-right: 15px; }
+        .btn-audit-agree:hover { background-color: #1a6328; }
+        
+        .btn-audit-disagree { background-color: #da3633; }
+        .btn-audit-disagree:hover { background-color: #a42725; }
+
+        .btn-audit-exit {
+            margin-left: auto;
+            background: white;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+        .btn-audit-exit:hover { background: var(--hover-bg); color: var(--text-main); }
+
+        /* Icons */
+        .btn-icon { width: 18px; height: 18px; fill: currentColor; }
     </style>
 </head>
 <body>
 
     <script src="sidebar.js"></script>
 
-    <main class="main-content" style="padding-bottom: 50px;">
+    <main class="main-content" style="padding-bottom: 100px;">
         
-        <div class="header" style="margin-bottom: 10px; border-bottom: none; padding-bottom: 0;">
+        <div class="header" style="margin-bottom: 20px; border-bottom: none; padding-bottom: 0;">
             <div>
                 <a href="audit-queue.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem;">← Back to Audit Queues</a>
                 <h1 id="queue-title" style="margin-top: 5px;">Loading...</h1>
             </div>
             
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <span class="badge status-Active">QA Time: <span id="timer" class="timer-badge">00:00:00</span></span>
-                <span class="badge" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-main);">
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <span class="badge status-Active" style="font-size:0.9rem;">QA Time: <span id="timer" class="timer-badge">00:00:00</span></span>
+                <span class="badge" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-main); font-size:0.9rem;">
                     Audited: <span id="session-counter" style="font-weight:bold;">0</span>
                 </span>
             </div>
@@ -59,79 +127,91 @@
             <div>⚡ Fetching task for audit...</div>
         </div>
 
-        <div id="workbench" class="workbench-container" style="display: none;">
+        <div id="workbench" class="workbench-container" style="display: none; align-items: flex-start;">
             
-            <div class="left-sidebar">
+            <div class="left-sidebar" style="width: 300px;">
                 
-                <div class="mod-decision-card" id="mod-decision-card">
-                    <div class="mod-decision-title">Previous Decision</div>
-                    <div class="mod-decision-val" id="mod-decision-val">--</div>
-                    <div class="mod-decision-reason" id="mod-decision-reason"></div>
-                    <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted);">
-                        By: <span id="mod-name">--</span> <br>
-                        Time: <span id="mod-time">--</span>
-                    </div>
-                </div>
-
                 <div class="info-card">
                     <div class="info-header">Content Info</div>
-                    <div class="info-row"><span class="label">Content ID:</span> <span class="value" id="content-id">--</span></div>
-                    <div class="info-row"><span class="label">Type:</span> <span class="value" id="content-type">--</span></div>
-                    <div class="info-row"><span class="label">Queue:</span> <span class="value" id="queue-name">--</span></div>
+                    <div class="info-row"><span class="label">Tenant:</span> <span class="value" id="info-tenant">--</span></div>
+                    <div class="info-row"><span class="label">Content ID:</span> <span class="value" id="info-id">--</span></div>
+                    <div class="info-row"><span class="label">Publisher:</span> <span class="value" id="info-publisher">--</span></div>
+                    <div class="info-row"><span class="label">Account Type:</span> <span class="value" id="info-account">--</span></div>
+                    <div class="info-row"><span class="label">Publish Time:</span> <span class="value" id="info-time">--</span></div>
+                </div>
+
+                <div class="info-card" style="border-left: 4px solid var(--accent-blue);">
+                    <div class="info-header">Moderation Info</div>
+                    <div class="info-row">
+                        <span class="label">Moderator:</span> 
+                        <span class="value" id="mod-name">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Time Moderated:</span> 
+                        <span class="value" id="mod-time">--</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="content-canvas">
+            <div class="content-canvas" style="background: transparent; border: none; padding: 0; overflow: visible;">
                 
-                <div id="module-content">
-                    <div class="image-grid" id="image-container"></div>
-                </div>
+                <div class="content-section">
+                    <div class="content-section-title">User Profile</div>
+                    
+                    <div id="image-container" class="image-grid">
+                        </div>
 
-                <div id="module-text" style="margin-top: 30px;">
-                    <div id="text-wrapper-top" style="margin-bottom: 15px;">
-                        <div class="label" id="label-top" style="margin-bottom:4px; font-weight:bold;">Context</div>
-                        <div id="text-top" class="text-context-box"></div>
-                    </div>
-
-                    <div id="text-wrapper-bottom">
-                        <div class="label" id="label-bottom" style="margin-bottom:4px; font-weight:bold;">Content</div>
-                        <div id="text-bottom" class="text-context-box"></div>
+                    <div class="initial-mod-status" id="status-display-images">
+                        Initial Moderation: <span id="mod-val-images">--</span>
                     </div>
                 </div>
 
-                <div class="action-bar" style="left: 390px;"> <div style="font-weight: 600; color: var(--text-muted); margin-right: 20px;">AUDIT DECISION:</div>
+                <div class="content-section">
+                    <div class="content-section-title">Bio or Nickname</div>
                     
-                    <button class="btn-sm btn-agree" style="flex: 0 0 150px; padding: 12px; font-size: 1rem;" onclick="AuditApp.submitAudit('agree')">
-                        ✅ Agree (Correct)
-                    </button>
-                    
-                    <button class="btn-sm btn-disagree" style="flex: 0 0 150px; padding: 12px; font-size: 1rem;" onclick="AuditApp.openErrorDrawer()">
-                        ❌ Disagree (Error)
-                    </button>
-                    
-                    <button class="btn-cancel" style="margin-left: auto;" onclick="AuditApp.exit()">Exit</button>
+                    <div id="text-container" class="text-context-box" style="background: #f6f8fa; border: 1px solid #d0d7de;">
+                        </div>
+
+                    <div class="initial-mod-status" id="status-display-text">
+                        Initial Moderation: <span id="mod-val-text">--</span>
+                    </div>
                 </div>
 
             </div>
+        </div>
+
+        <div class="audit-footer">
+            <span class="audit-label">AUDIT DECISION:</span>
+            
+            <button class="btn-audit btn-audit-agree" onclick="AuditApp.submitAudit('agree')">
+                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                Agree (Correct)
+            </button>
+            
+            <button class="btn-audit btn-audit-disagree" onclick="AuditApp.openErrorDrawer()">
+                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                Disagree (Error)
+            </button>
+
+            <button class="btn-audit btn-audit-exit" onclick="AuditApp.exit()">Exit</button>
         </div>
 
         <div id="errorDrawer" class="violation-drawer">
             <div class="drawer-header">
                 <span>Select Error Type</span>
                 <span style="cursor:pointer;" onclick="AuditApp.closeDrawer()">
-                    <svg class="close-icon-svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    <svg class="close-icon-svg" viewBox="0 0 24 24" style="width:24px;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
                 </span>
             </div>
-            <div class="drawer-content" id="errorList">
-                </div>
+            <div class="drawer-content" id="errorList"></div>
         </div>
 
         <div id="imageViewer" class="viewer-overlay">
             <span class="close-viewer" onclick="ImageViewer.close()">
-                <svg class="close-icon-svg" style="fill: white;" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                <svg class="close-icon-svg" style="fill: white; width:30px;" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
             </span>
             <div class="viewer-content">
-                <img id="viewer-img-target" src="" class="viewer-image" alt="Zoom View">
+                <img id="viewer-img-target" src="" class="viewer-image">
             </div>
         </div>
 
@@ -140,5 +220,5 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="audit-review-logic.js"></script>
-    </body>
+</body>
 </html>
