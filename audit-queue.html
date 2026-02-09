@@ -5,10 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Queues</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .back-nav {
+            margin-bottom: 15px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+        .back-nav:hover { color: var(--accent-blue); }
+    </style>
 </head>
 <body>
 
+    <script src="sidebar.js"></script>
+
     <main class="main-content">
+        <a href="quality-assurance.html" class="back-nav">← Back to Quality Assurance</a>
+
         <div class="header">
             <h1>Audit Queues</h1>
             
@@ -42,7 +59,6 @@
 
     </main>
 
-    <script src="sidebar.js"></script>
     <script>
         // --- 1. AUTH GUARD ---
         if (!localStorage.getItem('currentUser')) {
@@ -50,7 +66,6 @@
         }
 
         // --- 2. CONFIGURATION ---
-        // Note: queue.name now prefixed with "QA - " and we added auditedPercent (percentage of tasks audited by moderators)
         let queueData = [
             { id: 'bp_img',   category: 'BP', name: 'QA - Dynamic Image Review',   count: 142, latency: '1m 20s', aht: '12s', auditedPercent: 42 },
             { id: 'bp_vid',   category: 'BP', name: 'QA - Dynamic Video Review',   count: 56,  latency: '3m 45s', aht: '45s', auditedPercent: 27 },
@@ -100,7 +115,6 @@
         function executeSort() {
             queueData.sort((a, b) => {
                 let av = a[sortCol], bv = b[sortCol];
-                // Ensure undefined comparison handled
                 if (av === undefined) av = 0;
                 if (bv === undefined) bv = 0;
                 if (typeof av === 'string') av = av.toLowerCase();
@@ -130,12 +144,10 @@
 
             let html = '';
 
-            // Update Container Class
             if (currentView === 'card') {
                 container.className = 'queue-grid';
                 html += queueData.map(queue => {
                     total += queue.count;
-                    // Card view focuses on Audited %
                     return `
                     <div class="queue-card" onclick="openQueue('${queue.name.replace(/'/g,"\\'")}')">
                         <div class="card-body">
@@ -163,7 +175,6 @@
                 }).join('');
             } else {
                 container.className = 'queue-container list-mode';
-                // LIST HEADER (only show tenant, name, audited %)
                 html += `
                 <div class="list-header-row">
                     <div class="col-tenant ${getSortClass('category')}" onclick="handleHeaderSort('category')">
@@ -194,15 +205,13 @@
             updateViewButtons();
         }
 
-        // --- 5. NAVIGATION ---
         function openQueue(queueName) {
-            // preserve behavior: pass Queue Name and Tenant category to review page
             const queue = queueData.find(q => q.name === queueName);
             const tenant = queue ? queue.category : 'BP';
+            // Note: In a real app, you might route this to an Audit Workbench instead of the regular review page
             window.location.href = `review.html?queue=${encodeURIComponent(queueName)}&tenant=${encodeURIComponent(tenant)}`;
         }
 
-        // Initialize Sorting & Render
         executeSort();
         renderQueues();
 
