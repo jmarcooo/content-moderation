@@ -9,16 +9,14 @@
         .timer-badge { font-family: monospace; font-size: 1rem; letter-spacing: 1px; font-weight: bold; }
         
         /* Layout Tweaks for Labelling */
-        .content-canvas { display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+        .content-canvas { display: flex; flex-direction: column; height: 100%; overflow-y: auto; padding: 30px; }
         
-        /* Label Button Styles */
+        /* Labelling Grid Styles */
         .labelling-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
+            margin-top: 15px;
         }
 
         .btn-label {
@@ -72,7 +70,7 @@
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            background-color: var(--bg-input); /* Use variable for theme support */
+            background-color: var(--bg-input);
             color: var(--text-main);
             font-size: 0.9rem;
             resize: vertical;
@@ -144,20 +142,20 @@
                 </div>
             </div>
 
-            <div class="content-canvas" style="background: transparent; border: none; padding: 0; overflow: visible; flex-grow:1;">
+            <div class="content-canvas" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                 
-                <div class="content-section">
-                    <div class="content-section-title">Visual Content</div>
+                <div id="module-content">
+                    <div class="section-header">CONTENT</div>
                     <div id="image-container" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
                 </div>
 
-                <div class="content-section">
-                    <div class="content-section-title">Caption & Context</div>
-                    <div id="text-container" class="text-context-box" style="background: #f6f8fa; border: 1px solid #d0d7de; min-height:80px; padding:15px; border-radius:6px;"></div>
+                <div id="module-text" style="margin-top: 30px;">
+                    <div class="section-header">TEXT</div>
+                    <div id="text-container" class="text-context-box"></div>
                 </div>
 
-                <div class="content-section" style="margin-bottom: 0;">
-                    <div class="content-section-title">Select Applicable Labels</div>
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <div class="section-header">LABELLING DECISION</div>
                     <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Select one option that applies to this content.</div>
                     
                     <div class="labelling-grid">
@@ -182,8 +180,8 @@
                         </button>
                     </div>
 
-                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-                        <label for="labelling-remarks" style="display:block; font-weight:600; color:var(--text-header); font-size:0.9rem; margin-bottom: 4px;">Remarks (Optional)</label>
+                    <div style="margin-top: 20px;">
+                        <label for="labelling-remarks" style="display:block; font-weight:600; color:var(--text-header); font-size:0.85rem; margin-bottom: 6px;">Remarks (Optional)</label>
                         <textarea id="labelling-remarks" class="labelling-textarea" placeholder="Add any additional context or notes here..."></textarea>
                     </div>
                 </div>
