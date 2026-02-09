@@ -168,7 +168,7 @@
                             </div>
 
                             <div class="card-footer">
-                                <button class="btn-review" style="padding: 2px 8px; font-size: 0.75rem;">Review</button>
+                                <button class="btn-review" style="padding: 2px 8px; font-size: 0.75rem;">Audit</button>
                             </div>
                         </div>
                     </div>`;
@@ -205,11 +205,12 @@
             updateViewButtons();
         }
 
+        // --- UPDATED: Links to Audit Review ---
         function openQueue(queueName) {
             const queue = queueData.find(q => q.name === queueName);
             const tenant = queue ? queue.category : 'BP';
-            // Note: In a real app, you might route this to an Audit Workbench instead of the regular review page
-            window.location.href = `review.html?queue=${encodeURIComponent(queueName)}&tenant=${encodeURIComponent(tenant)}`;
+            // UPDATED LINK: Points to audit-review.html
+            window.location.href = `audit-review.html?queue=${encodeURIComponent(queueName)}&tenant=${encodeURIComponent(tenant)}`;
         }
 
         executeSort();
