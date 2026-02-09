@@ -8,56 +8,63 @@
     <style>
         .timer-badge { font-family: monospace; font-size: 1rem; letter-spacing: 1px; font-weight: bold; }
         
-        /* --- SIDEBAR STYLING (FIXED ALIGNMENT) --- */
+        /* --- SIDEBAR STYLING (NEAT LOOK) --- */
         .info-card {
-            background-color: var(--bg-card);
+            background-color: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 20px; /* More padding for breathing room */
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); /* Subtle shadow like image */
         }
 
         .info-header {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: var(--text-header);
-            margin-bottom: 15px;
+            margin-bottom: 16px;
             padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid #eaeaea; /* Light divider line */
         }
 
         .info-row { 
-            margin-bottom: 15px; 
             display: flex; 
-            flex-direction: column; 
+            justify-content: space-between; /* Pushes label left, value right */
+            align-items: flex-start;
+            margin-bottom: 12px; 
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
+        
+        .info-row:last-child { margin-bottom: 0; }
         
         /* Label on the left */
         .info-row .label { 
-            font-size: 0.85rem; 
             color: var(--text-muted); 
-            font-weight: 600; 
-            margin-bottom: 4px;
-            text-align: left;
+            font-weight: 500; 
+            flex-shrink: 0;
+            margin-right: 10px;
         }
         
-        /* Value on the right (Matches screenshot) */
+        /* Value on the right */
         .info-row .value { 
-            font-size: 1rem; 
-            color: var(--text-main); 
-            font-weight: 500; 
-            word-break: break-word; 
+            color: var(--text-header); /* Darker for contrast */
+            font-weight: 600; 
             text-align: right; 
+            word-break: break-word; 
         }
+
+        /* Highlight specific values if needed */
+        .value.highlight { color: var(--accent-blue); }
 
         /* --- CONTENT AREA --- */
         .content-section {
             background: white;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 25px;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
         .content-section-title {
             font-size: 0.95rem;
@@ -70,12 +77,13 @@
 
         .initial-mod-status {
             margin-top: 15px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             padding: 8px 12px;
             background-color: #f6f8fa;
-            border-radius: 4px;
+            border-radius: 6px;
             display: inline-block;
+            border: 1px solid var(--border-color);
         }
         .mod-approve { color: #238636; border-left: 4px solid #238636; }
         .mod-reject { color: #da3633; border-left: 4px solid #da3633; }
@@ -92,7 +100,7 @@
             display: flex;
             align-items: center;
             padding: 0 40px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
             z-index: 100;
         }
 
@@ -112,21 +120,22 @@
             gap: 8px;
             height: 44px;
             padding: 0 24px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             border-radius: 6px;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: all 0.1s;
             border: none;
             color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        .btn-audit:active { transform: scale(0.98); }
+        .btn-audit:active { transform: translateY(1px); }
 
         .btn-audit-agree { background-color: #238636; margin-right: 15px; }
-        .btn-audit-agree:hover { background-color: #1a6328; }
+        .btn-audit-agree:hover { background-color: #1f732d; }
         
         .btn-audit-disagree { background-color: #da3633; }
-        .btn-audit-disagree:hover { background-color: #a42725; }
+        .btn-audit-disagree:hover { background-color: #b92b27; }
 
         .btn-audit-exit {
             margin-left: auto;
@@ -134,10 +143,9 @@
             border: 1px solid var(--border-color);
             color: var(--text-muted);
         }
-        .btn-audit-exit:hover { background: var(--hover-bg); color: var(--text-main); }
+        .btn-audit-exit:hover { background: var(--hover-bg); color: var(--text-main); border-color: #b0b8c1; }
 
         .btn-icon { width: 18px; height: 18px; fill: currentColor; }
-        
         .close-icon-svg { width: 24px; height: 24px; fill: currentColor; }
     </style>
 </head>
@@ -147,15 +155,15 @@
 
     <main class="main-content" style="padding-bottom: 100px;">
         
-        <div class="header" style="margin-bottom: 20px; border-bottom: none; padding-bottom: 0;">
+        <div class="header" style="margin-bottom: 25px; border-bottom: none; padding-bottom: 0;">
             <div>
-                <a href="audit-queue.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem;">← Back to Audit Queues</a>
-                <h1 id="queue-title" style="margin-top: 5px;">Loading...</h1>
+                <a href="audit-queue.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem; display:inline-flex; align-items:center; gap:5px;">← Back to Audit Queues</a>
+                <h1 id="queue-title" style="margin-top: 8px;">Loading...</h1>
             </div>
             
             <div style="display: flex; gap: 15px; align-items: center;">
-                <span class="badge status-Active" style="font-size:0.9rem;">QA Time: <span id="timer" class="timer-badge">00:00:00</span></span>
-                <span class="badge" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-main); font-size:0.9rem;">
+                <span class="badge status-Active" style="font-size:0.9rem; padding: 6px 12px;">QA Time: <span id="timer" class="timer-badge">00:00:00</span></span>
+                <span class="badge" style="background-color: #f6f8fa; border: 1px solid var(--border-color); color: var(--text-main); font-size:0.9rem; padding: 6px 12px;">
                     Audited: <span id="session-counter" style="font-weight:bold;">0</span>
                 </span>
             </div>
@@ -165,23 +173,34 @@
             <div>⚡ Fetching task for audit...</div>
         </div>
 
-        <div id="workbench" class="workbench-container" style="display: none; align-items: flex-start;">
+        <div id="workbench" class="workbench-container" style="display: none; align-items: flex-start; gap: 24px;">
             
-            <div class="left-sidebar" style="width: 300px;">
+            <div class="left-sidebar" style="width: 320px; flex-shrink:0;">
                 
                 <div class="info-card">
                     <div class="info-header">Content Info</div>
                     <div class="info-row"><span class="label">Tenant:</span> <span class="value" id="info-tenant">--</span></div>
                     <div class="info-row"><span class="label">Content ID:</span> <span class="value" id="info-id">--</span></div>
-                    <div class="info-row"><span class="label">Publisher:</span> <span class="value" id="info-publisher">--</span></div>
+                    <div class="info-row"><span class="label">Publisher:</span> <span class="value highlight" id="info-publisher">--</span></div>
                     <div class="info-row"><span class="label">Account Type:</span> <span class="value" id="info-account">--</span></div>
                     <div class="info-row"><span class="label">Publish Time:</span> <span class="value" id="info-time">--</span></div>
                 </div>
 
-                <div class="info-card" style="border-left: 4px solid var(--accent-blue);">
+                <div class="info-card">
+                    <div class="info-header">User Info</div>
+                    <div class="info-row"><span class="label">User ID:</span> <span class="value" id="info-userid">--</span></div>
+                    <div class="info-row"><span class="label">Level:</span> <span class="value" id="info-level">--</span></div>
+                    <div class="info-row"><span class="label">Violations:</span> <span class="value" id="info-violations" style="color:#da3633">0</span></div>
+                </div>
+
+                <div class="info-card">
                     <div class="info-header">Moderation Info</div>
                     <div class="info-row">
-                        <span class="label">Moderator:</span> 
+                        <span class="label">Task ID:</span> 
+                        <span class="value" id="info-taskid">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Reviewer:</span> 
                         <span class="value" id="mod-name">--</span>
                     </div>
                     <div class="info-row">
@@ -191,7 +210,7 @@
                 </div>
             </div>
 
-            <div class="content-canvas" style="background: transparent; border: none; padding: 0; overflow: visible;">
+            <div class="content-canvas" style="background: transparent; border: none; padding: 0; overflow: visible; flex-grow:1;">
                 
                 <div class="content-section">
                     <div class="content-section-title">User Profile</div>
@@ -203,7 +222,7 @@
 
                 <div class="content-section">
                     <div class="content-section-title">Bio or Nickname</div>
-                    <div id="text-container" class="text-context-box" style="background: #f6f8fa; border: 1px solid #d0d7de;"></div>
+                    <div id="text-container" class="text-context-box" style="background: #f6f8fa; border: 1px solid #d0d7de; min-height:80px; padding:15px; border-radius:6px;"></div>
                     <div class="initial-mod-status" id="status-display-text">
                         Initial Moderation: <span id="mod-val-text">--</span>
                     </div>
@@ -249,5 +268,82 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="audit-review-logic.js"></script>
+    <script>
+        // Override generateTask to include new mock fields for the cards
+        const originalGenerate = window.AuditApp.generateAuditTask;
+        window.AuditApp.generateAuditTask = function() {
+            // Call original to get base properties
+            let task = originalGenerate.call(this);
+            
+            // Add specific fields for the neat cards
+            task.userId = "User-" + Math.floor(Math.random() * 10000);
+            task.level = "Lvl " + Math.floor(Math.random() * 50);
+            task.violations = Math.floor(Math.random() * 5);
+            task.taskId = "Task-" + task.id; // Match format in screenshot
+            
+            return task;
+        };
+
+        // Override loadNextTask to populate new DOM elements
+        const originalLoad = window.AuditApp.loadNextTask;
+        window.AuditApp.loadNextTask = function() {
+            this.stopTimer();
+            document.getElementById('loader').style.display = 'flex';
+            document.getElementById('workbench').style.display = 'none';
+            
+            setTimeout(() => {
+                const task = this.generateAuditTask();
+                
+                // --- POPULATE SIDEBAR (The Neat Cards) ---
+                // Card 1
+                document.getElementById('info-tenant').innerText = task.tenant;
+                document.getElementById('info-id').innerText = task.id;
+                document.getElementById('info-publisher').innerText = task.publisher;
+                document.getElementById('info-account').innerText = task.accountType;
+                document.getElementById('info-time').innerText = task.publishTime;
+
+                // Card 2
+                document.getElementById('info-userid').innerText = task.userId;
+                document.getElementById('info-level').innerText = task.level;
+                document.getElementById('info-violations').innerText = task.violations;
+
+                // Card 3
+                document.getElementById('info-taskid').innerText = task.taskId;
+                document.getElementById('mod-name').innerText = task.modName;
+                document.getElementById('mod-time').innerText = task.modTime;
+
+                // --- REST OF CONTENT ---
+                const imgContainer = document.getElementById('image-container');
+                const txtContainer = document.getElementById('text-container');
+                
+                if (task.images.length > 0) {
+                    imgContainer.innerHTML = task.images.map(src => 
+                        `<img src="${src}" style="height:160px; border-radius:6px; cursor:pointer; border:1px solid #eee;" onclick="window.ImageViewer.open(this.src)">`
+                    ).join('');
+                } else {
+                    imgContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem;">No media content.</span>';
+                }
+
+                txtContainer.innerText = task.text;
+
+                // Update Inline Status Labels
+                const els = ['mod-val-images', 'mod-val-text'];
+                const wrappers = ['status-display-images', 'status-display-text'];
+                
+                els.forEach((id, idx) => {
+                    const el = document.getElementById(id);
+                    const wrap = document.getElementById(wrappers[idx]);
+                    el.innerText = task.modDecision;
+                    wrap.classList.remove('mod-approve', 'mod-reject');
+                    if (task.modDecision === 'Approve') wrap.classList.add('mod-approve');
+                    else wrap.classList.add('mod-reject');
+                });
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('workbench').style.display = 'flex';
+                this.startTimer();
+            }, 400); // Slightly faster load for feel
+        };
+    </script>
 </body>
 </html>
