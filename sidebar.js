@@ -4,7 +4,6 @@
 const APP_LANG = localStorage.getItem('appLang') || 'en';
 
 const TRANSLATIONS = {
-    // UPDATED: Changed 'mod' to "Moderation"
     en: { brand: "AdminPanel", overview: "Overview", users: "User Management", mod: "Moderation", audit: "Quality Audit", appeal: "Appeal Center", notifs: "Notifications", settings: "Settings", logout: "Logout", online: "Online", offline: "Offline" },
     zh: { brand: "管理后台", overview: "总览", users: "用户管理", mod: "审核", audit: "质量质检", appeal: "申诉中心", notifs: "通知中心", settings: "设置", logout: "退出登录", online: "在线", offline: "离线" }
 };
@@ -78,7 +77,10 @@ setTimeout(() => {
     const path = window.location.pathname;
     if (path.includes('home.html')) document.getElementById('link-home')?.classList.add('active');
     if (path.includes('user-management.html')) document.getElementById('link-users')?.classList.add('active');
-    if (path.includes('moderation.html')) document.getElementById('link-mod')?.classList.add('active');
+    // Active state works for sub-pages too
+    if (path.includes('moderation.html') || path.includes('content-moderation.html') || path.includes('content-labelling.html') || path.includes('moderation-history.html')) {
+        document.getElementById('link-mod')?.classList.add('active');
+    }
     if (path.includes('audit.html')) document.getElementById('link-audit')?.classList.add('active');
     if (path.includes('appeal-center.html')) document.getElementById('link-appeal')?.classList.add('active');
     if (path.includes('notifications.html')) document.getElementById('link-notifs')?.classList.add('active');
