@@ -151,24 +151,22 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
 .left-sidebar { width: 350px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-bottom: 80px; }
 .content-canvas { flex-grow: 1; background-color: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color); padding: 30px; overflow-y: auto; height: 100%; display: flex; flex-direction: column; gap: 30px; }
 
-/* IMAGE GRID (Responsive Square Placeholders) */
+/* IMAGE GRID (Fixed 300x300 Flex Layout) */
 .image-grid {
-    display: grid;
-    /* This creates squares that fill the width, min 200px wide */
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 15px;
     width: 100%;
 }
 
 .content-image-card, .image-grid > div {
     position: relative;
-    width: 100%;
-    /* Enforce Square Aspect Ratio */
-    aspect-ratio: 1 / 1; 
+    /* Let JS inline style control width/height */
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid var(--border-color);
     background-color: var(--bg-body);
+    flex-shrink: 0; /* Prevent shrinking */
 }
 
 .content-image-card img, .image-grid img {
