@@ -1,4 +1,3 @@
-// --- 1. IMAGE VIEWER UTILITY ---
 window.ImageViewer = {
     scale: 1, rotate: 0, flip: 1,
     open(src) {
@@ -18,7 +17,6 @@ window.ImageViewer = {
     }
 };
 
-// --- 2. AUDIT LOGIC ---
 window.AuditApp = {
     timerInterval: null,
     secondsElapsed: 0,
@@ -28,24 +26,17 @@ window.AuditApp = {
 
     init() {
         if(typeof Auth !== 'undefined') Auth.requireLogin();
-        
         const urlParams = new URLSearchParams(window.location.search);
-        this.queueName = urlParams.get('queue') || 'Audit Queue';
+        this.queueName = urlParams.get('queue') || 'Audit';
         const tenant = urlParams.get('tenant') || 'Community';
-
-        const titleEl = document.getElementById('queue-title');
-        if(titleEl) titleEl.innerText = `${tenant} - ${this.queueName}`;
-
+        document.getElementById('queue-title').innerText = `${tenant} - ${this.queueName}`;
         this.loadNextTask();
         this.bindKeys();
     },
 
     bindKeys() {
         document.addEventListener('keydown', (e) => {
-            if(e.key === 'Escape') {
-                window.ImageViewer.close();
-                this.closeDrawer();
-            }
+            if(e.key === 'Escape') { window.ImageViewer.close(); this.closeDrawer(); }
         });
     },
 
@@ -55,7 +46,6 @@ window.AuditApp = {
         
         const decisions = ['Approve', 'Reject'];
         const modDecision = decisions[Math.floor(Math.random() * decisions.length)];
-        
         let modReason = null;
 
         if (modDecision === 'Reject') {
@@ -65,8 +55,7 @@ window.AuditApp = {
                 const subReasons = Config.violations[randCat];
                 modReason = subReasons[Math.floor(Math.random() * subReasons.length)]; 
             } else {
-                const fallbacks = ["Violence", "Harassment", "Spam", "Nudity"];
-                modReason = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+                modReason = "Violence - General";
             }
         }
 
@@ -75,8 +64,7 @@ window.AuditApp = {
         const publishers = ['User_7723', 'GamerPro', 'Anna_Banana', 'Test_Account'];
 
         let task = { 
-            id, type, 
-            tenant: "BP/GP/Community",
+            id, type, tenant: "BP/GP/Community",
             publisher: publishers[Math.floor(Math.random() * publishers.length)],
             accountType: accountTypes[Math.floor(Math.random() * accountTypes.length)],
             publishTime: new Date(Date.now() - Math.floor(Math.random() * 100000000)).toLocaleString(),
@@ -95,12 +83,9 @@ window.AuditApp = {
              task.text = "Check out this content!";
         } else if (type.includes('avatar')) {
              task.images.push(`https://i.pravatar.cc/300?u=${id}`);
-             task.text = ""; 
         } else if (type.includes('nick') || type.includes('profile')) {
-             task.images = []; 
              task.text = "Super_Gamer_Profile";
         }
-
         return task;
     },
 
@@ -110,7 +95,6 @@ window.AuditApp = {
         document.getElementById('workbench').style.display = 'none';
         this.closeDrawer();
         
-        // REMOVED SETTIMEOUT
         const task = this.generateAuditTask();
         this.currentTaskState = task; 
         
@@ -128,23 +112,20 @@ window.AuditApp = {
 
         const imgContainer = document.getElementById('image-container');
         const txtContainer = document.getElementById('text-container');
-        
         const imgModule = document.getElementById('module-content');
         const txtModule = document.getElementById('module-text');
 
         if (task.images.length > 0) {
             imgModule.style.display = 'block';
-            // UPDATED: Adaptive Square Style
-            const squareStyle = 'width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer; margin-right: 10px; margin-bottom: 10px;';
             imgContainer.innerHTML = task.images.map(src => 
-                `<div><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
+                `<div><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
             ).join('');
             this.updateInlineStatus('images', task.modDecision, task.modReason);
         } else {
             imgModule.style.display = 'none';
         }
 
-        if (task.text && task.text.trim() !== "") {
+        if (task.text) {
             txtModule.style.display = 'block';
             txtContainer.innerText = task.text;
             this.updateInlineStatus('text', task.modDecision, task.modReason);
@@ -160,7 +141,6 @@ window.AuditApp = {
     updateInlineStatus(type, decision, reason) {
         const el = document.getElementById(`mod-val-${type}`);
         const wrap = document.getElementById(`status-display-${type}`);
-        
         if(el && wrap) {
             wrap.classList.remove('mod-approve', 'mod-reject');
             if (decision === 'Approve') {
@@ -187,24 +167,18 @@ window.AuditApp = {
     stopTimer() { clearInterval(this.timerInterval); },
 
     openErrorDrawer() {
-        const drawer = document.getElementById('violationDrawer');
-        const content = document.getElementById('errorList');
-        const title = document.querySelector('.drawer-header span');
-        
+        const d = document.getElementById('violationDrawer');
+        const c = document.getElementById('errorList');
         if(!this.currentTaskState) return;
-
-        title.innerText = "Audit Correction";
-        drawer.classList.add('open');
-        this.renderStep1_ErrorType(content);
+        document.querySelector('.drawer-header span').innerText = "Audit Correction";
+        d.classList.add('open');
+        this.renderStep1_ErrorType(c);
     },
 
-    closeDrawer() {
-        document.getElementById('violationDrawer').classList.remove('open');
-    },
+    closeDrawer() { document.getElementById('violationDrawer').classList.remove('open'); },
 
     renderStep1_ErrorType(container) {
         const initial = this.currentTaskState.modDecision;
-        
         let validErrors = [];
         if(initial === 'Reject') {
             validErrors = [
@@ -218,16 +192,9 @@ window.AuditApp = {
                 { id: 'policy_miss', label: 'Policy Misinterpretation', sub: 'Applied policy incorrectly' }
             ];
         }
-
-        let html = `<div style="padding: 20px;">
-            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; text-transform:uppercase; font-weight:700;">1. Select Error Type</div>`;
-        
+        let html = `<div style="padding: 20px;"><div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; text-transform:uppercase; font-weight:700;">1. Select Error Type</div>`;
         validErrors.forEach(err => {
-            html += `
-            <div class="violation-category" onclick="AuditApp.renderStep2_Decision('${err.id}', '${err.label}')" style="cursor:pointer; padding:15px; border:1px solid var(--border-color); margin-bottom:10px; border-radius:6px; background:var(--bg-body);">
-                <div style="font-weight:600; color:var(--text-header);">${err.label}</div>
-                <div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">${err.sub}</div>
-            </div>`;
+            html += `<div class="violation-category" onclick="AuditApp.renderStep2_Decision('${err.id}', '${err.label}')" style="cursor:pointer; padding:15px; border:1px solid var(--border-color); margin-bottom:10px; border-radius:6px; background:var(--bg-body);"><div style="font-weight:600; color:var(--text-header);">${err.label}</div><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">${err.sub}</div></div>`;
         });
         html += `</div>`;
         container.innerHTML = html;
@@ -235,42 +202,18 @@ window.AuditApp = {
 
     renderStep2_Decision(errorId, errorLabel) {
         const container = document.getElementById('errorList');
-        const title = document.querySelector('.drawer-header span');
-        title.innerText = "Correct Decision";
-
-        let html = `<div style="padding: 20px;">
-            <div style="margin-bottom:20px; font-size:0.9rem; padding:10px; background:var(--hover-bg); border-radius:6px;">
-                <span style="color:var(--text-muted);">Selected Error:</span> 
-                <strong>${errorLabel}</strong>
-                <a href="#" onclick="AuditApp.openErrorDrawer()" style="color:#0969da; font-size:0.8rem; margin-left:10px; text-decoration:none;">(Change)</a>
-            </div>
-            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase; font-weight:700;">2. Select Correct Audit Decision</div>`;
+        document.querySelector('.drawer-header span').innerText = "Correct Decision";
+        let html = `<div style="padding: 20px;"><div style="margin-bottom:20px; font-size:0.9rem; padding:10px; background:var(--hover-bg); border-radius:6px;"><span style="color:var(--text-muted);">Selected Error:</span> <strong>${errorLabel}</strong> <a href="#" onclick="AuditApp.openErrorDrawer()" style="color:#0969da; font-size:0.8rem; margin-left:10px; text-decoration:none;">(Change)</a></div><div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase; font-weight:700;">2. Select Correct Audit Decision</div>`;
 
         if (errorId === 'false_pos') {
-            html += `
-            <button class="btn-primary" style="width:100%; padding:12px; font-size:1rem;" onclick="AuditApp.submitCorrection('Approve', '${errorLabel}')">
-                Set Decision to <strong>Approve</strong>
-            </button>`;
-        } 
-        else {
+            html += `<button class="btn-primary" style="width:100%; padding:12px; font-size:1rem;" onclick="AuditApp.submitCorrection('Approve', '${errorLabel}')">Set Decision to <strong>Approve</strong></button>`;
+        } else {
             if (typeof Config !== 'undefined' && Config.violations) {
                 for(let [cat, subs] of Object.entries(Config.violations)) {
-                    html += `<div class="violation-category">
-                        <div class="category-trigger" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">
-                            ${cat} ▼
-                        </div>
-                        <div class="violation-submenu" style="display:none;">
-                            ${subs.map(s => `
-                                <div class="violation-option" onclick="AuditApp.submitCorrection('Reject', '${errorLabel}', '${cat} - ${s}')">
-                                    ${s}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>`;
+                    html += `<div class="violation-category"><div class="category-trigger" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">${cat} ▼</div><div class="violation-submenu" style="display:none;">${subs.map(s => `<div class="violation-option" onclick="AuditApp.submitCorrection('Reject', '${errorLabel}', '${cat} - ${s}')">${s}</div>`).join('')}</div></div>`;
                 }
             }
         }
-        
         html += `</div>`;
         container.innerHTML = html;
     },
@@ -278,7 +221,6 @@ window.AuditApp = {
     submitCorrection(newDecision, errorType, violationReason = '') {
         const counter = document.getElementById('session-counter');
         if(counter) counter.innerText = ++this.tasksAudited;
-        console.log(`Audit Submitted: Error=${errorType}, Correct=${newDecision}, Reason=${violationReason}`);
         this.closeDrawer();
         this.loadNextTask();
     },
@@ -291,11 +233,7 @@ window.AuditApp = {
         }
     },
 
-    exit() {
-        window.location.href = 'audit-queue.html';
-    }
+    exit() { window.location.href = 'audit-queue.html'; }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.AuditApp.init();
-});
+document.addEventListener('DOMContentLoaded', () => { window.AuditApp.init(); });
