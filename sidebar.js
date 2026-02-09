@@ -4,8 +4,9 @@
 const APP_LANG = localStorage.getItem('appLang') || 'en';
 
 const TRANSLATIONS = {
-    en: { brand: "AdminPanel", overview: "Overview", users: "User Management", mod: "Moderation Queue", audit: "Quality Audit", appeal: "Appeal Center", notifs: "Notifications", settings: "Settings", logout: "Logout", online: "Online", offline: "Offline" },
-    zh: { brand: "管理后台", overview: "总览", users: "用户管理", mod: "审核队列", audit: "质量质检", appeal: "申诉中心", notifs: "通知中心", settings: "设置", logout: "退出登录", online: "在线", offline: "离线" }
+    // UPDATED: Changed 'mod' to "Moderation"
+    en: { brand: "AdminPanel", overview: "Overview", users: "User Management", mod: "Moderation", audit: "Quality Audit", appeal: "Appeal Center", notifs: "Notifications", settings: "Settings", logout: "Logout", online: "Online", offline: "Offline" },
+    zh: { brand: "管理后台", overview: "总览", users: "用户管理", mod: "审核", audit: "质量质检", appeal: "申诉中心", notifs: "通知中心", settings: "设置", logout: "退出登录", online: "在线", offline: "离线" }
 };
 const T = TRANSLATIONS[APP_LANG];
 
@@ -72,7 +73,6 @@ document.body.insertAdjacentHTML('afterbegin', sidebarContent);
 // ===========================================
 // 2. LOGIC INITIALIZATION
 // ===========================================
-// Use setTimeout to ensure the inserted HTML is available in the DOM
 setTimeout(() => {
     // --- Active Link Logic ---
     const path = window.location.pathname;
@@ -109,14 +109,12 @@ setTimeout(() => {
         });
     }
 
-    // Close menu on click outside
     document.addEventListener('click', (e) => {
         if (statusMenu && statusMenu.classList.contains('active')) {
             statusMenu.classList.remove('active');
         }
     });
 
-    // Init Status from Storage
     const savedStatus = JSON.parse(localStorage.getItem('userStatus'));
     if (savedStatus && currentLabel && currentDot) {
         currentLabel.innerText = savedStatus.label;
@@ -125,7 +123,6 @@ setTimeout(() => {
 
 }, 100);
 
-// --- Theme Logic ---
 const savedTheme = localStorage.getItem('appTheme') || 'light';
 if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
@@ -135,7 +132,6 @@ window.toggleTheme = function() {
     window.dispatchEvent(new Event('themeChanged'));
 };
 
-// --- Auth Placeholder ---
 if (typeof Auth === 'undefined') {
     window.Auth = { logout: () => { window.location.href='login.html'; } };
 }
