@@ -155,41 +155,52 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
 .image-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 20px;
     width: 100%;
-    justify-content: center; /* Keeps them centered */
+    justify-content: center; /* Centers the cards horizontally */
+    padding-bottom: 20px;
 }
 
+/* THE CARD CONTAINER (The outer box with the frame) */
 .content-image-card, .image-grid > div {
     position: relative;
-    width: 300px;
-    height: 300px;
-    border-radius: 8px;
-    overflow: hidden;
+    width: 300px;       /* Fixed total width */
+    height: 300px;      /* Fixed total height */
+    
     border: 1px solid var(--border-color);
+    background-color: var(--bg-card); /* White background for the frame */
+    padding: 12px;      /* This padding creates the white "frame" thickness */
     
-    /* UPDATED: White background and padding to create the 'Frame' look */
-    background-color: var(--bg-card); 
-    padding: 12px;
-    
+    border-radius: 8px; /* Outer corner radius */
+    overflow: hidden;
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    
+    /* Ensure image fills space correctly */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* THE IMAGE ITSELF (Filling the space inside the padding) */
 .content-image-card img, .image-grid img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: pointer;
-    transition: transform 0.2s;
-    display: block;
+    height: 100%;       /* *** CRITICAL FIX: Ensures image fills the height *** */
+    object-fit: cover;  /* Crops the image precisely to fit the space */
     
-    /* UPDATED: Slight radius on the image itself looks cleaner inside the frame */
-    border-radius: 4px; 
+    border-radius: 4px; /* Inner corner radius for the image */
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display: block;
 }
 
+/* Hover effect */
 .content-image-card img:hover, .image-grid img:hover {
     transform: scale(1.02);
 }
+
+/* Remove old conflicting styles if they exist below this block */
+.image-meta { display: none; }
 
 /* Text Context Area */
 .text-context-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; background-color: var(--bg-input); font-size: 0.95rem; color: var(--text-main); line-height: 1.6; min-height: 60px; word-break: break-word; white-space: pre-wrap; }
