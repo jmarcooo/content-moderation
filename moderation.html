@@ -3,23 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moderation</title>
+    <title>Moderation Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* New SVG Utility Classes */
-        .icon-svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
-            vertical-align: middle;
-            margin-right: 4px;
-            opacity: 0.7;
-        }
-
-        /* Selection Card Styles (Matches image_2f7c85.png) */
         .selection-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 24px;
             margin-top: 20px;
         }
@@ -34,17 +23,31 @@
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            height: 200px;
+            justify-content: center;
+            align-items: flex-start;
+            height: 220px;
+            position: relative;
+            text-decoration: none; /* Ensure link style doesn't break layout */
         }
 
         .selection-card:hover {
-            border-color: #0969da;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border-color: var(--accent-blue);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 12px;
+            background-color: var(--hover-bg);
+            fill: var(--accent-blue);
         }
 
         .selection-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: var(--text-header);
             margin-bottom: 8px;
@@ -55,302 +58,51 @@
             color: var(--text-muted);
             line-height: 1.5;
         }
-        
-        .back-nav {
-            margin-bottom: 15px;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
-        }
-        .back-nav:hover { color: var(--accent-blue); }
-
-        /* Hide sections initially */
-        #view-content-mod, #view-labeling {
-            display: none;
-        }
     </style>
 </head>
 <body>
 
+    <script src="sidebar.js"></script>
+
     <main class="main-content">
-        
-        <div id="view-dashboard">
-            <div class="header" style="border-bottom: none; margin-bottom: 10px;">
-                <h1>Moderation</h1>
-            </div>
-            <div style="border-bottom: 1px solid var(--border-color); margin-bottom: 2rem;"></div>
-
-            <div class="selection-grid">
-                <div class="selection-card" onclick="switchSection('view-content-mod')">
-                    <div class="selection-title">Content Moderation</div>
-                    <div class="selection-desc">Shows UGC content queues for moderation</div>
-                </div>
-                
-                <div class="selection-card" onclick="switchSection('view-labeling')">
-                    <div class="selection-title">Content Labelling</div>
-                    <div class="selection-desc">Labels contents based on the context</div>
-                </div>
-            </div>
+        <div class="header" style="border-bottom: none; padding-bottom: 0;">
+            <h1>Moderation</h1>
         </div>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">Select a moderation tool to proceed.</p>
 
-        <div id="view-content-mod">
-            <div class="back-nav" onclick="switchSection('view-dashboard')">← Back to Moderation</div>
+        <div class="selection-grid">
             
-            <div class="header">
-                <h1>Content Moderation</h1>
-                
-                <div style="display: flex; align-items: center;">
-                    
-                    <select id="sortDropdown" class="sort-select" onchange="handleDropdownSort(this.value)">
-                        <option value="count-desc">Pending (Highest)</option>
-                        <option value="count-asc">Pending (Lowest)</option>
-                        <option value="latency-desc">Latency (Slowest)</option>
-                        <option value="latency-asc">Latency (Fastest)</option>
-                        <option value="aht-desc">AHT (Slowest)</option>
-                        <option value="aht-asc">AHT (Fastest)</option>
-                    </select>
+            <a href="content-moderation.html" class="selection-card">
+                <svg class="card-icon" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                <div class="selection-title">Content Moderation</div>
+                <div class="selection-desc">Shows UGC content queues for moderation and review.</div>
+            </a>
 
-                    <div class="view-switcher">
-                        <button id="btn-card" class="view-btn" onclick="switchView('card')" title="Card View">
-                            ⊞
-                        </button>
-                        <button id="btn-list" class="view-btn" onclick="switchView('list')" title="List View">
-                            ☰
-                        </button>
-                    </div>
+            <a href="content-labelling.html" class="selection-card">
+                <svg class="card-icon" viewBox="0 0 24 24" style="fill: #d29922;">
+                    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16zM16 17H5V7h11l3.55 5L16 17z"/>
+                </svg>
+                <div class="selection-title">Content Labelling</div>
+                <div class="selection-desc">Labels contents based on the context for training data.</div>
+            </a>
 
-                    <div style="text-align: right; margin-left: 20px;">
-                        <span style="color:var(--text-muted); font-size:0.9rem;">Total Pending:</span>
-                        <strong id="total-pending" style="font-size:1.2rem; color:var(--text-header); margin-left:5px;">0</strong>
-                    </div>
-                </div>
-            </div>
+            <a href="moderation-history.html" class="selection-card">
+                <svg class="card-icon" viewBox="0 0 24 24" style="fill: #8957e5;">
+                    <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+                </svg>
+                <div class="selection-title">Moderation History</div>
+                <div class="selection-desc">View past actions and audit logs for your account.</div>
+            </a>
 
-            <div id="queue-container" class="queue-grid">
-                </div>
-        </div>
-
-        <div id="view-labeling">
-            <div class="back-nav" onclick="switchSection('view-dashboard')">← Back to Moderation</div>
-            
-            <div class="header">
-                <h1>Content Labelling</h1>
-            </div>
-
-            <div class="card" style="min-height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--text-muted);">
-                <div style="font-size: 3rem; margin-bottom: 20px;">🏷️</div>
-                <div>Labelling Interface Coming Soon</div>
-            </div>
         </div>
 
     </main>
 
-    <script src="config.js"></script>
     <script src="auth.js"></script>
-    <script src="sidebar.js"></script>
-
     <script>
-        // --- AUTH GUARD ---
         Auth.requireLogin();
-
-        // --- NAVIGATION LOGIC ---
-        function switchSection(sectionId) {
-            document.getElementById('view-dashboard').style.display = 'none';
-            document.getElementById('view-content-mod').style.display = 'none';
-            document.getElementById('view-labeling').style.display = 'none';
-
-            document.getElementById(sectionId).style.display = 'block';
-
-            // Store state to persist on refresh? For now, we keep it simple.
-            // If switching to mod queue, render it if needed (though we render on load for simplicity)
-        }
-
-        // --- CONFIGURATION ---
-        let queueData = Config.queues.map(q => ({
-            ...q,
-            count: Math.floor(Math.random() * 500)
-        }));
-
-        // --- VIEW STATE & SORT LOGIC (Existing Logic) ---
-        let currentView = localStorage.getItem('modQueueView') || 'list'; // Default to List based on image_2f7cfe.png
-        let sortCol = 'count'; 
-        let sortAsc = false;
-
-        function switchView(viewType) {
-            currentView = viewType;
-            localStorage.setItem('modQueueView', viewType);
-            renderQueues();
-            updateViewButtons();
-        }
-
-        function updateViewButtons() {
-            document.getElementById('btn-card').classList.toggle('active', currentView === 'card');
-            document.getElementById('btn-list').classList.toggle('active', currentView === 'list');
-        }
-
-        function parseTime(timeStr) {
-            if (!timeStr) return 0;
-            let m = 0, s = 0;
-            const mMatch = timeStr.match(/(\d+)m/);
-            const sMatch = timeStr.match(/(\d+)s/);
-            if (mMatch) m = parseInt(mMatch[1]);
-            if (sMatch) s = parseInt(sMatch[1]);
-            return (m * 60) + s;
-        }
-
-        // --- SORTING ENGINE ---
-        function executeSort() {
-            queueData.sort((a, b) => {
-                let valA, valB;
-                if (sortCol === 'latency' || sortCol === 'aht') {
-                    valA = parseTime(a[sortCol]);
-                    valB = parseTime(b[sortCol]);
-                } else if (sortCol === 'count') {
-                    valA = a[sortCol];
-                    valB = b[sortCol];
-                } else {
-                    valA = a[sortCol].toLowerCase();
-                    valB = b[sortCol].toLowerCase();
-                }
-
-                if (valA < valB) return sortAsc ? -1 : 1;
-                if (valA > valB) return sortAsc ? 1 : -1;
-                return 0;
-            });
-            renderQueues();
-        }
-
-        function handleHeaderSort(column) {
-            if (sortCol === column) {
-                sortAsc = !sortAsc;
-            } else {
-                sortCol = column;
-                sortAsc = true; 
-            }
-            syncDropdown();
-            executeSort();
-        }
-
-        function handleDropdownSort(value) {
-            const [col, dir] = value.split('-');
-            sortCol = col;
-            sortAsc = (dir === 'asc');
-            executeSort();
-        }
-
-        function syncDropdown() {
-            const dir = sortAsc ? 'asc' : 'desc';
-            const val = `${sortCol}-${dir}`;
-            const dropdown = document.getElementById('sortDropdown');
-            if (dropdown.querySelector(`option[value="${val}"]`)) {
-                dropdown.value = val;
-            }
-        }
-
-        function getSortIcon(column) {
-            if (sortCol !== column) return '<span class="sort-icon">⇅</span>';
-            return sortAsc ? '▲' : '▼';
-        }
-        function getSortClass(column) {
-            return sortCol === column ? 'active-sort' : '';
-        }
-
-        // --- RENDER FUNCTION ---
-        function renderQueues() {
-            const container = document.getElementById('queue-container');
-            let total = 0;
-            let html = '';
-
-            // DEFINING SVG ICONS HERE
-            const ICON_CLOCK = `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
-            const ICON_BOLT  = `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></svg>`;
-
-            if (currentView === 'card') {
-                container.className = 'queue-grid';
-            } else {
-                container.className = 'queue-container list-mode';
-                html += `
-                <div class="list-header-row">
-                    <div class="col-tenant ${getSortClass('category')}" onclick="handleHeaderSort('category')">
-                        TENANT ${getSortIcon('category')}
-                    </div>
-                    <div class="col-name ${getSortClass('name')}" onclick="handleHeaderSort('name')">
-                        QUEUE NAME ${getSortIcon('name')}
-                    </div>
-                    <div class="col-pending ${getSortClass('count')}" onclick="handleHeaderSort('count')">
-                        PENDING ${getSortIcon('count')}
-                    </div>
-                    <div class="col-latency ${getSortClass('latency')}" onclick="handleHeaderSort('latency')">
-                        LATENCY ${getSortIcon('latency')}
-                    </div>
-                    <div class="col-aht ${getSortClass('aht')}" onclick="handleHeaderSort('aht')">
-                        AHT ${getSortIcon('aht')}
-                    </div>
-                    <div class="col-action" style="cursor:default">ACTION</div>
-                </div>
-                `;
-            }
-
-            html += queueData.map(queue => {
-                total += queue.count;
-                
-                if (currentView === 'card') {
-                    // CARD LAYOUT
-                    return `
-                    <div class="queue-card" onclick="openQueue('${queue.name}')">
-                        <div>
-                            <div class="queue-type">${queue.category}</div>
-                            <div class="queue-title">${queue.name}</div>
-                        </div>
-                        
-                        <div>
-                            <div class="count-number">${queue.count.toLocaleString()}</div>
-                            <div class="count-label">Pending Items</div>
-                        </div>
-
-                        <div class="card-footer">
-                            <div class="card-stat-item" title="Average Latency">
-                                ${ICON_CLOCK} <span class="card-stat-val">${queue.latency}</span>
-                            </div>
-                            <div class="card-stat-item" title="Average Handle Time">
-                                ${ICON_BOLT} <span class="card-stat-val">${queue.aht}</span>
-                            </div>
-                            <button class="btn-review" style="padding: 2px 8px; font-size: 0.75rem;">Review</button>
-                        </div>
-                    </div>`;
-                } else {
-                    // LIST LAYOUT
-                    return `
-                    <div class="queue-list-item" onclick="openQueue('${queue.name}')">
-                        <div class="col-tenant"><span class="badge-tenant">${queue.category}</span></div>
-                        <div class="col-name">${queue.name}</div>
-                        <div class="col-pending">${queue.count.toLocaleString()} <span class="sub-text">Tasks</span></div>
-                        <div class="col-latency">${ICON_CLOCK} ${queue.latency}</div>
-                        <div class="col-aht">${ICON_BOLT} ${queue.aht}</div>
-                        <div class="col-action"><button class="btn-review">Review</button></div>
-                    </div>`;
-                }
-            }).join('');
-
-            container.innerHTML = html;
-            document.getElementById('total-pending').innerText = total.toLocaleString();
-            updateViewButtons();
-        }
-
-        // --- NAVIGATION ---
-        function openQueue(queueName) {
-            const queue = queueData.find(q => q.name === queueName);
-            const tenant = queue ? queue.category : 'BP'; 
-            window.location.href = `review.html?queue=${encodeURIComponent(queueName)}&tenant=${encodeURIComponent(tenant)}`;
-        }
-
-        // Initialize Sorting & Render
-        executeSort();
-        // Force view update just in case
-        updateViewButtons();
     </script>
 </body>
 </html>
