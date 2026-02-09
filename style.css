@@ -157,25 +157,25 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
     flex-wrap: wrap;
     gap: 16px;
     width: 100%;
+    justify-content: center; /* This centers the images horizontally */
 }
 
-/* Force specific 300x300 dimensions for the card holder */
+/* ... keep the rest of .content-image-card styles as they are ... */
 .content-image-card, .image-grid > div {
     position: relative;
-    width: 300px;       /* Fixed Width */
-    height: 300px;      /* Fixed Height */
+    width: 300px;
+    height: 300px;
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid var(--border-color);
     background-color: var(--bg-body);
-    flex-shrink: 0;     /* Prevent shrinking if space is tight */
+    flex-shrink: 0;
 }
 
-/* Ensure the image fills the card exactly */
 .content-image-card img, .image-grid img {
     width: 100%;
     height: 100%;
-    object-fit: cover;  /* Crops image to fit 300x300 perfectly */
+    object-fit: cover;
     cursor: pointer;
     transition: transform 0.2s;
     display: block;
@@ -184,7 +184,6 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
 .content-image-card img:hover, .image-grid img:hover {
     transform: scale(1.03);
 }
-.content-image-card img:hover, .image-grid img:hover { transform: scale(1.03); }
 
 /* Text Context Area */
 .text-context-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; background-color: var(--bg-input); font-size: 0.95rem; color: var(--text-main); line-height: 1.6; min-height: 60px; word-break: break-word; white-space: pre-wrap; }
