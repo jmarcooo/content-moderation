@@ -25,6 +25,7 @@ window.AuditApp = {
     tasksAudited: 0,
     queueName: '',
     
+    // Audit-specific error types (Auditor selects these when they disagree)
     errorTypes: [
         { label: "False Positive", desc: "Moderator punished benign content" },
         { label: "False Negative", desc: "Moderator missed a violation" },
@@ -61,22 +62,26 @@ window.AuditApp = {
         const id = Math.floor(Math.random() * 999999999999).toString();
         const type = this.queueName.toLowerCase();
         
-        // --- MODERATION DECISION LOGIC ---
+        // --- 1. SIMULATE PREVIOUS DECISION ---
         const decisions = ['Approve', 'Reject'];
-        // 50/50 Chance
         const modDecision = decisions[Math.floor(Math.random() * decisions.length)];
         
-        let modReason = '';
-        
-        // If Reject, pick a random reason from Config
-        if (modDecision === 'Reject' && typeof Config !== 'undefined' && Config.violations) {
-            const categories = Object.keys(Config.violations);
-            const randCat = categories[Math.floor(Math.random() * categories.length)];
-            const subReasons = Config.violations[randCat];
-            const randSub = subReasons[Math.floor(Math.random() * subReasons.length)];
-            modReason = `${randCat} - ${randSub}`;
-        } else if (modDecision === 'Reject') {
-            modReason = "Violence - General"; // Fallback if config missing
+        let modReason = null;
+
+        // If Rejected, pick a specific violation reason
+        if (modDecision === 'Reject') {
+            // Attempt to use Config.violations if available
+            if (typeof Config !== 'undefined' && Config.violations) {
+                const categories = Object.keys(Config.violations);
+                const randCat = categories[Math.floor(Math.random() * categories.length)];
+                const subReasons = Config.violations[randCat];
+                const randSub = subReasons[Math.floor(Math.random() * subReasons.length)];
+                modReason = `${randCat} - ${randSub}`;
+            } else {
+                // Fallback if Config not loaded
+                const fallbacks = ["Violence - General", "Harassment - Bullying", "Spam - Advertising", "Nudity - General"];
+                modReason = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+            }
         }
 
         const modNames = ['kenneth.cortes', 'liezl.tejero', 'mark.villanueva', 'jon.odono'];
@@ -93,7 +98,7 @@ window.AuditApp = {
             images: [], text: "",
             
             modDecision,
-            modReason, // Store the reason
+            modReason, // Contains the specific violation (e.g. "Violence - Horror Scenes")
             modName: modNames[Math.floor(Math.random() * modNames.length)],
             modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString(),
             
@@ -103,6 +108,7 @@ window.AuditApp = {
             taskId: "Task-" + id
         };
 
+        // --- 2. GENERATE CONTENT BASED ON TYPE ---
         // RULE 1: Video/Image Review (Content + Text)
         if (type.includes('image') || type.includes('video')) {
              task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
@@ -143,7 +149,7 @@ window.AuditApp = {
             document.getElementById('mod-name').innerText = task.modName;
             document.getElementById('mod-time').innerText = task.modTime;
 
-            // --- MODULE VISIBILITY ---
+            // --- MODULE VISIBILITY & STATUS UPDATE ---
             const imgSection = document.getElementById('image-container').parentElement;
             const txtSection = document.getElementById('text-container').parentElement;
             const imgContainer = document.getElementById('image-container');
@@ -155,6 +161,7 @@ window.AuditApp = {
                 imgContainer.innerHTML = task.images.map(src => 
                     `<img src="${src}" style="height:160px; border-radius:6px; cursor:pointer; border:1px solid #eee;" onclick="window.ImageViewer.open(this.src)">`
                 ).join('');
+                // Pass decision AND reason
                 this.updateInlineStatus('images', task.modDecision, task.modReason);
             } else {
                 imgSection.style.display = 'none';
@@ -164,6 +171,7 @@ window.AuditApp = {
             if (task.text && task.text.trim() !== "") {
                 txtSection.style.display = 'block';
                 txtContainer.innerText = task.text;
+                // Pass decision AND reason
                 this.updateInlineStatus('text', task.modDecision, task.modReason);
             } else {
                 txtSection.style.display = 'none';
@@ -178,16 +186,18 @@ window.AuditApp = {
     updateInlineStatus(type, decision, reason) {
         const el = document.getElementById(`mod-val-${type}`);
         const wrap = document.getElementById(`status-display-${type}`);
+        
         if(el && wrap) {
-            // Remove old classes
+            // Remove old styling classes
             wrap.classList.remove('mod-approve', 'mod-reject');
             
             if (decision === 'Approve') {
                 el.innerText = "Approve";
                 wrap.classList.add('mod-approve');
             } else {
-                // Show "Reject: Reason"
-                el.innerText = `Reject: ${reason}`;
+                // Show "Reject: [Reason]"
+                const reasonText = reason ? `: ${reason}` : "";
+                el.innerText = `Reject${reasonText}`; 
                 wrap.classList.add('mod-reject');
             }
         }
