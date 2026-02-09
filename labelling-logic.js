@@ -107,7 +107,9 @@ window.LabelApp = {
     },
 
     updateCounter() {
-        document.getElementById('selected-count').innerText = this.selectedLabels.size;
+        // UPDATED: Safety check for missing element
+        const el = document.getElementById('selected-count');
+        if(el) el.innerText = this.selectedLabels.size;
     },
 
     startTimer() {
