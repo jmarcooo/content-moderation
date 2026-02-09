@@ -147,15 +147,12 @@ window.ReviewApp = {
         const imgContainer = document.getElementById('image-container');
 
         if (task.images.length > 0) {
-            modContent.style.display = 'block'; 
-            if (this.queueName.toLowerCase().includes('avatar')) {
-                imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="window.ImageViewer.open(this.src)">`;
-            } else {
-                // FIXED: Removed hardcoded style. Now uses CSS class for responsive grid.
-                imgContainer.innerHTML = task.images.map(src => 
-                    `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
-                ).join('');
-            }
+            modContent.style.display = 'block';
+            // FIXED: Removed special handling for 'avatar'.
+            // Now ALL images, including avatars, use the standard .content-image-card wrapper.
+            imgContainer.innerHTML = task.images.map(src => 
+                `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
+            ).join('');
         } else {
             modContent.style.display = 'none'; 
         }
