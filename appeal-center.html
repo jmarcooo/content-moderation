@@ -10,19 +10,33 @@
     .appeal-card { border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 12px; background: var(--panel-bg); }
     .appeal-meta { font-size: 0.85rem; color: var(--text-muted); }
     .badge-pending { background: #d29922; color:white; padding: 3px 8px; border-radius: 4px; font-weight:600; }
+    
+    .back-nav {
+        margin-bottom: 15px;
+        color: var(--text-muted);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+    .back-nav:hover { color: var(--accent-blue); }
   </style>
 </head>
 <body>
   <script src="sidebar.js"></script>
   <main class="main-content">
+    
+    <a href="quality-assurance.html" class="back-nav">← Back to Quality Assurance</a>
+
     <div class="header">
       <h1>Appeal Center</h1>
       <div style="color:var(--text-muted)">Tasks flagged by QA for review</div>
     </div>
 
     <div class="appeal-list" id="appealList">
-      <!-- items inserted by script -->
-    </div>
+      </div>
   </main>
 
   <script>
