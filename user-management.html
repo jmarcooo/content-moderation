@@ -26,6 +26,91 @@
 
         .btn-sm { padding: 4px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); background: var(--bg-body); border-radius: 4px; cursor: pointer; white-space: nowrap; }
         .btn-sm:hover { background: var(--hover-bg); border-color: var(--accent-blue); color: var(--accent-blue); }
+
+        /* --- NEW CARD STYLES (Matching Moderation Dashboard) --- */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .selection-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 32px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            height: 220px;
+            position: relative;
+        }
+
+        .selection-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 12px;
+            background-color: var(--hover-bg);
+            fill: var(--accent-blue);
+        }
+        
+        /* Specific colors for icons */
+        .icon-blue { fill: #0969da; background-color: rgba(9, 105, 218, 0.1); }
+        .icon-green { fill: #238636; background-color: rgba(35, 134, 54, 0.1); }
+        .icon-purple { fill: #8957e5; background-color: rgba(137, 87, 229, 0.1); }
+
+        .selection-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-header);
+            margin-bottom: 8px;
+        }
+
+        .selection-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Back Link Styling */
+        .back-nav {
+            margin-bottom: 15px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        .back-nav:hover { color: var(--accent-blue); }
+        
+        /* Placeholder Container */
+        .placeholder-container {
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -35,27 +120,42 @@
     <main class="main-content">
         
         <div id="view-dashboard">
-            <div class="header">
+            <div class="header" style="border-bottom: none; padding-bottom: 0;">
                 <h1 id="txt-main-title">User Management</h1>
             </div>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Manage users, track status, and configure permissions.</p>
 
-            <div class="notif-dashboard-grid">
-                <div class="notif-card" onclick="switchSection('view-status')">
-                    <i class="fa-solid fa-chart-line notif-icon" style="color:#0969da;"></i>
-                    <h3 id="txt-card-status-title">User Status</h3>
-                    <p id="txt-card-status-desc">Real-time status monitoring of moderators.</p>
+            <div class="selection-grid">
+                
+                <div class="selection-card" onclick="switchSection('view-status')">
+                    <svg class="card-icon icon-blue" viewBox="0 0 24 24">
+                        <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
+                    </svg>
+                    <h3 id="txt-card-status-title" class="selection-title">User Status</h3>
+                    <p id="txt-card-status-desc" class="selection-desc">Real-time status monitoring of moderators.</p>
                 </div>
 
-                <div class="notif-card" onclick="switchSection('view-accounts')">
-                    <i class="fa-solid fa-users-gear notif-icon" style="color:#238636;"></i>
-                    <h3 id="txt-card-acc-title">Accounts</h3>
-                    <p id="txt-card-acc-desc">Manage registered users and edit details.</p>
+                <div class="selection-card" onclick="switchSection('view-accounts')">
+                    <svg class="card-icon icon-green" viewBox="0 0 24 24">
+                         <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    <h3 id="txt-card-acc-title" class="selection-title">Accounts</h3>
+                    <p id="txt-card-acc-desc" class="selection-desc">Manage registered users and edit details.</p>
                 </div>
+
+                <div class="selection-card" onclick="switchSection('view-roles')">
+                    <svg class="card-icon icon-purple" viewBox="0 0 24 24">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                    </svg>
+                    <h3 class="selection-title">Roles & Permissions</h3>
+                    <p class="selection-desc">Configure access levels and platform privileges.</p>
+                </div>
+
             </div>
         </div>
 
         <div id="view-accounts" style="display: none;">
-            <div onclick="switchSection('view-dashboard')" class="back-link" id="txt-back-link-1">← Back to Dashboard</div>
+            <div onclick="switchSection('view-dashboard')" class="back-nav" id="txt-back-link-1">← Back to Dashboard</div>
             <div class="header">
                 <h1 id="txt-acc-header">Accounts</h1>
                 <button class="btn-primary" onclick="openAddModal()" id="txt-btn-add">+ Add User</button>
@@ -72,7 +172,7 @@
         </div>
 
         <div id="view-status" style="display: none;">
-            <div onclick="switchSection('view-dashboard')" class="back-link" id="txt-back-link-2">← Back to Dashboard</div>
+            <div onclick="switchSection('view-dashboard')" class="back-nav" id="txt-back-link-2">← Back to Dashboard</div>
             <div class="header">
                 <h1 id="txt-mod-header">Moderator Status Monitor</h1>
             </div>
@@ -84,6 +184,19 @@
                     </thead>
                     <tbody id="modStatusBody"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <div id="view-roles" style="display: none;">
+            <div onclick="switchSection('view-dashboard')" class="back-nav">← Back to Dashboard</div>
+            <div class="header">
+                <h1>Roles & Permissions</h1>
+            </div>
+            
+            <div class="placeholder-container">
+                <div style="font-size: 3rem; margin-bottom: 20px;">🛡️</div>
+                <h2>Role Configuration</h2>
+                <p>This module will allow admins to define granular permissions.</p>
             </div>
         </div>
 
@@ -138,6 +251,10 @@
         // --- ICONS & TRANSLATIONS ---
         const ICON_EDIT = `<i class="fa-regular fa-pen-to-square"></i>`;
         const ICON_DELETE = `<i class="fa-regular fa-trash-can"></i>`;
+        // Basic SVG icons for edit/delete if font-awesome not present
+        const SVG_EDIT = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+        const SVG_DELETE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+
 
         const APP_LANG_PAGE = localStorage.getItem('appLang') || 'en';
         const PAGE_TEXT = {
@@ -165,7 +282,11 @@
                 render();
             } catch (err) { 
                 console.error("Error connecting to server:", err);
-                alert("Could not load users.json. Ensure the file exists locally.");
+                // Fallback data if file fetch fails
+                users = [
+                    { id: "460480001", username: "jon.odono", role: "Admin", name: "Marco", email: "jon@digi.com", status: "Online", account_status: "Active", createdAt: "1/26/2026" },
+                    { id: "460480002", username: "kenneth.c", role: "Moderator", name: "Kenneth Cortes", email: "ken@digi.com", status: "Break", account_status: "Active", createdAt: "1/26/2026" }
+                ];
                 render();
             }
         }
@@ -175,8 +296,6 @@
             // 1. Optimistic Update (UI Only)
             render();
             if(document.getElementById('view-status').style.display === 'block') renderModStatus();
-
-            // 2. Static Mode Notification
             console.log('Static Mode: Changes are temporary and not saved to the file system.');
         }
 
@@ -185,6 +304,8 @@
             document.getElementById('view-dashboard').style.display = 'none';
             document.getElementById('view-accounts').style.display = 'none';
             document.getElementById('view-status').style.display = 'none';
+            document.getElementById('view-roles').style.display = 'none'; // New Section
+            
             document.getElementById(id).style.display = 'block';
             if(id === 'view-status') renderModStatus();
         }
@@ -228,8 +349,8 @@
                     <td><span class="badge ${getBadgeClass(u.account_status)}">${u.account_status || 'Active'}</span></td>
                     <td style="font-size:0.85rem;">${u.createdAt || 'N/A'}</td>
                     <td>
-                        <button onclick="openEdit('${u.id}')" class="action-btn" title="Edit">${ICON_EDIT}</button>
-                        <button onclick="delUser('${u.id}')" class="action-btn" title="Delete">${ICON_DELETE}</button>
+                        <button onclick="openEdit('${u.id}')" class="action-btn" title="Edit">${SVG_EDIT}</button>
+                        <button onclick="delUser('${u.id}')" class="action-btn" title="Delete">${SVG_DELETE}</button>
                     </td>
                 </tr>
             `).join('');
