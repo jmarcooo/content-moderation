@@ -61,8 +61,24 @@ window.AuditApp = {
         const id = Math.floor(Math.random() * 999999999999).toString();
         const type = this.queueName.toLowerCase();
         
+        // --- MODERATION DECISION LOGIC ---
         const decisions = ['Approve', 'Reject'];
+        // 50/50 Chance
         const modDecision = decisions[Math.floor(Math.random() * decisions.length)];
+        
+        let modReason = '';
+        
+        // If Reject, pick a random reason from Config
+        if (modDecision === 'Reject' && typeof Config !== 'undefined' && Config.violations) {
+            const categories = Object.keys(Config.violations);
+            const randCat = categories[Math.floor(Math.random() * categories.length)];
+            const subReasons = Config.violations[randCat];
+            const randSub = subReasons[Math.floor(Math.random() * subReasons.length)];
+            modReason = `${randCat} - ${randSub}`;
+        } else if (modDecision === 'Reject') {
+            modReason = "Violence - General"; // Fallback if config missing
+        }
+
         const modNames = ['kenneth.cortes', 'liezl.tejero', 'mark.villanueva', 'jon.odono'];
         const accountTypes = ['Normal User', 'Verified User', 'Influencer', 'New Account'];
         const publishers = ['User_7723', 'GamerPro', 'Anna_Banana', 'Test_Account'];
@@ -77,6 +93,7 @@ window.AuditApp = {
             images: [], text: "",
             
             modDecision,
+            modReason, // Store the reason
             modName: modNames[Math.floor(Math.random() * modNames.length)],
             modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString(),
             
@@ -94,11 +111,11 @@ window.AuditApp = {
         // RULE 2: Avatar (Content Only)
         else if (type.includes('avatar')) {
              task.images.push(`https://i.pravatar.cc/300?u=${id}`);
-             task.text = ""; // Empty text
+             task.text = ""; 
         }
         // RULE 3: Nickname/Profile (Text Only)
         else if (type.includes('nick') || type.includes('profile')) {
-             task.images = []; // Empty images
+             task.images = []; 
              task.text = "Super_Gamer_Profile";
         }
 
@@ -113,7 +130,7 @@ window.AuditApp = {
         setTimeout(() => {
             const task = this.generateAuditTask();
             
-            // Populate Sidebar info...
+            // Populate Sidebar info
             document.getElementById('info-tenant').innerText = task.tenant;
             document.getElementById('info-id').innerText = task.id;
             document.getElementById('info-publisher').innerText = task.publisher;
@@ -138,7 +155,7 @@ window.AuditApp = {
                 imgContainer.innerHTML = task.images.map(src => 
                     `<img src="${src}" style="height:160px; border-radius:6px; cursor:pointer; border:1px solid #eee;" onclick="window.ImageViewer.open(this.src)">`
                 ).join('');
-                this.updateInlineStatus('images', task.modDecision);
+                this.updateInlineStatus('images', task.modDecision, task.modReason);
             } else {
                 imgSection.style.display = 'none';
             }
@@ -147,7 +164,7 @@ window.AuditApp = {
             if (task.text && task.text.trim() !== "") {
                 txtSection.style.display = 'block';
                 txtContainer.innerText = task.text;
-                this.updateInlineStatus('text', task.modDecision);
+                this.updateInlineStatus('text', task.modDecision, task.modReason);
             } else {
                 txtSection.style.display = 'none';
             }
@@ -158,14 +175,21 @@ window.AuditApp = {
         }, 400);
     },
 
-    updateInlineStatus(type, decision) {
+    updateInlineStatus(type, decision, reason) {
         const el = document.getElementById(`mod-val-${type}`);
         const wrap = document.getElementById(`status-display-${type}`);
         if(el && wrap) {
-            el.innerText = decision;
+            // Remove old classes
             wrap.classList.remove('mod-approve', 'mod-reject');
-            if (decision === 'Approve') wrap.classList.add('mod-approve');
-            else wrap.classList.add('mod-reject');
+            
+            if (decision === 'Approve') {
+                el.innerText = "Approve";
+                wrap.classList.add('mod-approve');
+            } else {
+                // Show "Reject: Reason"
+                el.innerText = `Reject: ${reason}`;
+                wrap.classList.add('mod-reject');
+            }
         }
     },
 
