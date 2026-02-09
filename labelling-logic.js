@@ -52,12 +52,17 @@ window.LabelApp = {
             publisher: publishers[Math.floor(Math.random() * publishers.length)],
             followers: Math.floor(Math.random() * 500000).toLocaleString(),
             publishTime: new Date().toLocaleString(),
-            images: [], text: ""
+            images: [], textTop: "", textBottom: ""
         };
         const imgCount = Math.floor(Math.random() * 3) + 1;
         for(let i=0; i<imgCount; i++) task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-        const captions = ["Innovation!", "Healthy vibes.", "Check this out."];
-        task.text = captions[Math.floor(Math.random() * captions.length)];
+        
+        const titles = ["Innovation!", "Check this out", "Healthy vibes", "New Project"];
+        const descs = ["This is the latest trend happening now.", "Please subscribe for more content.", "Just a random thought of the day."];
+        
+        task.textTop = titles[Math.floor(Math.random() * titles.length)];
+        task.textBottom = descs[Math.floor(Math.random() * descs.length)];
+        
         return task;
     },
 
@@ -80,14 +85,15 @@ window.LabelApp = {
         document.getElementById('info-followers').innerText = task.followers;
 
         const imgContainer = document.getElementById('image-container');
-        const txtContainer = document.getElementById('text-container');
         
-        // FIXED: Now uses .content-image-card class for uniform 300x300 framed boxes
+        // Consistent Image Rendering
         imgContainer.innerHTML = task.images.map(src => 
             `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
         ).join('');
 
-        txtContainer.innerText = task.text;
+        // Consistent Text Rendering (Split)
+        document.getElementById('text-top').innerText = task.textTop;
+        document.getElementById('text-bottom').innerText = task.textBottom;
 
         document.getElementById('loader').style.display = 'none';
         document.getElementById('workbench').style.display = 'flex';
@@ -107,7 +113,6 @@ window.LabelApp = {
     },
 
     updateCounter() {
-        // UPDATED: Safety check for missing element
         const el = document.getElementById('selected-count');
         if(el) el.innerText = this.selectedLabels.size;
     },
