@@ -149,10 +149,13 @@ window.ReviewApp = {
         if (task.images.length > 0) {
             modContent.style.display = 'block'; 
             if (this.queueName.toLowerCase().includes('avatar')) {
+                // Avatars keep their specific circular style, but sized up slightly
                 imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="window.ImageViewer.open(this.src)">`;
             } else {
+                // FIXED: 300x300 Square Style
+                const squareStyle = 'width: 300px; height: 300px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;';
                 imgContainer.innerHTML = task.images.map(src => 
-                    `<div><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
+                    `<div><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
                 ).join('');
             }
         } else {
