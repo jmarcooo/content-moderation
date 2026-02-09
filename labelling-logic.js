@@ -82,7 +82,7 @@ window.LabelApp = {
         const imgContainer = document.getElementById('image-container');
         const txtContainer = document.getElementById('text-container');
         
-        // FIXED: Removed inline squareStyle, rely on CSS Grid .content-image-card
+        // FIXED: Now uses .content-image-card class for uniform 300x300 framed boxes
         imgContainer.innerHTML = task.images.map(src => 
             `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
         ).join('');
