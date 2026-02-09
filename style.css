@@ -572,11 +572,12 @@ body.dark-mode .status-Active { color: #58a6ff; }
     letter-spacing: 0.5px;
 }
 
-/* Image Grid */
+/* UPDATED Image Grid: Using Flexbox for proper spacing */
 .image-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 15px;
+    align-items: flex-start;
 }
 
 .content-image-card {
