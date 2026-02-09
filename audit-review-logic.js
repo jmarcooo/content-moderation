@@ -25,7 +25,6 @@ window.AuditApp = {
     tasksAudited: 0,
     queueName: '',
     
-    // Audit-specific error types
     errorTypes: [
         { label: "False Positive", desc: "Moderator punished benign content" },
         { label: "False Negative", desc: "Moderator missed a violation" },
@@ -68,14 +67,11 @@ window.AuditApp = {
         
         let modReason = null;
 
-        // If Rejected, pick a specific violation reason from Config or Fallback
         if (modDecision === 'Reject') {
             if (typeof Config !== 'undefined' && Config.violations) {
-                // Flatten the violations object to pick a random sub-reason
                 const categories = Object.keys(Config.violations);
                 const randCat = categories[Math.floor(Math.random() * categories.length)];
                 const subReasons = Config.violations[randCat];
-                // Just use the sub-reason to match the screenshot (e.g., "Malicious Smear")
                 modReason = subReasons[Math.floor(Math.random() * subReasons.length)]; 
             } else {
                 const fallbacks = ["Violence", "Harassment", "Spam", "Nudity"];
@@ -101,7 +97,6 @@ window.AuditApp = {
             modName: modNames[Math.floor(Math.random() * modNames.length)],
             modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString(),
             
-            // Generate Neat Card Data Here
             userId: "User-" + Math.floor(Math.random() * 10000),
             level: "Lvl " + Math.floor(Math.random() * 50),
             violations: Math.floor(Math.random() * 5),
@@ -131,7 +126,7 @@ window.AuditApp = {
         setTimeout(() => {
             const task = this.generateAuditTask();
             
-            // --- 3. POPULATE SIDEBAR (Neat Layout) ---
+            // --- 3. POPULATE SIDEBAR ---
             document.getElementById('info-tenant').innerText = task.tenant;
             document.getElementById('info-id').innerText = task.id;
             document.getElementById('info-publisher').innerText = task.publisher;
@@ -150,15 +145,16 @@ window.AuditApp = {
             const imgContainer = document.getElementById('image-container');
             const txtContainer = document.getElementById('text-container');
             
-            // Hiding Logic: Hide the entire SECTION (parent of title + container)
             const imgSection = imgContainer.closest('.content-section');
             const txtSection = txtContainer.closest('.content-section');
 
             // Images
             if (task.images.length > 0) {
                 imgSection.style.display = 'block';
+                // UPDATED: Apply SQUARE placeholder style
+                const squareStyle = 'width: 180px; height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer; margin-right: 10px; margin-bottom: 10px;';
                 imgContainer.innerHTML = task.images.map(src => 
-                    `<img src="${src}" style="height:160px; border-radius:6px; cursor:pointer; border:1px solid #eee;" onclick="window.ImageViewer.open(this.src)">`
+                    `<img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)">`
                 ).join('');
                 this.updateInlineStatus('images', task.modDecision, task.modReason);
             } else {
@@ -191,7 +187,6 @@ window.AuditApp = {
                 el.innerText = "Approve";
                 wrap.classList.add('mod-approve');
             } else {
-                // Format: "Reject: Violation Name"
                 const reasonText = reason ? `: ${reason}` : "";
                 el.innerText = `Reject${reasonText}`; 
                 wrap.classList.add('mod-reject');
