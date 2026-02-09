@@ -151,10 +151,9 @@ window.ReviewApp = {
             if (this.queueName.toLowerCase().includes('avatar')) {
                 imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="window.ImageViewer.open(this.src)">`;
             } else {
-                // FIXED: 300x300 Square Style
-                const squareStyle = 'width: 300px; height: 300px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer; margin-right: 10px; margin-bottom: 10px;';
+                // FIXED: Removed hardcoded style. Now uses CSS class for responsive grid.
                 imgContainer.innerHTML = task.images.map(src => 
-                    `<div><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
+                    `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
                 ).join('');
             }
         } else {
