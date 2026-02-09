@@ -126,19 +126,6 @@ body {
 .logout-link { display: flex; align-items: center; gap: 6px; color: var(--danger-red); text-decoration: none; font-size: 0.8rem; font-weight: 500; }
 .logout-link:hover { text-decoration: underline; }
 
-.status-menu { display: none; position: absolute; bottom: 100%; left: 60px; width: 160px; background-color: var(--bg-card); border: 1px solid var(--border-color); box-shadow: var(--shadow); border-radius: 6px; z-index: 10000; padding: 5px; }
-.status-menu.active { display: block; animation: fadeIn 0.1s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-.status-menu li { padding: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-main); border-radius: 4px; }
-.status-menu li:hover { background-color: var(--hover-bg); }
-
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.dot-online { background-color: #238636; }
-.dot-offline { background-color: #6e7681; }
-.dot-break { background-color: #d29922; }
-.dot-lunch { background-color: #f0883e; }
-.dot-meeting { background-color: #0969da; }
-
 /* =========================================
    4. CONTENT & LAYOUT
    ========================================= */
@@ -151,7 +138,9 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
 .left-sidebar { width: 350px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-bottom: 80px; }
 .content-canvas { flex-grow: 1; background-color: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color); padding: 30px; overflow-y: auto; height: 100%; display: flex; flex-direction: column; gap: 30px; }
 
-/* IMAGE GRID (Fixed 300x300 Flex Layout) */
+/* UPDATED: 300x300 FRAMED IMAGE CARDS 
+   This replaces the old flex/grid styles for images 
+*/
 .image-grid {
     display: flex;
     flex-wrap: wrap;
@@ -161,46 +150,35 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
     padding-bottom: 20px;
 }
 
-/* THE CARD CONTAINER (The outer box with the frame) */
+/* The Frame Container */
 .content-image-card, .image-grid > div {
     position: relative;
-    width: 300px;       /* Fixed total width */
-    height: 300px;      /* Fixed total height */
-    
+    width: 300px;           /* Fixed Width */
+    height: 300px;          /* Fixed Height */
     border: 1px solid var(--border-color);
-    background-color: var(--bg-card); /* White background for the frame */
-    padding: 12px;      /* This padding creates the white "frame" thickness */
-    
-    border-radius: 8px; /* Outer corner radius */
+    background-color: var(--bg-card); 
+    padding: 12px;          /* Frame Thickness */
+    border-radius: 8px;
     overflow: hidden;
     flex-shrink: 0;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    
-    /* Ensure image fills space correctly */
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* THE IMAGE ITSELF (Filling the space inside the padding) */
+/* The Image Inside */
 .content-image-card img, .image-grid img {
     width: 100%;
-    height: 100%;       /* *** CRITICAL FIX: Ensures image fills the height *** */
-    object-fit: cover;  /* Crops the image precisely to fit the space */
-    
-    border-radius: 4px; /* Inner corner radius for the image */
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
     cursor: pointer;
     transition: transform 0.2s ease;
     display: block;
 }
 
-/* Hover effect */
-.content-image-card img:hover, .image-grid img:hover {
-    transform: scale(1.02);
-}
-
-/* Remove old conflicting styles if they exist below this block */
-.image-meta { display: none; }
+.content-image-card img:hover, .image-grid img:hover { transform: scale(1.02); }
 
 /* Text Context Area */
 .text-context-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; background-color: var(--bg-input); font-size: 0.95rem; color: var(--text-main); line-height: 1.6; min-height: 60px; word-break: break-word; white-space: pre-wrap; }
@@ -492,7 +470,7 @@ body.dark-mode .status-Active { color: #58a6ff; }
 /* --- RIGHT COLUMN: CONTENT CANVAS --- */
 .content-canvas {
     flex-grow: 1;
-    background-color: var(--bg-card);
+    background-color: var(--bg-card); /* Canvas background */
     border-radius: 8px;
     border: 1px solid var(--border-color);
     padding: 30px;
@@ -506,48 +484,46 @@ body.dark-mode .status-Active { color: #58a6ff; }
 .section-header {
     font-size: 0.8rem;
     font-weight: bold;
-    color: #2da44e;
+    color: #2da44e; /* Teal/Green color from screenshot */
     text-transform: uppercase;
     margin-bottom: 15px;
     letter-spacing: 0.5px;
 }
 
-/* UPDATED: GRID LAYOUT FOR IMAGES */
+/* UPDATED Image Grid: Using Flexbox for proper spacing */
 .image-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 20px;
     width: 100%;
-    /* Center images if there are few, or align left if preferred */
-    justify-content: center; 
+    justify-content: center;
+    padding-bottom: 20px;
 }
 
-/* UPDATED: CARD CONTAINER (The Frame) */
-.content-image-card, .image-grid > div {
+.content-image-card {
     position: relative;
-    width: 300px;           /* Fixed Width */
-    height: 300px;          /* Fixed Height */
+    width: 300px;
+    height: 300px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    padding: 12px;
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid var(--border-color);
-    
-    /* THE FRAME STYLE */
-    background-color: var(--bg-card); /* White background */
-    padding: 12px;          /* Spacing creates the white frame */
-    
     flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Optional subtle shadow */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* UPDATED: IMAGE STYLES */
-.content-image-card img, .image-grid img {
+.content-image-card img {
     width: 100%;
-    height: 100%;           /* FIXED: Changed from 180px to 100% to fill the frame */
-    object-fit: cover;      /* Ensures image covers the area without distortion */
-    display: block;
-    border-radius: 4px;     /* Rounded corners for the image inside the frame */
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.2s ease;
+    display: block;
 }
 
 .image-meta {
@@ -1043,4 +1019,64 @@ body.dark-mode .status-Active { color: #58a6ff; }
 /* Specific styling for Image Viewer Buttons */
 .viewer-btn .icon-svg-lg {
     fill: white; /* Viewer background is dark */
+}
+
+/* =========================================
+   15. AUDIT REVIEW STYLES
+   ========================================= */
+
+/* Action Module (Replaces Footer) */
+.audit-action-module {
+    margin-top: auto; 
+    padding-top: 30px; 
+    border-top: 1px solid var(--border-color);
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-end; /* Default align right */
+    gap: 15px;
+}
+
+.audit-label { 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+}
+
+/* Audit Buttons */
+.btn-audit { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 8px; 
+    height: 38px; 
+    padding: 0 20px; 
+    font-size: 0.9rem; 
+    font-weight: 600; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    transition: all 0.1s; 
+    border: none; 
+    color: white; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+}
+.btn-audit:active { transform: translateY(1px); }
+
+.btn-audit-agree { background-color: #238636; }
+.btn-audit-agree:hover { background-color: #1f732d; }
+
+.btn-audit-disagree { background-color: #da3633; }
+.btn-audit-disagree:hover { background-color: #b92b27; }
+
+.btn-audit-exit { 
+    background: transparent; 
+    border: 1px solid var(--border-color); 
+    color: var(--text-muted); 
+    box-shadow: none;
+}
+.btn-audit-exit:hover { 
+    background: var(--hover-bg); 
+    color: var(--text-main); 
+    border-color: #b0b8c1; 
 }
