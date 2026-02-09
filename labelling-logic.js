@@ -35,6 +35,7 @@ window.LabelApp = {
     bindKeys() {
         document.addEventListener('keydown', (e) => {
             if(e.key === 'Escape') window.ImageViewer.close();
+            
             // Bind number keys 1-4 to toggle labels
             if (['1','2','3','4'].includes(e.key)) {
                 const buttons = document.querySelectorAll('.btn-label');
@@ -56,13 +57,10 @@ window.LabelApp = {
             publisher: publishers[Math.floor(Math.random() * publishers.length)],
             followers: Math.floor(Math.random() * 500000).toLocaleString(),
             publishTime: new Date().toLocaleString(),
-            
-            // Dynamic Post Content (Image + Text)
             images: [], 
             text: ""
         };
 
-        // Randomly generate 1-3 images
         const imgCount = Math.floor(Math.random() * 3) + 1;
         for(let i=0; i<imgCount; i++) {
             task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
@@ -86,23 +84,22 @@ window.LabelApp = {
         
         // Reset selections
         this.selectedLabels.clear();
-        this.updateUISelection();
+        // Remove 'selected' class from all buttons
+        document.querySelectorAll('.btn-label').forEach(btn => btn.classList.remove('selected'));
+        this.updateCounter();
 
         setTimeout(() => {
             const task = this.generateTask();
             
-            // Populate Info
             document.getElementById('info-id').innerText = task.id;
             document.getElementById('info-source').innerText = task.source;
             document.getElementById('info-time').innerText = task.publishTime;
             document.getElementById('info-user').innerText = task.publisher;
             document.getElementById('info-followers').innerText = task.followers;
 
-            // Populate Content
             const imgContainer = document.getElementById('image-container');
             const txtContainer = document.getElementById('text-container');
             
-            // Images with Square Placeholder style
             const squareStyle = 'width: 180px; height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer;';
             imgContainer.innerHTML = task.images.map(src => 
                 `<img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)">`
@@ -116,18 +113,24 @@ window.LabelApp = {
     },
 
     toggleLabel(btn, labelKey) {
+        // --- SINGLE SELECTION LOGIC ---
+        
+        // 1. If clicking the currently selected label, deselect it.
         if(this.selectedLabels.has(labelKey)) {
-            this.selectedLabels.delete(labelKey);
+            this.selectedLabels.clear();
             btn.classList.remove('selected');
-        } else {
+        } 
+        // 2. Otherwise, clear everything else and select this one.
+        else {
+            this.selectedLabels.clear();
+            // Visually deselect all buttons
+            document.querySelectorAll('.btn-label').forEach(b => b.classList.remove('selected'));
+            
+            // Select the new one
             this.selectedLabels.add(labelKey);
             btn.classList.add('selected');
         }
-        this.updateCounter();
-    },
-
-    updateUISelection() {
-        document.querySelectorAll('.btn-label').forEach(btn => btn.classList.remove('selected'));
+        
         this.updateCounter();
     },
 
@@ -147,16 +150,17 @@ window.LabelApp = {
     },
 
     submitLabels() {
+        // --- VALIDATION: Prevent submit if empty ---
         if(this.selectedLabels.size === 0) {
-            // Optional: Allow submitting without labels (Neutral)? 
-            // For now, let's just proceed, assuming "None" is a valid state.
+            alert("⚠️ Please select a label before submitting.");
+            return;
         }
         
         const counter = document.getElementById('session-counter');
         if(counter) counter.innerText = ++this.tasksLabelled;
         
-        // Log for demo
-        console.log("Submitted Labels:", Array.from(this.selectedLabels));
+        // Log for verification
+        console.log("Submitted Label:", Array.from(this.selectedLabels)[0]);
         
         this.loadNextTask();
     },
