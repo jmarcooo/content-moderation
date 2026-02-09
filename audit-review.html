@@ -41,24 +41,6 @@
         .info-row .value { color: var(--text-header); font-weight: 600; text-align: right; word-break: break-word; font-size: 0.85rem; }
         .value.highlight { color: var(--accent-blue); }
 
-        /* --- CONTENT AREA --- */
-        .content-section {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-        .content-section-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--text-header);
-            margin-bottom: 12px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
-
         /* Initial Moderation Status Box */
         .initial-mod-status {
             margin-top: 12px;
@@ -142,21 +124,24 @@
                 </div>
             </div>
 
-            <div class="content-canvas" style="background: transparent; border: none; padding: 0; overflow: visible; flex-grow:1;">
-                <div class="content-section">
-                    <div class="content-section-title">User Profile</div>
+            <div class="content-canvas">
+                
+                <div id="module-content">
+                    <div class="section-header">CONTENT</div>
                     <div id="image-container" class="image-grid"></div>
                     <div class="initial-mod-status" id="status-display-images">
                         Initial Moderation: <span id="mod-val-images">--</span>
                     </div>
                 </div>
-                <div class="content-section">
-                    <div class="content-section-title">Bio or Nickname</div>
-                    <div id="text-container" class="text-context-box" style="background: #f6f8fa; border: 1px solid #d0d7de; min-height:60px; padding:12px; border-radius:6px;"></div>
+
+                <div id="module-text" style="margin-top: 30px;">
+                    <div class="section-header">TEXT</div>
+                    <div id="text-container" class="text-context-box"></div>
                     <div class="initial-mod-status" id="status-display-text">
                         Initial Moderation: <span id="mod-val-text">--</span>
                     </div>
                 </div>
+
             </div>
         </div>
 
