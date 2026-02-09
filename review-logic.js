@@ -31,7 +31,6 @@ window.ImageViewer = {
     }
 };
 
-// Attach ReviewApp to window to ensure HTML access
 window.ReviewApp = {
     timerInterval: null,
     secondsElapsed: 0,
@@ -56,8 +55,6 @@ window.ReviewApp = {
 
         this.renderViolations();
         this.loadNextTask();
-        
-        // Initialize Keybinds
         this.bindKeys();
     },
 
@@ -66,9 +63,9 @@ window.ReviewApp = {
             'approve-content': '1', 
             'reject-content': '2', 
             'approve-text': '3', 
-            'reject-text': '4',
-            'approve-all': 'Ctrl+1',
-            'reject-all': 'Ctrl+2',
+            'reject-text': '4', 
+            'approve-all': 'Ctrl+1', 
+            'reject-all': 'Ctrl+2', 
             'next': 'Enter' 
         };
         const binds = JSON.parse(localStorage.getItem('appKeybinds')) || defaults;
@@ -87,78 +84,30 @@ window.ReviewApp = {
             return keys.join('+');
         };
 
-        // Helper to check if a module is actually visible
         const isVisible = (id) => {
             const el = document.getElementById(id);
-            // Checks if element exists and is rendered (offsetParent is null if display:none)
-            return el && el.offsetParent !== null;
+            return el && el.style.display !== 'none';
         };
 
         document.addEventListener('keydown', (e) => {
-            // --- HANDLE ESCAPE KEY ---
             if (e.key === 'Escape') {
-                // 1. Close Image Viewer if open
                 const viewer = document.getElementById('imageViewer');
-                if(viewer && viewer.style.display === 'flex') {
-                    e.preventDefault();
-                    window.ImageViewer.close();
-                    return; 
-                }
-                
-                // 2. Close Rejection Drawer if open
+                if(viewer && viewer.style.display === 'flex') { e.preventDefault(); window.ImageViewer.close(); return; }
                 const drawer = document.getElementById('violationDrawer');
-                if(drawer && drawer.classList.contains('open')) {
-                    e.preventDefault();
-                    this.closeDrawer();
-                    return; 
-                }
+                if(drawer && drawer.classList.contains('open')) { e.preventDefault(); this.closeDrawer(); return; }
             }
-
-            // Ignore typing in inputs
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
             const pressed = getPressedString(e);
             if (!pressed) return;
 
-            // --- SINGLE ACTIONS (With Visibility Checks) ---
-            if (pressed === binds['approve-content']) {
-                if (!isVisible('module-content')) return; // FIX: Stop if no content
-                e.preventDefault();
-                this.setStatus('content', 'approve');
-
-            } else if (pressed === binds['reject-content']) {
-                if (!isVisible('module-content')) return; // FIX: Stop if no content
-                e.preventDefault();
-                this.openDrawer('content');
-
-            } else if (pressed === binds['approve-text']) {
-                if (!isVisible('module-text')) return; // FIX: Stop if no text
-                e.preventDefault();
-                this.setStatus('text', 'approve');
-
-            } else if (pressed === binds['reject-text']) {
-                if (!isVisible('module-text')) return; // FIX: Stop if no text
-                e.preventDefault();
-                this.openDrawer('text');
-            } 
-            
-            // --- BATCH ACTIONS ---
-            else if (pressed === binds['approve-all']) {
-                e.preventDefault();
-                // "Approve All" safely ignores hidden modules automatically
-                if(isVisible('module-content')) this.setStatus('content', 'approve');
-                if(isVisible('module-text')) this.setStatus('text', 'approve');
-            } 
-            else if (pressed === binds['reject-all']) {
-                e.preventDefault();
-                this.openDrawer('both');
-            } 
-            
-            // --- SUBMIT ---
-            else if (pressed === binds['next']) {
-                e.preventDefault();
-                this.nextTask();
-            }
+            if (pressed === binds['approve-content']) { if (!isVisible('module-content')) return; e.preventDefault(); this.setStatus('content', 'approve'); }
+            else if (pressed === binds['reject-content']) { if (!isVisible('module-content')) return; e.preventDefault(); this.openDrawer('content'); }
+            else if (pressed === binds['approve-text']) { if (!isVisible('module-text')) return; e.preventDefault(); this.setStatus('text', 'approve'); }
+            else if (pressed === binds['reject-text']) { if (!isVisible('module-text')) return; e.preventDefault(); this.openDrawer('text'); }
+            else if (pressed === binds['approve-all']) { e.preventDefault(); if(isVisible('module-content')) this.setStatus('content', 'approve'); if(isVisible('module-text')) this.setStatus('text', 'approve'); }
+            else if (pressed === binds['reject-all']) { e.preventDefault(); this.openDrawer('both'); }
+            else if (pressed === binds['next']) { e.preventDefault(); this.nextTask(); }
         });
     },
 
@@ -167,20 +116,17 @@ window.ReviewApp = {
         const type = this.queueName.toLowerCase();
         let task = { id, type, userId: "720" + Math.floor(Math.random()*1000), images: [], textTop: "", textBottom: "" };
 
-        if (type.includes('dynamic') || type.includes('image') || type.includes('video')) {
+        if (type.includes('image') || type.includes('video')) {
             const imgCount = Math.floor(Math.random() * 3) + 1;
             for(let i=0; i<imgCount; i++) task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-            task.textTop = "Check out this crazy win! #gaming #win"; 
-            task.textBottom = "I can't believe I pulled this off. Follow for more clips."; 
-        } else if (type.includes('comment')) {
-            task.textTop = "Parent Post: Anyone know how to fix the lag bug?"; 
-            task.textBottom = "You are trash, uninstall the game.";
-            if (Math.random() > 0.5) task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-        } else if (type.includes('nick') || type.includes('profile')) {
-            task.textTop = "CoolGamer123"; 
-            task.textBottom = "Nazi_Killer_88"; 
+            task.textTop = "Check out this content!"; 
+            task.textBottom = "Please like and subscribe to my channel."; 
         } else if (type.includes('avatar')) {
             task.images.push(`https://i.pravatar.cc/300?u=${id}`);
+        } else if (type.includes('nick') || type.includes('profile')) {
+            task.images = []; 
+            task.textTop = "Old_Nickname_123"; 
+            task.textBottom = "New_Nickname_SUPER"; 
         }
         return task;
     },
@@ -191,63 +137,50 @@ window.ReviewApp = {
         document.getElementById('workbench').style.display = 'none';
         this.resetUI(); 
 
-        // REMOVED SETTIMEOUT: Instant Loading
         const task = this.generateTask();
         document.getElementById('content-id').innerText = task.id;
         document.getElementById('content-type').innerText = this.queueName;
         document.getElementById('sidebar-task-id').innerText = `Task-${task.id}`;
 
-        const q = this.queueName.toLowerCase();
-        const imgContainer = document.getElementById('image-container');
         const modContent = document.getElementById('module-content');
-        
+        const modText = document.getElementById('module-text');
+        const imgContainer = document.getElementById('image-container');
+
         if (task.images.length > 0) {
             modContent.style.display = 'block'; 
-            if (q.includes('avatar')) {
+            if (this.queueName.toLowerCase().includes('avatar')) {
                 imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="window.ImageViewer.open(this.src)">`;
             } else {
-                // Square placeholders
-                const squareStyle = 'width: 180px; height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;';
                 imgContainer.innerHTML = task.images.map(src => 
-                    `<div><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
+                    `<div><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
                 ).join('');
             }
         } else {
             modContent.style.display = 'none'; 
         }
 
-        const modText = document.getElementById('module-text');
-        const slotTop = document.getElementById('text-top');
-        const slotBottom = document.getElementById('text-bottom');
-        const lblTop = document.getElementById('label-top');
-        const lblBottom = document.getElementById('label-bottom');
-
-        if (q.includes('avatar')) {
-            modText.style.display = 'none'; 
-        } else {
+        if (task.textTop || task.textBottom) {
             modText.style.display = 'block';
-            slotTop.innerText = task.textTop;
-            slotBottom.innerText = task.textBottom;
-            slotTop.className = "text-context-box";
-            slotBottom.className = "text-context-box";
+            document.getElementById('text-top').innerText = task.textTop;
+            document.getElementById('text-bottom').innerText = task.textBottom;
+            
+            const lblTop = document.getElementById('label-top');
+            const lblBottom = document.getElementById('label-bottom');
+            const slotTop = document.getElementById('text-top');
 
-            if (q.includes('comment')) {
-                lblTop.innerText = "Replying To (Context)";
-                slotTop.classList.add("read-only"); 
-                lblBottom.innerText = "Comment to Moderate";
-                slotBottom.classList.add("moderatable"); 
-            } else if (q.includes('nick') || q.includes('profile')) {
-                lblTop.innerText = "Previous (Current)";
+            if (this.queueName.toLowerCase().includes('nick') || this.queueName.toLowerCase().includes('profile')) {
+                lblTop.innerText = "Current (Old)";
                 slotTop.classList.add("read-only");
                 lblBottom.innerText = "New Request";
-                slotBottom.classList.add("moderatable");
             } else {
-                lblTop.innerText = "Title";
-                slotTop.classList.add("moderatable"); 
-                lblBottom.innerText = "Content / Caption";
-                slotBottom.classList.add("moderatable"); 
+                lblTop.innerText = "Title/Context";
+                slotTop.classList.remove("read-only");
+                lblBottom.innerText = "Description";
             }
+        } else {
+            modText.style.display = 'none';
         }
+
         document.getElementById('loader').style.display = 'none';
         document.getElementById('workbench').style.display = 'flex';
         this.startTimer(); 
@@ -282,7 +215,6 @@ window.ReviewApp = {
         if(!container) return; 
         
         container.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
-        
         if (!preserve && target === 'text') this.clearAllHighlights();
 
         if(status === 'approve') container.querySelector('.btn-approve-sm').classList.add('active');
@@ -306,17 +238,10 @@ window.ReviewApp = {
 
     handleTextSelection(slot) {
         const box = document.getElementById(`text-${slot}`);
-        if (!box || !box.classList.contains('moderatable')) return;
-
+        if (!box) return;
         const selection = window.getSelection();
         if (selection.rangeCount === 0 || selection.isCollapsed) return;
         if (!box.contains(selection.anchorNode) || !box.contains(selection.focusNode)) return;
-
-        const range = selection.getRangeAt(0);
-        const text = selection.toString();
-        
-        if (!text || text.trim().length === 0) return;
-        
         try {
             const span = document.createElement('span');
             span.className = 'restricted-text';
@@ -329,47 +254,21 @@ window.ReviewApp = {
     },
 
     renderViolations() {
-        if (typeof Config === 'undefined' || !Config.violations) {
-            console.error("Config.violations is missing. Check config.js syntax.");
-            return;
-        }
+        if (typeof Config === 'undefined' || !Config.violations) return;
         const list = document.getElementById('violationList');
         let h = '';
         for(let [c, s] of Object.entries(Config.violations)) {
-            h += `<div class="violation-category">
-                    <div class="category-trigger" onclick="this.nextElementSibling.classList.toggle('active')">${c} ▼</div>
-                    <div class="violation-submenu">
-                        ${s.map(sub=>`<div class="violation-option" onclick="window.ReviewApp.confirmReject('${c}-${sub}')">${sub}</div>`).join('')}
-                    </div>
-                </div>`;
+            h += `<div class="violation-category"><div class="category-trigger" onclick="this.nextElementSibling.classList.toggle('active')">${c} ▼</div><div class="violation-submenu">${s.map(sub=>`<div class="violation-option" onclick="window.ReviewApp.confirmReject('${c}-${sub}')">${sub}</div>`).join('')}</div></div>`;
         }
         list.innerHTML = h;
     },
 
     openDrawer(t) { 
         this.currentTargetForDrawer = t; 
-        
-        let titleEl = document.getElementById('drawer-title');
-        if (!titleEl) {
-            titleEl = document.querySelector('.drawer-header span:first-child');
-        }
-        
-        if(titleEl) {
-            if (t === 'content') titleEl.innerText = "Select Rejection for Content";
-            else if (t === 'text') titleEl.innerText = "Select Rejection for Text";
-            else if (t === 'both') titleEl.innerText = "Select Rejection for Both";
-            else titleEl.innerText = "Select Reason";
-        }
-        
-        const drawer = document.getElementById('violationDrawer');
-        if(drawer) drawer.classList.add('open'); 
+        document.getElementById('violationDrawer')?.classList.add('open'); 
     },
 
-    closeDrawer() { 
-        const drawer = document.getElementById('violationDrawer');
-        if(drawer) drawer.classList.remove('open'); 
-    },
-    
+    closeDrawer() { document.getElementById('violationDrawer')?.classList.remove('open'); },
     confirmReject(r) { 
         if (this.currentTargetForDrawer === 'both') {
             const mc = document.getElementById('module-content');
@@ -383,23 +282,13 @@ window.ReviewApp = {
     },
 
     validateSubmission() {
-        const isVisible = (elem) => !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
+        const isVisible = (elem) => elem && elem.style.display !== 'none';
         const contentModule = document.getElementById('module-content');
-        if (contentModule && isVisible(contentModule) && !contentModule.querySelector('.btn-sm.active')) {
-            alert("⚠️ Missing decision for CONTENT.");
-            return false;
-        }
+        if (isVisible(contentModule) && !contentModule.querySelector('.btn-sm.active')) { alert("⚠️ Missing decision for CONTENT."); return false; }
         const textModule = document.getElementById('module-text');
-        if (textModule && isVisible(textModule)) {
+        if (isVisible(textModule)) {
             const activeBtn = textModule.querySelector('.btn-sm.active');
-            if (!activeBtn) {
-                alert("⚠️ Missing decision for TEXT.");
-                return false;
-            }
-            if (activeBtn.textContent.trim() === 'Restrict' && textModule.querySelectorAll('.restricted-text').length === 0) {
-                alert("⚠️ For Restriction, please highlight the specific words in the text.");
-                return false;
-            }
+            if (!activeBtn) { alert("⚠️ Missing decision for TEXT."); return false; }
         }
         return true;
     },
@@ -411,13 +300,7 @@ window.ReviewApp = {
         this.loadNextTask();
     },
 
-    submitAndExit() { 
-        if (!this.validateSubmission()) return;
-        this.closeDrawer(); 
-        window.location.href = 'moderation.html'; 
-    }
+    submitAndExit() { if (!this.validateSubmission()) return; this.closeDrawer(); window.location.href = 'moderation.html'; }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.ReviewApp.init();
-});
+document.addEventListener('DOMContentLoaded', () => { window.ReviewApp.init(); });
