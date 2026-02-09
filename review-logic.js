@@ -151,7 +151,7 @@ window.ReviewApp = {
             if (this.queueName.toLowerCase().includes('avatar')) {
                 imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="window.ImageViewer.open(this.src)">`;
             } else {
-                // Fixed: Square images (300x300)
+                // FIXED: 300x300 Square Style
                 const squareStyle = 'width: 300px; height: 300px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer; margin-right: 10px; margin-bottom: 10px;';
                 imgContainer.innerHTML = task.images.map(src => 
                     `<div><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
@@ -245,7 +245,6 @@ window.ReviewApp = {
         if (selection.rangeCount === 0 || selection.isCollapsed) return;
         if (!box.contains(selection.anchorNode) || !box.contains(selection.focusNode)) return;
         
-        // FIXED: Added missing definition of range
         const range = selection.getRangeAt(0);
 
         try {
@@ -289,22 +288,12 @@ window.ReviewApp = {
 
     validateSubmission() {
         const isVisible = (elem) => elem && elem.style.display !== 'none';
-        
         const contentModule = document.getElementById('module-content');
-        if (isVisible(contentModule) && !contentModule.querySelector('.btn-sm.active')) {
-            alert("⚠️ Missing decision for CONTENT.");
-            return false;
-        }
-        
+        if (isVisible(contentModule) && !contentModule.querySelector('.btn-sm.active')) { alert("⚠️ Missing decision for CONTENT."); return false; }
         const textModule = document.getElementById('module-text');
         if (isVisible(textModule)) {
             const activeBtn = textModule.querySelector('.btn-sm.active');
-            if (!activeBtn) {
-                alert("⚠️ Missing decision for TEXT.");
-                return false;
-            }
-            
-            // FIXED: Check for class 'btn-restrict-sm' specifically
+            if (!activeBtn) { alert("⚠️ Missing decision for TEXT."); return false; }
             if (activeBtn.classList.contains('btn-restrict-sm') && textModule.querySelectorAll('.restricted-text').length === 0) {
                 alert("⚠️ For Restriction, please highlight the specific words in the text.");
                 return false;
