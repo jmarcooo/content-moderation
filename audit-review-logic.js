@@ -68,7 +68,7 @@ window.AuditApp = {
             publisher: publishers[Math.floor(Math.random() * publishers.length)],
             accountType: accountTypes[Math.floor(Math.random() * accountTypes.length)],
             publishTime: new Date(Date.now() - Math.floor(Math.random() * 100000000)).toLocaleString(),
-            images: [], text: "",
+            images: [], textTop: "", textBottom: "",
             modDecision, modReason, 
             modName: modNames[Math.floor(Math.random() * modNames.length)],
             modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString(),
@@ -80,11 +80,13 @@ window.AuditApp = {
 
         if (type.includes('image') || type.includes('video')) {
              task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-             task.text = "Check out this content!";
+             task.textTop = "Check out this content!";
+             task.textBottom = "Please like and subscribe to my channel.";
         } else if (type.includes('avatar')) {
              task.images.push(`https://i.pravatar.cc/300?u=${id}`);
         } else if (type.includes('nick') || type.includes('profile')) {
-             task.text = "Super_Gamer_Profile";
+             task.textTop = "Old_Nickname_123";
+             task.textBottom = "Super_Gamer_Profile";
         }
         return task;
     },
@@ -111,13 +113,13 @@ window.AuditApp = {
         document.getElementById('mod-time').innerText = task.modTime;
 
         const imgContainer = document.getElementById('image-container');
-        const txtContainer = document.getElementById('text-container');
         const imgModule = document.getElementById('module-content');
         const txtModule = document.getElementById('module-text');
 
+        // Images
         if (task.images.length > 0) {
             imgModule.style.display = 'block';
-            // FIXED: Removed inline squareStyle, rely on CSS Grid .content-image-card
+            // Use the consistent class .content-image-card for layout
             imgContainer.innerHTML = task.images.map(src => 
                 `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
             ).join('');
@@ -126,9 +128,11 @@ window.AuditApp = {
             imgModule.style.display = 'none';
         }
 
-        if (task.text) {
+        // Text (Split)
+        if (task.textTop || task.textBottom) {
             txtModule.style.display = 'block';
-            txtContainer.innerText = task.text;
+            document.getElementById('text-top').innerText = task.textTop;
+            document.getElementById('text-bottom').innerText = task.textBottom;
             this.updateInlineStatus('text', task.modDecision, task.modReason);
         } else {
             txtModule.style.display = 'none';
