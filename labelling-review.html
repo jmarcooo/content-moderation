@@ -85,16 +85,6 @@
             box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
         }
 
-        /* Footer override */
-        .labelling-footer {
-            position: fixed;
-            bottom: 0; left: 260px; right: 0; height: 80px;
-            background: white; border-top: 1px solid var(--border-color);
-            display: flex; align-items: center; justify-content: flex-end;
-            padding: 0 40px; gap: 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.03); z-index: 100;
-        }
-
         /* Viewer SVG */
         .icon-svg-lg { width: 20px; height: 20px; fill: white; }
         .close-icon-svg { width: 24px; height: 24px; fill: currentColor; }
@@ -104,7 +94,7 @@
 
     <script src="sidebar.js"></script>
 
-    <main class="main-content" style="padding-bottom: 100px;">
+    <main class="main-content">
         
         <div class="header" style="margin-bottom: 20px; border-bottom: none; padding-bottom: 0;">
             <div>
@@ -146,7 +136,7 @@
                 
                 <div id="module-content">
                     <div class="section-header">CONTENT</div>
-                    <div id="image-container" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                    <div id="image-container" class="image-grid"></div>
                 </div>
 
                 <div id="module-text" style="margin-top: 30px;">
@@ -186,15 +176,15 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
+                <div class="action-module" style="margin-top: auto; padding-top: 30px; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;">
+                    <div style="margin-right: auto; font-size: 0.9rem; color: var(--text-muted);">
+                        <span id="selected-count" style="font-weight:bold; color:var(--accent-blue);">0</span> labels selected
+                    </div>
+                    <button class="btn-cancel" onclick="LabelApp.skipTask()">Skip</button>
+                    <button class="btn-primary" onclick="LabelApp.submitLabels()">Submit Labels</button>
+                </div>
 
-        <div class="labelling-footer">
-            <div style="margin-right: auto; font-size: 0.9rem; color: var(--text-muted);">
-                <span id="selected-count">0</span> labels selected
             </div>
-            <button class="btn-cancel" onclick="LabelApp.skipTask()">Skip</button>
-            <button class="btn-primary" onclick="LabelApp.submitLabels()">Submit Labels</button>
         </div>
 
         <div id="imageViewer" class="viewer-overlay">
