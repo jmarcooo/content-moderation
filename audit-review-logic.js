@@ -117,10 +117,9 @@ window.AuditApp = {
 
         if (task.images.length > 0) {
             imgModule.style.display = 'block';
-            // FIXED: 300x300 Square Style
-            const squareStyle = 'width: 300px; height: 300px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer; margin-right: 10px; margin-bottom: 10px;';
+            // FIXED: Removed inline squareStyle, rely on CSS Grid .content-image-card
             imgContainer.innerHTML = task.images.map(src => 
-                `<div><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
+                `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
             ).join('');
             this.updateInlineStatus('images', task.modDecision, task.modReason);
         } else {
