@@ -42,8 +42,10 @@ window.LabelApp = {
                 const idx = parseInt(e.key) - 1;
                 if(buttons[idx]) buttons[idx].click();
             }
-            // Enter to submit
-            if (e.key === 'Enter') this.submitLabels();
+            // Enter to submit (only if textarea is not focused)
+            if (e.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') {
+                this.submitLabels();
+            }
         });
     },
 
@@ -82,10 +84,12 @@ window.LabelApp = {
         document.getElementById('loader').style.display = 'flex';
         document.getElementById('workbench').style.display = 'none';
         
-        // Reset selections
+        // Reset selections & Remarks
         this.selectedLabels.clear();
-        // Remove 'selected' class from all buttons
         document.querySelectorAll('.btn-label').forEach(btn => btn.classList.remove('selected'));
+        const remarkBox = document.getElementById('labelling-remarks');
+        if(remarkBox) remarkBox.value = '';
+        
         this.updateCounter();
 
         setTimeout(() => {
@@ -114,23 +118,15 @@ window.LabelApp = {
 
     toggleLabel(btn, labelKey) {
         // --- SINGLE SELECTION LOGIC ---
-        
-        // 1. If clicking the currently selected label, deselect it.
         if(this.selectedLabels.has(labelKey)) {
             this.selectedLabels.clear();
             btn.classList.remove('selected');
-        } 
-        // 2. Otherwise, clear everything else and select this one.
-        else {
+        } else {
             this.selectedLabels.clear();
-            // Visually deselect all buttons
             document.querySelectorAll('.btn-label').forEach(b => b.classList.remove('selected'));
-            
-            // Select the new one
             this.selectedLabels.add(labelKey);
             btn.classList.add('selected');
         }
-        
         this.updateCounter();
     },
 
@@ -150,7 +146,6 @@ window.LabelApp = {
     },
 
     submitLabels() {
-        // --- VALIDATION: Prevent submit if empty ---
         if(this.selectedLabels.size === 0) {
             alert("⚠️ Please select a label before submitting.");
             return;
@@ -159,8 +154,12 @@ window.LabelApp = {
         const counter = document.getElementById('session-counter');
         if(counter) counter.innerText = ++this.tasksLabelled;
         
+        // Get Remarks
+        const remarks = document.getElementById('labelling-remarks').value;
+        const selectedLabel = Array.from(this.selectedLabels)[0];
+
         // Log for verification
-        console.log("Submitted Label:", Array.from(this.selectedLabels)[0]);
+        console.log(`Submitted: [${selectedLabel}] | Remarks: "${remarks}"`);
         
         this.loadNextTask();
     },
