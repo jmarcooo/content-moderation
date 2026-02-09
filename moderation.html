@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moderation Queues</title>
+    <title>Moderation</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* New SVG Utility Classes */
@@ -15,43 +15,136 @@
             margin-right: 4px;
             opacity: 0.7;
         }
+
+        /* Selection Card Styles (Matches image_2f7c85.png) */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .selection-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 32px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            height: 200px;
+        }
+
+        .selection-card:hover {
+            border-color: #0969da;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .selection-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-header);
+            margin-bottom: 8px;
+        }
+
+        .selection-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        
+        .back-nav {
+            margin-bottom: 15px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        .back-nav:hover { color: var(--accent-blue); }
+
+        /* Hide sections initially */
+        #view-content-mod, #view-labeling {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
     <main class="main-content">
-        <div class="header">
-            <h1>Moderation Queues</h1>
-            
-            <div style="display: flex; align-items: center;">
-                
-                <select id="sortDropdown" class="sort-select" onchange="handleDropdownSort(this.value)">
-                    <option value="count-desc">Pending (Highest)</option>
-                    <option value="count-asc">Pending (Lowest)</option>
-                    <option value="latency-desc">Latency (Slowest)</option>
-                    <option value="latency-asc">Latency (Fastest)</option>
-                    <option value="aht-desc">AHT (Slowest)</option>
-                    <option value="aht-asc">AHT (Fastest)</option>
-                </select>
+        
+        <div id="view-dashboard">
+            <div class="header" style="border-bottom: none; margin-bottom: 10px;">
+                <h1>Moderation</h1>
+            </div>
+            <div style="border-bottom: 1px solid var(--border-color); margin-bottom: 2rem;"></div>
 
-                <div class="view-switcher">
-                    <button id="btn-card" class="view-btn" onclick="switchView('card')" title="Card View">
-                        ⊞
-                    </button>
-                    <button id="btn-list" class="view-btn" onclick="switchView('list')" title="List View">
-                        ☰
-                    </button>
+            <div class="selection-grid">
+                <div class="selection-card" onclick="switchSection('view-content-mod')">
+                    <div class="selection-title">Content Moderation</div>
+                    <div class="selection-desc">Shows UGC content queues for moderation</div>
                 </div>
-
-                <div style="text-align: right; margin-left: 20px;">
-                    <span style="color:var(--text-muted); font-size:0.9rem;">Total Pending:</span>
-                    <strong id="total-pending" style="font-size:1.2rem; color:var(--text-header); margin-left:5px;">0</strong>
+                
+                <div class="selection-card" onclick="switchSection('view-labeling')">
+                    <div class="selection-title">Content Labelling</div>
+                    <div class="selection-desc">Labels contents based on the context</div>
                 </div>
             </div>
         </div>
 
-        <div id="queue-container" class="queue-grid">
+        <div id="view-content-mod">
+            <div class="back-nav" onclick="switchSection('view-dashboard')">← Back to Moderation</div>
+            
+            <div class="header">
+                <h1>Content Moderation</h1>
+                
+                <div style="display: flex; align-items: center;">
+                    
+                    <select id="sortDropdown" class="sort-select" onchange="handleDropdownSort(this.value)">
+                        <option value="count-desc">Pending (Highest)</option>
+                        <option value="count-asc">Pending (Lowest)</option>
+                        <option value="latency-desc">Latency (Slowest)</option>
+                        <option value="latency-asc">Latency (Fastest)</option>
+                        <option value="aht-desc">AHT (Slowest)</option>
+                        <option value="aht-asc">AHT (Fastest)</option>
+                    </select>
+
+                    <div class="view-switcher">
+                        <button id="btn-card" class="view-btn" onclick="switchView('card')" title="Card View">
+                            ⊞
+                        </button>
+                        <button id="btn-list" class="view-btn" onclick="switchView('list')" title="List View">
+                            ☰
+                        </button>
+                    </div>
+
+                    <div style="text-align: right; margin-left: 20px;">
+                        <span style="color:var(--text-muted); font-size:0.9rem;">Total Pending:</span>
+                        <strong id="total-pending" style="font-size:1.2rem; color:var(--text-header); margin-left:5px;">0</strong>
+                    </div>
+                </div>
             </div>
+
+            <div id="queue-container" class="queue-grid">
+                </div>
+        </div>
+
+        <div id="view-labeling">
+            <div class="back-nav" onclick="switchSection('view-dashboard')">← Back to Moderation</div>
+            
+            <div class="header">
+                <h1>Content Labelling</h1>
+            </div>
+
+            <div class="card" style="min-height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--text-muted);">
+                <div style="font-size: 3rem; margin-bottom: 20px;">🏷️</div>
+                <div>Labelling Interface Coming Soon</div>
+            </div>
+        </div>
 
     </main>
 
@@ -63,14 +156,26 @@
         // --- AUTH GUARD ---
         Auth.requireLogin();
 
+        // --- NAVIGATION LOGIC ---
+        function switchSection(sectionId) {
+            document.getElementById('view-dashboard').style.display = 'none';
+            document.getElementById('view-content-mod').style.display = 'none';
+            document.getElementById('view-labeling').style.display = 'none';
+
+            document.getElementById(sectionId).style.display = 'block';
+
+            // Store state to persist on refresh? For now, we keep it simple.
+            // If switching to mod queue, render it if needed (though we render on load for simplicity)
+        }
+
         // --- CONFIGURATION ---
         let queueData = Config.queues.map(q => ({
             ...q,
             count: Math.floor(Math.random() * 500)
         }));
 
-        // --- VIEW STATE & SORT LOGIC ---
-        let currentView = localStorage.getItem('modQueueView') || 'card';
+        // --- VIEW STATE & SORT LOGIC (Existing Logic) ---
+        let currentView = localStorage.getItem('modQueueView') || 'list'; // Default to List based on image_2f7cfe.png
         let sortCol = 'count'; 
         let sortAsc = false;
 
@@ -244,6 +349,8 @@
 
         // Initialize Sorting & Render
         executeSort();
+        // Force view update just in case
+        updateViewButtons();
     </script>
 </body>
 </html>
