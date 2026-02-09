@@ -25,7 +25,7 @@ window.AuditApp = {
     tasksAudited: 0,
     queueName: '',
     
-    // Audit-specific error types (Auditor selects these when they disagree)
+    // Audit-specific error types
     errorTypes: [
         { label: "False Positive", desc: "Moderator punished benign content" },
         { label: "False Negative", desc: "Moderator missed a violation" },
@@ -68,18 +68,17 @@ window.AuditApp = {
         
         let modReason = null;
 
-        // If Rejected, pick a specific violation reason
+        // If Rejected, pick a specific violation reason from Config or Fallback
         if (modDecision === 'Reject') {
-            // Attempt to use Config.violations if available
             if (typeof Config !== 'undefined' && Config.violations) {
+                // Flatten the violations object to pick a random sub-reason
                 const categories = Object.keys(Config.violations);
                 const randCat = categories[Math.floor(Math.random() * categories.length)];
                 const subReasons = Config.violations[randCat];
-                const randSub = subReasons[Math.floor(Math.random() * subReasons.length)];
-                modReason = `${randCat} - ${randSub}`;
+                // Just use the sub-reason to match the screenshot (e.g., "Malicious Smear")
+                modReason = subReasons[Math.floor(Math.random() * subReasons.length)]; 
             } else {
-                // Fallback if Config not loaded
-                const fallbacks = ["Violence - General", "Harassment - Bullying", "Spam - Advertising", "Nudity - General"];
+                const fallbacks = ["Violence", "Harassment", "Spam", "Nudity"];
                 modReason = fallbacks[Math.floor(Math.random() * fallbacks.length)];
             }
         }
@@ -98,29 +97,25 @@ window.AuditApp = {
             images: [], text: "",
             
             modDecision,
-            modReason, // Contains the specific violation (e.g. "Violence - Horror Scenes")
+            modReason, 
             modName: modNames[Math.floor(Math.random() * modNames.length)],
             modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString(),
             
+            // Generate Neat Card Data Here
             userId: "User-" + Math.floor(Math.random() * 10000),
             level: "Lvl " + Math.floor(Math.random() * 50),
             violations: Math.floor(Math.random() * 5),
             taskId: "Task-" + id
         };
 
-        // --- 2. GENERATE CONTENT BASED ON TYPE ---
-        // RULE 1: Video/Image Review (Content + Text)
+        // --- 2. GENERATE CONTENT ---
         if (type.includes('image') || type.includes('video')) {
              task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
              task.text = "Check out this content!";
-        }
-        // RULE 2: Avatar (Content Only)
-        else if (type.includes('avatar')) {
+        } else if (type.includes('avatar')) {
              task.images.push(`https://i.pravatar.cc/300?u=${id}`);
              task.text = ""; 
-        }
-        // RULE 3: Nickname/Profile (Text Only)
-        else if (type.includes('nick') || type.includes('profile')) {
+        } else if (type.includes('nick') || type.includes('profile')) {
              task.images = []; 
              task.text = "Super_Gamer_Profile";
         }
@@ -136,42 +131,44 @@ window.AuditApp = {
         setTimeout(() => {
             const task = this.generateAuditTask();
             
-            // Populate Sidebar info
+            // --- 3. POPULATE SIDEBAR (Neat Layout) ---
             document.getElementById('info-tenant').innerText = task.tenant;
             document.getElementById('info-id').innerText = task.id;
             document.getElementById('info-publisher').innerText = task.publisher;
             document.getElementById('info-account').innerText = task.accountType;
             document.getElementById('info-time').innerText = task.publishTime;
+            
             document.getElementById('info-userid').innerText = task.userId;
             document.getElementById('info-level').innerText = task.level;
             document.getElementById('info-violations').innerText = task.violations;
+            
             document.getElementById('info-taskid').innerText = task.taskId;
             document.getElementById('mod-name').innerText = task.modName;
             document.getElementById('mod-time').innerText = task.modTime;
 
-            // --- MODULE VISIBILITY & STATUS UPDATE ---
-            const imgSection = document.getElementById('image-container').parentElement;
-            const txtSection = document.getElementById('text-container').parentElement;
+            // --- 4. MODULE VISIBILITY & STATUS ---
             const imgContainer = document.getElementById('image-container');
             const txtContainer = document.getElementById('text-container');
             
-            // 1. Content (Images)
+            // Hiding Logic: Hide the entire SECTION (parent of title + container)
+            const imgSection = imgContainer.closest('.content-section');
+            const txtSection = txtContainer.closest('.content-section');
+
+            // Images
             if (task.images.length > 0) {
                 imgSection.style.display = 'block';
                 imgContainer.innerHTML = task.images.map(src => 
                     `<img src="${src}" style="height:160px; border-radius:6px; cursor:pointer; border:1px solid #eee;" onclick="window.ImageViewer.open(this.src)">`
                 ).join('');
-                // Pass decision AND reason
                 this.updateInlineStatus('images', task.modDecision, task.modReason);
             } else {
                 imgSection.style.display = 'none';
             }
 
-            // 2. Text
+            // Text
             if (task.text && task.text.trim() !== "") {
                 txtSection.style.display = 'block';
                 txtContainer.innerText = task.text;
-                // Pass decision AND reason
                 this.updateInlineStatus('text', task.modDecision, task.modReason);
             } else {
                 txtSection.style.display = 'none';
@@ -188,14 +185,13 @@ window.AuditApp = {
         const wrap = document.getElementById(`status-display-${type}`);
         
         if(el && wrap) {
-            // Remove old styling classes
             wrap.classList.remove('mod-approve', 'mod-reject');
             
             if (decision === 'Approve') {
                 el.innerText = "Approve";
                 wrap.classList.add('mod-approve');
             } else {
-                // Show "Reject: [Reason]"
+                // Format: "Reject: Violation Name"
                 const reasonText = reason ? `: ${reason}` : "";
                 el.innerText = `Reject${reasonText}`; 
                 wrap.classList.add('mod-reject');
