@@ -17,143 +17,98 @@ window.ImageViewer = {
     }
 };
 
-window.AuditApp = {
+window.LabelApp = {
     timerInterval: null,
     secondsElapsed: 0,
-    tasksAudited: 0,
-    queueName: '',
-    currentTaskState: null, 
+    tasksLabelled: 0,
+    selectedLabels: new Set(),
 
     init() {
         if(typeof Auth !== 'undefined') Auth.requireLogin();
-        const urlParams = new URLSearchParams(window.location.search);
-        this.queueName = urlParams.get('queue') || 'Audit';
-        const tenant = urlParams.get('tenant') || 'Community';
-        document.getElementById('queue-title').innerText = `${tenant} - ${this.queueName}`;
         this.loadNextTask();
+        this.startTimer();
         this.bindKeys();
     },
 
     bindKeys() {
         document.addEventListener('keydown', (e) => {
-            if(e.key === 'Escape') { window.ImageViewer.close(); this.closeDrawer(); }
+            if(e.key === 'Escape') window.ImageViewer.close();
+            if (['1','2','3','4'].includes(e.key)) {
+                const buttons = document.querySelectorAll('.btn-label');
+                const idx = parseInt(e.key) - 1;
+                if(buttons[idx]) buttons[idx].click();
+            }
+            if (e.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') {
+                this.submitLabels();
+            }
         });
     },
 
-    generateAuditTask() {
+    generateTask() {
         const id = Math.floor(Math.random() * 999999999999).toString();
-        const type = this.queueName.toLowerCase();
-        
-        const decisions = ['Approve', 'Reject'];
-        const modDecision = decisions[Math.floor(Math.random() * decisions.length)];
-        let modReason = null;
-
-        if (modDecision === 'Reject') {
-            if (typeof Config !== 'undefined' && Config.violations) {
-                const categories = Object.keys(Config.violations);
-                const randCat = categories[Math.floor(Math.random() * categories.length)];
-                const subReasons = Config.violations[randCat];
-                modReason = subReasons[Math.floor(Math.random() * subReasons.length)]; 
-            } else {
-                modReason = "Violence - General";
-            }
-        }
-
-        const modNames = ['kenneth.cortes', 'liezl.tejero', 'mark.villanueva', 'jon.odono'];
-        const accountTypes = ['Normal User', 'Verified User', 'Influencer', 'New Account'];
-        const publishers = ['User_7723', 'GamerPro', 'Anna_Banana', 'Test_Account'];
-
+        const publishers = ['Creative_Studio', 'InnoLab', 'GamerPro', 'Tech_Insider', 'Artistic_Soul'];
         let task = { 
-            id, type, tenant: "BP/GP/Community",
+            id, source: "Organic Feed",
             publisher: publishers[Math.floor(Math.random() * publishers.length)],
-            accountType: accountTypes[Math.floor(Math.random() * accountTypes.length)],
-            publishTime: new Date(Date.now() - Math.floor(Math.random() * 100000000)).toLocaleString(),
-            images: [], text: "",
-            modDecision, modReason, 
-            modName: modNames[Math.floor(Math.random() * modNames.length)],
-            modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString(),
-            userId: "User-" + Math.floor(Math.random() * 10000),
-            level: "Lvl " + Math.floor(Math.random() * 50),
-            violations: Math.floor(Math.random() * 5),
-            taskId: "Task-" + id
+            followers: Math.floor(Math.random() * 500000).toLocaleString(),
+            publishTime: new Date().toLocaleString(),
+            images: [], text: ""
         };
-
-        if (type.includes('image') || type.includes('video')) {
-             task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-             task.text = "Check out this content!";
-        } else if (type.includes('avatar')) {
-             task.images.push(`https://i.pravatar.cc/300?u=${id}`);
-        } else if (type.includes('nick') || type.includes('profile')) {
-             task.text = "Super_Gamer_Profile";
-        }
+        const imgCount = Math.floor(Math.random() * 3) + 1;
+        for(let i=0; i<imgCount; i++) task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
+        const captions = ["Innovation!", "Healthy vibes.", "Check this out."];
+        task.text = captions[Math.floor(Math.random() * captions.length)];
         return task;
     },
 
     loadNextTask() {
-        this.stopTimer();
         document.getElementById('loader').style.display = 'flex';
         document.getElementById('workbench').style.display = 'none';
-        this.closeDrawer();
         
-        const task = this.generateAuditTask();
-        this.currentTaskState = task; 
+        this.selectedLabels.clear();
+        document.querySelectorAll('.btn-label').forEach(btn => btn.classList.remove('selected'));
+        const remarkBox = document.getElementById('labelling-remarks');
+        if(remarkBox) remarkBox.value = '';
+        this.updateCounter();
+
+        const task = this.generateTask();
         
-        document.getElementById('info-tenant').innerText = task.tenant;
         document.getElementById('info-id').innerText = task.id;
-        document.getElementById('info-publisher').innerText = task.publisher;
-        document.getElementById('info-account').innerText = task.accountType;
+        document.getElementById('info-source').innerText = task.source;
         document.getElementById('info-time').innerText = task.publishTime;
-        document.getElementById('info-userid').innerText = task.userId;
-        document.getElementById('info-level').innerText = task.level;
-        document.getElementById('info-violations').innerText = task.violations;
-        document.getElementById('info-taskid').innerText = task.taskId;
-        document.getElementById('mod-name').innerText = task.modName;
-        document.getElementById('mod-time').innerText = task.modTime;
+        document.getElementById('info-user').innerText = task.publisher;
+        document.getElementById('info-followers').innerText = task.followers;
 
         const imgContainer = document.getElementById('image-container');
         const txtContainer = document.getElementById('text-container');
-        const imgModule = document.getElementById('module-content');
-        const txtModule = document.getElementById('module-text');
+        
+        // FIXED: 300x300 Square Style
+        const squareStyle = 'width: 300px; height: 300px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer; margin-right: 10px; margin-bottom: 10px;';
+        imgContainer.innerHTML = task.images.map(src => 
+            `<div><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
+        ).join('');
 
-        if (task.images.length > 0) {
-            imgModule.style.display = 'block';
-            // FIXED: 300x300 Square Style
-            const squareStyle = 'width: 300px; height: 300px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer; margin-right: 10px; margin-bottom: 10px;';
-            imgContainer.innerHTML = task.images.map(src => 
-                `<div><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
-            ).join('');
-            this.updateInlineStatus('images', task.modDecision, task.modReason);
-        } else {
-            imgModule.style.display = 'none';
-        }
-
-        if (task.text) {
-            txtModule.style.display = 'block';
-            txtContainer.innerText = task.text;
-            this.updateInlineStatus('text', task.modDecision, task.modReason);
-        } else {
-            txtModule.style.display = 'none';
-        }
+        txtContainer.innerText = task.text;
 
         document.getElementById('loader').style.display = 'none';
         document.getElementById('workbench').style.display = 'flex';
-        this.startTimer();
     },
 
-    updateInlineStatus(type, decision, reason) {
-        const el = document.getElementById(`mod-val-${type}`);
-        const wrap = document.getElementById(`status-display-${type}`);
-        if(el && wrap) {
-            wrap.classList.remove('mod-approve', 'mod-reject');
-            if (decision === 'Approve') {
-                el.innerText = "Approve";
-                wrap.classList.add('mod-approve');
-            } else {
-                const reasonText = reason ? `: ${reason}` : "";
-                el.innerText = `Reject${reasonText}`; 
-                wrap.classList.add('mod-reject');
-            }
+    toggleLabel(btn, labelKey) {
+        if(this.selectedLabels.has(labelKey)) {
+            this.selectedLabels.clear();
+            btn.classList.remove('selected');
+        } else {
+            this.selectedLabels.clear();
+            document.querySelectorAll('.btn-label').forEach(b => b.classList.remove('selected'));
+            this.selectedLabels.add(labelKey);
+            btn.classList.add('selected');
         }
+        this.updateCounter();
+    },
+
+    updateCounter() {
+        document.getElementById('selected-count').innerText = this.selectedLabels.size;
     },
 
     startTimer() {
@@ -166,76 +121,17 @@ window.AuditApp = {
             if(timerEl) timerEl.innerText = date.toISOString().substr(11, 8);
         }, 1000);
     },
-    stopTimer() { clearInterval(this.timerInterval); },
 
-    openErrorDrawer() {
-        const d = document.getElementById('violationDrawer');
-        const c = document.getElementById('errorList');
-        if(!this.currentTaskState) return;
-        document.querySelector('.drawer-header span').innerText = "Audit Correction";
-        d.classList.add('open');
-        this.renderStep1_ErrorType(c);
-    },
-
-    closeDrawer() { document.getElementById('violationDrawer').classList.remove('open'); },
-
-    renderStep1_ErrorType(container) {
-        const initial = this.currentTaskState.modDecision;
-        let validErrors = [];
-        if(initial === 'Reject') {
-            validErrors = [
-                { id: 'false_pos', label: 'False Positive', sub: 'Content is safe, should be Approved' },
-                { id: 'wrong_reason', label: 'Wrong Violation Reason', sub: 'Content is bad, but reason is wrong' },
-                { id: 'wrong_scope', label: 'Wrong Scope', sub: 'Restriction scope incorrect' }
-            ];
-        } else {
-            validErrors = [
-                { id: 'false_neg', label: 'False Negative', sub: 'Content violates policy, should be Rejected' },
-                { id: 'policy_miss', label: 'Policy Misinterpretation', sub: 'Applied policy incorrectly' }
-            ];
-        }
-        let html = `<div style="padding: 20px;"><div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; text-transform:uppercase; font-weight:700;">1. Select Error Type</div>`;
-        validErrors.forEach(err => {
-            html += `<div class="violation-category" onclick="AuditApp.renderStep2_Decision('${err.id}', '${err.label}')" style="cursor:pointer; padding:15px; border:1px solid var(--border-color); margin-bottom:10px; border-radius:6px; background:var(--bg-body);"><div style="font-weight:600; color:var(--text-header);">${err.label}</div><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">${err.sub}</div></div>`;
-        });
-        html += `</div>`;
-        container.innerHTML = html;
-    },
-
-    renderStep2_Decision(errorId, errorLabel) {
-        const container = document.getElementById('errorList');
-        document.querySelector('.drawer-header span').innerText = "Correct Decision";
-        let html = `<div style="padding: 20px;"><div style="margin-bottom:20px; font-size:0.9rem; padding:10px; background:var(--hover-bg); border-radius:6px;"><span style="color:var(--text-muted);">Selected Error:</span> <strong>${errorLabel}</strong> <a href="#" onclick="AuditApp.openErrorDrawer()" style="color:#0969da; font-size:0.8rem; margin-left:10px; text-decoration:none;">(Change)</a></div><div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase; font-weight:700;">2. Select Correct Audit Decision</div>`;
-
-        if (errorId === 'false_pos') {
-            html += `<button class="btn-primary" style="width:100%; padding:12px; font-size:1rem;" onclick="AuditApp.submitCorrection('Approve', '${errorLabel}')">Set Decision to <strong>Approve</strong></button>`;
-        } else {
-            if (typeof Config !== 'undefined' && Config.violations) {
-                for(let [cat, subs] of Object.entries(Config.violations)) {
-                    html += `<div class="violation-category"><div class="category-trigger" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">${cat} ▼</div><div class="violation-submenu" style="display:none;">${subs.map(s => `<div class="violation-option" onclick="AuditApp.submitCorrection('Reject', '${errorLabel}', '${cat} - ${s}')">${s}</div>`).join('')}</div></div>`;
-                }
-            }
-        }
-        html += `</div>`;
-        container.innerHTML = html;
-    },
-
-    submitCorrection(newDecision, errorType, violationReason = '') {
+    submitLabels() {
+        if(this.selectedLabels.size === 0) { alert("⚠️ Please select a label before submitting."); return; }
         const counter = document.getElementById('session-counter');
-        if(counter) counter.innerText = ++this.tasksAudited;
-        this.closeDrawer();
+        if(counter) counter.innerText = ++this.tasksLabelled;
         this.loadNextTask();
     },
 
-    submitAudit(decision) {
-        if(decision === 'agree') {
-            const counter = document.getElementById('session-counter');
-            if(counter) counter.innerText = ++this.tasksAudited;
-            this.loadNextTask();
-        }
-    },
-
-    exit() { window.location.href = 'audit-queue.html'; }
+    skipTask() {
+        this.loadNextTask();
+    }
 };
 
-document.addEventListener('DOMContentLoaded', () => { window.AuditApp.init(); });
+document.addEventListener('DOMContentLoaded', () => { window.LabelApp.init(); });
