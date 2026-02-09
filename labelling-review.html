@@ -66,6 +66,27 @@
         .check-icon svg { width: 12px; height: 12px; fill: white; display: none; }
         .btn-label.selected .check-icon svg { display: block; }
 
+        /* Remarks Input Style */
+        .labelling-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-input); /* Use variable for theme support */
+            color: var(--text-main);
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            margin-top: 8px;
+        }
+        .labelling-textarea:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+        }
+
         /* Footer override */
         .labelling-footer {
             position: fixed;
@@ -137,7 +158,7 @@
 
                 <div class="content-section" style="margin-bottom: 0;">
                     <div class="content-section-title">Select Applicable Labels</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Select all that apply to this content.</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Select one option that applies to this content.</div>
                     
                     <div class="labelling-grid">
                         <button class="btn-label" onclick="LabelApp.toggleLabel(this, 'positive_motion')">
@@ -159,6 +180,11 @@
                             <span>Healthy interaction</span>
                             <div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
                         </button>
+                    </div>
+
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                        <label for="labelling-remarks" style="display:block; font-weight:600; color:var(--text-header); font-size:0.9rem; margin-bottom: 4px;">Remarks (Optional)</label>
+                        <textarea id="labelling-remarks" class="labelling-textarea" placeholder="Add any additional context or notes here..."></textarea>
                     </div>
                 </div>
 
