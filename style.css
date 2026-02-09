@@ -157,10 +157,9 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
     flex-wrap: wrap;
     gap: 16px;
     width: 100%;
-    justify-content: center; /* This centers the images horizontally */
+    justify-content: center; /* Keeps them centered */
 }
 
-/* ... keep the rest of .content-image-card styles as they are ... */
 .content-image-card, .image-grid > div {
     position: relative;
     width: 300px;
@@ -168,7 +167,11 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid var(--border-color);
-    background-color: var(--bg-body);
+    
+    /* UPDATED: White background and padding to create the 'Frame' look */
+    background-color: var(--bg-card); 
+    padding: 12px;
+    
     flex-shrink: 0;
 }
 
@@ -179,10 +182,13 @@ h1 { font-size: 1.5rem; color: var(--text-header); }
     cursor: pointer;
     transition: transform 0.2s;
     display: block;
+    
+    /* UPDATED: Slight radius on the image itself looks cleaner inside the frame */
+    border-radius: 4px; 
 }
 
 .content-image-card img:hover, .image-grid img:hover {
-    transform: scale(1.03);
+    transform: scale(1.02);
 }
 
 /* Text Context Area */
