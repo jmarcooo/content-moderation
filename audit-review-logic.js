@@ -1,4 +1,4 @@
-// --- 1. IMAGE VIEWER UTILITY (Copied for independence) ---
+// --- 1. IMAGE VIEWER UTILITY ---
 window.ImageViewer = {
     scale: 1, rotate: 0, flip: 1,
     open(src) {
@@ -25,7 +25,6 @@ window.AuditApp = {
     tasksAudited: 0,
     queueName: '',
     
-    // Config for Error Types
     errorTypes: [
         { label: "False Positive", desc: "Moderator punished benign content" },
         { label: "False Negative", desc: "Moderator missed a violation" },
@@ -39,7 +38,7 @@ window.AuditApp = {
         
         const urlParams = new URLSearchParams(window.location.search);
         this.queueName = urlParams.get('queue') || 'Audit Queue';
-        const tenant = urlParams.get('tenant') || 'BP';
+        const tenant = urlParams.get('tenant') || 'Community';
 
         const titleEl = document.getElementById('queue-title');
         if(titleEl) titleEl.innerText = `${tenant} - ${this.queueName}`;
@@ -55,51 +54,43 @@ window.AuditApp = {
                 window.ImageViewer.close();
                 this.closeDrawer();
             }
-            // 1 for Agree, 2 for Disagree
-            if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                if(e.key === '1') this.submitAudit('agree');
-                if(e.key === '2') this.openErrorDrawer();
-            }
         });
     },
 
-    // Mock Task Generator with Moderator Decision
     generateAuditTask() {
-        const id = Math.floor(Math.random() * 99999);
+        const id = Math.floor(Math.random() * 999999999999).toString(); // 12 digit format
         const type = this.queueName.toLowerCase();
         
-        // Randomly simulate previous decision
+        // Random moderation data
         const decisions = ['Approve', 'Reject'];
         const modDecision = decisions[Math.floor(Math.random() * decisions.length)];
-        let modReason = '';
-        if(modDecision === 'Reject') {
-            const reasons = ['Violence', 'Harassment', 'Spam', 'Nudity'];
-            modReason = reasons[Math.floor(Math.random() * reasons.length)];
-        }
-
-        const modNames = ['kenneth.cortes', 'liezl.tejero', 'mark.villanueva'];
+        const modNames = ['kenneth.cortes', 'liezl.tejero', 'mark.villanueva', 'jon.odono'];
+        const accountTypes = ['Normal User', 'Verified User', 'Influencer', 'New Account'];
+        const publishers = ['User_7723', 'GamerPro', 'Anna_Banana', 'Test_Account'];
 
         let task = { 
             id, type, 
-            images: [], textTop: "", textBottom: "",
-            modDecision, modReason,
+            tenant: "BP/GP/Community",
+            publisher: publishers[Math.floor(Math.random() * publishers.length)],
+            accountType: accountTypes[Math.floor(Math.random() * accountTypes.length)],
+            publishTime: new Date(Date.now() - Math.floor(Math.random() * 100000000)).toLocaleString(),
+            
+            images: [], text: "",
+            
+            modDecision,
             modName: modNames[Math.floor(Math.random() * modNames.length)],
             modTime: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toLocaleString()
         };
 
-        // Reuse Content Generation Logic
-        if (type.includes('image') || type.includes('video')) {
-            const imgCount = 1;
-            for(let i=0; i<imgCount; i++) task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
-            task.textTop = "Audit this post"; 
-            task.textBottom = "Is this compliant?"; 
-        } else if (type.includes('comment')) {
-            task.textTop = "Parent Post Context..."; 
-            task.textBottom = "User comment text that was moderated.";
+        // Mock Content
+        if (type.includes('avatar') || type.includes('profile')) {
+            task.images.push(`https://i.pravatar.cc/300?u=${id}`);
+            task.text = "Just a chill gamer living life.";
         } else {
-             task.textTop = "User Profile"; 
-             task.textBottom = "Bio or Nickname";
+            task.images.push(`https://picsum.photos/400/300?r=${Math.random()}`);
+            task.text = "Check out this content!";
         }
+        
         return task;
     },
 
@@ -111,50 +102,57 @@ window.AuditApp = {
         setTimeout(() => {
             const task = this.generateAuditTask();
             
-            // Render Info
-            document.getElementById('content-id').innerText = task.id;
-            document.getElementById('content-type').innerText = this.queueName;
-            document.getElementById('queue-name').innerText = this.queueName;
-            
-            // Render Moderator Decision
-            const card = document.getElementById('mod-decision-card');
-            const val = document.getElementById('mod-decision-val');
-            const reason = document.getElementById('mod-decision-reason');
-            
-            val.innerText = task.modDecision.toUpperCase();
-            if(task.modDecision === 'Approve') {
-                val.style.color = '#238636';
-                card.classList.remove('decision-reject');
-                card.classList.add('decision-approve');
-                reason.innerText = "Clean content";
-            } else {
-                val.style.color = '#da3633';
-                card.classList.remove('decision-approve');
-                card.classList.add('decision-reject');
-                reason.innerText = `Reason: ${task.modReason}`;
-            }
+            // 1. Sidebar Info
+            document.getElementById('info-tenant').innerText = task.tenant;
+            document.getElementById('info-id').innerText = task.id;
+            document.getElementById('info-publisher').innerText = task.publisher;
+            document.getElementById('info-account').innerText = task.accountType;
+            document.getElementById('info-time').innerText = task.publishTime;
 
+            // 2. Sidebar Moderation Info
             document.getElementById('mod-name').innerText = task.modName;
             document.getElementById('mod-time').innerText = task.modTime;
 
-            // Render Content
+            // 3. Render Content & Inline Status
             const imgContainer = document.getElementById('image-container');
+            const txtContainer = document.getElementById('text-container');
+            
+            // Images
             if (task.images.length > 0) {
-                document.getElementById('module-content').style.display = 'block';
                 imgContainer.innerHTML = task.images.map(src => 
-                    `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
+                    `<img src="${src}" style="height:150px; border-radius:4px; cursor:pointer;" onclick="window.ImageViewer.open(this.src)">`
                 ).join('');
             } else {
-                document.getElementById('module-content').style.display = 'none';
+                imgContainer.innerHTML = '<span style="color:var(--text-muted)">No media content.</span>';
             }
 
-            document.getElementById('text-top').innerText = task.textTop;
-            document.getElementById('text-bottom').innerText = task.textBottom;
+            // Text
+            txtContainer.innerText = task.text;
+
+            // Update Inline Status Labels
+            const els = ['mod-val-images', 'mod-val-text'];
+            const wrappers = ['status-display-images', 'status-display-text'];
+            
+            els.forEach((id, idx) => {
+                const el = document.getElementById(id);
+                const wrap = document.getElementById(wrappers[idx]);
+                
+                el.innerText = task.modDecision;
+                
+                // Reset classes
+                wrap.classList.remove('mod-approve', 'mod-reject');
+                
+                if (task.modDecision === 'Approve') {
+                    wrap.classList.add('mod-approve');
+                } else {
+                    wrap.classList.add('mod-reject');
+                }
+            });
 
             document.getElementById('loader').style.display = 'none';
             document.getElementById('workbench').style.display = 'flex';
             this.startTimer();
-        }, 600);
+        }, 500);
     },
 
     startTimer() {
@@ -195,15 +193,11 @@ window.AuditApp = {
     },
 
     submitAudit(decision, errorType = '') {
-        // Logic to save audit result would go here
         const counter = document.getElementById('session-counter');
         if(counter) counter.innerText = ++this.tasksAudited;
 
         if (decision === 'disagree') {
-            // alert(`Marked as Error: ${errorType}`);
             this.closeDrawer();
-        } else {
-            // alert(`Marked as Correct`);
         }
         
         this.loadNextTask();
