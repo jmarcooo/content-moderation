@@ -87,7 +87,6 @@ window.ReviewApp = {
             return keys.join('+');
         };
 
-        // Helper to check if a module is actually visible
         const isVisible = (id) => {
             const el = document.getElementById(id);
             return el && el.style.display !== 'none';
@@ -146,12 +145,12 @@ window.ReviewApp = {
         // RULE 2: Avatar (Community) -> Only Content (No Text)
         else if (type.includes('avatar')) {
             task.images.push(`https://i.pravatar.cc/300?u=${id}`);
-            task.textTop = ""; // Explicitly empty
+            task.textTop = ""; 
             task.textBottom = "";
         } 
         // RULE 3: Nickname/Profile (Community) -> Only Text (No Content)
         else if (type.includes('nick') || type.includes('profile')) {
-            task.images = []; // Explicitly empty
+            task.images = []; 
             task.textTop = "Old_Nickname_123"; 
             task.textBottom = "New_Nickname_SUPER"; 
         }
@@ -182,8 +181,10 @@ window.ReviewApp = {
                 if (this.queueName.toLowerCase().includes('avatar')) {
                     imgContainer.innerHTML = `<img src="${task.images[0]}" class="avatar-display" onclick="window.ImageViewer.open(this.src)">`;
                 } else {
+                    // UPDATED: Apply SQUARE placeholder style
+                    const squareStyle = 'width: 180px; height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;';
                     imgContainer.innerHTML = task.images.map(src => 
-                        `<div class="content-image-card"><img src="${src}" onclick="window.ImageViewer.open(this.src)"></div>`
+                        `<div style="display: inline-block; margin-right: 10px; margin-bottom: 10px;"><img src="${src}" style="${squareStyle}" onclick="window.ImageViewer.open(this.src)"></div>`
                     ).join('');
                 }
             } else {
@@ -196,7 +197,6 @@ window.ReviewApp = {
                 document.getElementById('text-top').innerText = task.textTop;
                 document.getElementById('text-bottom').innerText = task.textBottom;
                 
-                // Labels based on queue type
                 const lblTop = document.getElementById('label-top');
                 const lblBottom = document.getElementById('label-bottom');
                 const slotTop = document.getElementById('text-top');
