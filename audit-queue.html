@@ -5,32 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Queues</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .back-nav {
-            margin-bottom: 15px;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
-            text-decoration: none;
-        }
-        .back-nav:hover { color: var(--accent-blue); }
-    </style>
 </head>
 <body>
 
-    <script src="sidebar.js"></script>
-
     <main class="main-content">
-        <a href="quality-assurance.html" class="back-nav">← Back to Quality Assurance</a>
-
         <div class="header">
             <h1>Audit Queues</h1>
             
             <div style="display: flex; align-items: center;">
-                
                 <select id="sortDropdown" class="sort-select" onchange="handleDropdownSort(this.value)">
                     <option value="audited-desc">Audited % (Highest)</option>
                     <option value="audited-asc">Audited % (Lowest)</option>
@@ -39,12 +21,8 @@
                 </select>
 
                 <div class="view-switcher">
-                    <button id="btn-card" class="view-btn" onclick="switchView('card')" title="Card View">
-                        ⊞
-                    </button>
-                    <button id="btn-list" class="view-btn" onclick="switchView('list')" title="List View">
-                        ☰
-                    </button>
+                    <button id="btn-card" class="view-btn" onclick="switchView('card')" title="Card View">⊞</button>
+                    <button id="btn-list" class="view-btn" onclick="switchView('list')" title="List View">☰</button>
                 </div>
 
                 <div style="text-align: right; margin-left: 20px;">
@@ -54,26 +32,29 @@
             </div>
         </div>
 
-        <div id="queue-container" class="queue-grid">
-        </div>
+        <div id="queue-container" class="queue-grid"></div>
 
     </main>
 
+    <script src="sidebar.js"></script>
     <script>
         // --- 1. AUTH GUARD ---
         if (!localStorage.getItem('currentUser')) {
             window.location.href = 'login.html';
         }
 
-        // --- 2. CONFIGURATION ---
+        // --- 2. CONFIGURATION (MATCHING CONFIG.JS) ---
         let queueData = [
+            // Video/Image (BP/GP)
             { id: 'bp_img',   category: 'BP', name: 'QA - Dynamic Image Review',   count: 142, latency: '1m 20s', aht: '12s', auditedPercent: 42 },
             { id: 'bp_vid',   category: 'BP', name: 'QA - Dynamic Video Review',   count: 56,  latency: '3m 45s', aht: '45s', auditedPercent: 27 },
-            { id: 'bp_com',   category: 'BP', name: 'QA - Comment Review',         count: 890, latency: '0m 30s', aht: '5s',  auditedPercent: 13 },
             { id: 'gp_img',   category: 'GP', name: 'QA - Dynamic Image Review',   count: 23,  latency: '5m 10s', aht: '15s', auditedPercent: 61 },
             { id: 'gp_vid',   category: 'GP', name: 'QA - Dynamic Video Review',   count: 12,  latency: '8m 20s', aht: '55s', auditedPercent: 75 },
-            { id: 'gp_com',   category: 'GP', name: 'QA - Comment Review',         count: 45,  latency: '1m 05s', aht: '4s',  auditedPercent: 34 },
+            
+            // Avatar (Community)
             { id: 'comm_ava', category: 'Community', name: 'QA - Avatar Review',    count: 310, latency: '2m 15s', aht: '8s',  auditedPercent: 88 },
+            
+            // Nickname/Profile (Community)
             { id: 'comm_nick',category: 'Community', name: 'QA - Nickname Review',  count: 67,  latency: '0m 50s', aht: '3s',  auditedPercent: 52 },
             { id: 'comm_prof',category: 'Community', name: 'QA - Profile Review',   count: 105, latency: '4m 30s', aht: '20s', auditedPercent: 47 }
         ];
@@ -81,7 +62,7 @@
         // --- 3. VIEW STATE & SORT LOGIC ---
         let currentView = localStorage.getItem('modQueueView') || 'card';
         let sortCol = 'auditedPercent';
-        let sortAsc = false;   // Default: Highest first
+        let sortAsc = false;
 
         function getSortIcon(col) {
             if (col !== sortCol) return '';
@@ -141,7 +122,6 @@
         function renderQueues() {
             const container = document.getElementById('queue-container');
             let total = 0;
-
             let html = '';
 
             if (currentView === 'card') {
@@ -160,15 +140,13 @@
                                     <div class="count-label">Audited</div>
                                 </div>
                             </div>
-
                             <div style="margin-top:12px;">
                                 <div style="font-size:0.85rem; color:var(--text-muted);">
                                     ${queue.count.toLocaleString()} Pending Items
                                 </div>
                             </div>
-
                             <div class="card-footer">
-                                <button class="btn-review" style="padding: 2px 8px; font-size: 0.75rem;">Audit</button>
+                                <button class="btn-review" style="padding: 2px 8px; font-size: 0.75rem;">Review</button>
                             </div>
                         </div>
                     </div>`;
@@ -188,7 +166,6 @@
                     </div>
                 </div>
                 `;
-
                 html += queueData.map(queue => {
                     total += queue.count;
                     return `
@@ -205,11 +182,10 @@
             updateViewButtons();
         }
 
-        // --- UPDATED: Links to Audit Review ---
+        // --- 5. NAVIGATION ---
         function openQueue(queueName) {
             const queue = queueData.find(q => q.name === queueName);
             const tenant = queue ? queue.category : 'BP';
-            // UPDATED LINK: Points to audit-review.html
             window.location.href = `audit-review.html?queue=${encodeURIComponent(queueName)}&tenant=${encodeURIComponent(tenant)}`;
         }
 
