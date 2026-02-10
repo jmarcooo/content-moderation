@@ -1,0 +1,21 @@
+/* Table Specifics */
+#modStatusTable th:nth-child(1) { width: 30%; }
+#modStatusTable th:nth-child(6), #modStatusTable td:nth-child(6) { text-align: right; }
+
+/* Status Indicators */
+.status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+.dot-green { background-color: #238636; }
+.dot-orange { background-color: #d29922; }
+
+/* Dashboard Cards */
+.selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 20px; }
+.selection-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 32px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 220px;
+}
+.selection-card:hover { border-color: var(--accent-blue); transform: translateY(-4px); }
